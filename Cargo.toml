@@ -1,0 +1,30 @@
+[package]
+name = "linea-stark-prover"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+p3-bn254-fr = "0.2.0"
+p3-challenger = "0.2.0"
+p3-air = "0.2.0"
+p3-field = "0.2.0"
+p3-matrix = "0.2.0"
+p3-maybe-rayon = "0.2.0"
+p3-poseidon2 = "0.2.0"
+p3-util = "0.2.0"
+p3-baby-bear = "0.2.0"
+p3-circle = "0.2.0"
+p3-commit = "0.2.0"
+p3-dft = "0.2.0"
+p3-fri = "0.2.0"
+p3-keccak = "0.2.0"
+p3-merkle-tree = "0.2.0"
+p3-mersenne-31 = "0.2.0"
+p3-symmetric = "0.2.0"
+p3-uni-stark = "0.2.0"
+
+[target.'cfg(not(target_env = "msvc"))'.dependencies]
+tikv-jemallocator = "0.6"
+
+[features]
+parallel = ["p3-maybe-rayon/parallel"]
