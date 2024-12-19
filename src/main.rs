@@ -1,5 +1,6 @@
 mod air;
+use corset::cgo;
 
 fn main() {
-    println!("Hello, world!");
+    let corset = cgo::corset_from_file("zkevm.bin").unwrap();
 }

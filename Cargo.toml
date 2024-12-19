@@ -22,6 +22,9 @@ p3-merkle-tree = "0.2.0"
 p3-mersenne-31 = "0.2.0"
 p3-symmetric = "0.2.0"
 p3-uni-stark = "0.2.0"
+serde = { version = "1.0.197", features = ["derive"] }
+serde_json = "1.0.114"
+corset = { git = "https://github.com/olegfomenko/corset.git", features = ["default"], branch = "fix/lib"}
 
 [target.'cfg(not(target_env = "msvc"))'.dependencies]
 tikv-jemallocator = "0.6"
