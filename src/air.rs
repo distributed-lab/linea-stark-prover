@@ -1,11 +1,11 @@
 use p3_air::{Air, AirBuilder, BaseAir};
+use p3_field::extension::BinomialExtensionField;
 use p3_field::{AbstractField, Field, PackedValue};
 use p3_matrix::Matrix;
 use p3_mersenne_31::Mersenne31;
-use std::ops::{Add, Div};
-use std::ops::Mul;
-use p3_field::extension::BinomialExtensionField;
 use p3_uni_stark::SymbolicVariable;
+use std::ops::Mul;
+use std::ops::{Add, Div};
 
 pub struct LineaAir {
     // TODO: change to BLS12-377
@@ -29,20 +29,20 @@ impl<AB: AirBuilder<F = Mersenne31>> Air<AB> for LineaAir {
 
         let challenge = <AB as AirBuilder>::F::from(self.challenge);
 
-        builder.when_first_row().assert_eq(
-            local[2].into(),
-            local[0].add(challenge).mul(local[3])
-        );
+        builder
+            .when_first_row()
+            .assert_eq(local[2].into(), local[0].add(challenge).mul(local[3]));
 
-        builder.when_transition().assert_eq(
-            local[1].add(challenge).mul(local[3]),
-            AB::F::one()
-        );
+        builder
+            .when_transition()
+            .assert_eq(local[1].add(challenge).mul(local[3]), AB::F::one());
         builder.when_transition().assert_eq(
             next[2].add(<AB as AirBuilder>::F::zero()),
             next[0].add(challenge).mul(next[3]).mul(local[2]),
         );
 
-        builder.when_last_row().assert_eq(local[2].into(), AB::F::one());
+        builder
+            .when_last_row()
+            .assert_eq(local[2].into(), AB::F::one());
     }
 }

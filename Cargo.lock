@@ -552,6 +552,7 @@ checksum = "773648b94d0e5d620f64f280777445740e61fe701025087ec8b57f45c791888b"
 [[package]]
 name = "corset"
 version = "9.7.17"
+source = "git+https://github.com/distributed-lab/corset/?branch=fix%2Fvalue-backing-unwrap#4fa604eb357461ca03bd70fbf231fe8badaffead"
 dependencies = [
  "anyhow",
  "ark-bls12-377",

@@ -9,6 +9,7 @@ use p3_field::{AbstractField, Field};
 use p3_matrix::dense::RowMajorMatrix;
 use p3_matrix::Matrix;
 
+use crate::air::LineaAir;
 use p3_challenger::{HashChallenger, SerializingChallenger32};
 use p3_circle::CirclePcs;
 use p3_commit::ExtensionMmcs;
@@ -24,11 +25,12 @@ use tracing_forest::ForestLayer;
 use tracing_subscriber::layer::SubscriberExt;
 use tracing_subscriber::util::SubscriberInitExt;
 use tracing_subscriber::{EnvFilter, Registry};
-use crate::air::LineaAir;
 
-
-
-pub fn generate_permutation_trace<F: Field> (init_values: Vec<F>, perm_values: Vec<F>, challenge: F) -> RowMajorMatrix<F> {
+pub fn generate_permutation_trace<F: Field>(
+    init_values: Vec<F>,
+    perm_values: Vec<F>,
+    challenge: F,
+) -> RowMajorMatrix<F> {
     let mut res: Vec<F> = Vec::new();
 
     init_values.iter().enumerate().for_each(|(i, iv)| {
@@ -42,7 +44,12 @@ pub fn generate_permutation_trace<F: Field> (init_values: Vec<F>, perm_values: V
 
         if i != 0 {
             // s[i] = s[i-1] * (u + f[i]) * t_inv[i]
-            res.push(res.get(res.len() - 4).unwrap().mul(challenge.add(*iv)).mul(inv));
+            res.push(
+                res.get(res.len() - 4)
+                    .unwrap()
+                    .mul(challenge.add(*iv))
+                    .mul(inv),
+            );
         } else {
             // s[0] = (u + f[0]) * t_inv[0]
             res.push(challenge.add(*iv).mul(inv));
@@ -53,7 +60,6 @@ pub fn generate_permutation_trace<F: Field> (init_values: Vec<F>, perm_values: V
 
     RowMajorMatrix::new(res, 4)
 }
-
 
 fn main() -> Result<(), impl Debug> {
     let env_filter = EnvFilter::builder()
