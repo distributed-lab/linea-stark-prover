@@ -1,48 +1,59 @@
-use p3_air::{Air, AirBuilder, BaseAir};
-use p3_field::extension::BinomialExtensionField;
-use p3_field::{AbstractField, Field, PackedValue};
+use p3_air::{Air, AirBuilder, AirBuilderWithPublicValues, BaseAir};
+use p3_field::{Field, FieldAlgebra};
 use p3_matrix::Matrix;
-use p3_mersenne_31::Mersenne31;
-use p3_uni_stark::SymbolicVariable;
-use std::ops::Mul;
-use std::ops::{Add, Div};
 
-pub struct LineaAir {
-    // TODO: change to BLS12-377
-    pub challenge: Mersenne31,
-}
+/// Processes the permutation for two columns
+pub struct LineaPermutationAIR {}
 
-impl<F: Field> BaseAir<F> for LineaAir {
+/// | 0.       | 1.       | 2.                     | 3.                         |
+/// |`Column A`|`Column B`|`Constrain check column`|`B+challenge inverse column`|
+pub(crate) const PERMUTATION_WIDTH: usize = 4;
+const PERMUTATION_COLUMN_A_INDEX: usize = 0;
+const PERMUTATION_COLUMN_B_INDEX: usize = 1;
+const PERMUTATION_COLUMN_CHECK_INDEX: usize = 2;
+const PERMUTATION_COLUMN_INV_INDEX: usize = 3;
+
+impl<F: Field> BaseAir<F> for LineaPermutationAIR {
     fn width(&self) -> usize {
-        4
+        PERMUTATION_WIDTH
     }
 }
 
-impl<AB: AirBuilder<F = Mersenne31>> Air<AB> for LineaAir {
+impl<AB: AirBuilderWithPublicValues> Air<AB> for LineaPermutationAIR {
     fn eval(&self, builder: &mut AB) {
         let main = builder.main();
-
-        // Column indexes: 0 - first, 1 - second, 2 - s, 3 - inverse.
 
         let local = main.row_slice(0);
         let next = main.row_slice(1);
 
-        let challenge = <AB as AirBuilder>::F::from(self.challenge);
+        let pis = builder.public_values();
+        let challenge = pis[0].into();
 
-        builder
-            .when_first_row()
-            .assert_eq(local[2].into(), local[0].add(challenge).mul(local[3]));
-
-        builder
-            .when_transition()
-            .assert_eq(local[1].add(challenge).mul(local[3]), AB::F::one());
-        builder.when_transition().assert_eq(
-            next[2].add(<AB as AirBuilder>::F::zero()),
-            next[0].add(challenge).mul(next[3]).mul(local[2]),
+        // check[0] == (a[0] + ch) * inv[0]
+        builder.when_first_row().assert_eq(
+            local[PERMUTATION_COLUMN_CHECK_INDEX].into(),
+            (local[PERMUTATION_COLUMN_A_INDEX] + challenge.clone())
+                * local[PERMUTATION_COLUMN_INV_INDEX].into(),
         );
 
+        // (b[i] + ch) * inv[i] == 1
+        builder.when_transition().assert_eq(
+            (local[PERMUTATION_COLUMN_B_INDEX] + challenge.clone())
+                * local[PERMUTATION_COLUMN_INV_INDEX],
+            AB::F::ONE,
+        );
+
+        // check[i+1] == inv[i+1] * (a[i+1] + ch) * check[i]
+        builder.when_transition().assert_eq(
+            next[PERMUTATION_COLUMN_CHECK_INDEX].into(),
+            (next[PERMUTATION_COLUMN_A_INDEX] + challenge.clone())
+                * next[PERMUTATION_COLUMN_INV_INDEX]
+                * local[PERMUTATION_COLUMN_CHECK_INDEX],
+        );
+
+        // check[i] == 1
         builder
             .when_last_row()
-            .assert_eq(local[2].into(), AB::F::one());
+            .assert_eq(local[2].into(), AB::F::ONE);
     }
 }

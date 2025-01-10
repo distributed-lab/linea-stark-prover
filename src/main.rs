@@ -1,25 +1,19 @@
 mod air;
+mod config;
 
+use air::{LineaPermutationAIR, PERMUTATION_WIDTH};
+use config::*;
+
+use rand::distributions::Standard;
+use rand::{thread_rng, Rng};
 use std::fmt::Debug;
 use std::marker::PhantomData;
-use std::ops::{Add, Neg, Sub};
 
-use p3_air::{Air, AirBuilder, BaseAir};
-use p3_field::{AbstractField, Field};
+use p3_bls12_377_fr::Bls12_377Fr;
+use p3_commit::testing::TrivialPcs;
+use p3_field::{Field, FieldAlgebra};
 use p3_matrix::dense::RowMajorMatrix;
-use p3_matrix::Matrix;
-
-use crate::air::LineaAir;
-use p3_challenger::{HashChallenger, SerializingChallenger32};
-use p3_circle::CirclePcs;
-use p3_commit::ExtensionMmcs;
-use p3_field::extension::BinomialExtensionField;
-use p3_fri::FriConfig;
-use p3_keccak::Keccak256Hash;
-use p3_merkle_tree::FieldMerkleTreeMmcs;
-use p3_mersenne_31::Mersenne31;
-use p3_symmetric::{CompressionFunctionFromHasher, SerializingHasher32};
-use p3_uni_stark::{prove, verify, StarkConfig};
+use p3_uni_stark::{prove, verify};
 use tracing_forest::util::LevelFilter;
 use tracing_forest::ForestLayer;
 use tracing_subscriber::layer::SubscriberExt;
@@ -27,38 +21,33 @@ use tracing_subscriber::util::SubscriberInitExt;
 use tracing_subscriber::{EnvFilter, Registry};
 
 pub fn generate_permutation_trace<F: Field>(
-    init_values: Vec<F>,
-    perm_values: Vec<F>,
+    column_a: Vec<F>,
+    column_b: Vec<F>,
     challenge: F,
 ) -> RowMajorMatrix<F> {
     let mut res: Vec<F> = Vec::new();
 
-    init_values.iter().enumerate().for_each(|(i, iv)| {
-        let perm = perm_values.get(i).unwrap();
+    res.push(column_a[0].clone());
+    res.push(column_b[0].clone());
 
-        res.push(iv.clone());
-        res.push(perm.clone());
+    let mut inverse = (column_b[0] + challenge).inverse();
+    let mut previous = (column_a[0] + challenge) * inverse;
+    res.push(previous);
+    res.push(inverse);
 
-        // t_inv[i] = (u + t[i])^-1
-        let inv = challenge.add(*perm).inverse();
+    column_a[1..]
+        .iter()
+        .zip(column_b[1..].iter())
+        .for_each(|(a, b)| {
+            res.push(a.clone());
+            res.push(b.clone());
+            inverse = (*b + challenge).inverse();
+            previous = (*a + challenge) * inverse * previous;
+            res.push(previous);
+            res.push(inverse);
+        });
 
-        if i != 0 {
-            // s[i] = s[i-1] * (u + f[i]) * t_inv[i]
-            res.push(
-                res.get(res.len() - 4)
-                    .unwrap()
-                    .mul(challenge.add(*iv))
-                    .mul(inv),
-            );
-        } else {
-            // s[0] = (u + f[0]) * t_inv[0]
-            res.push(challenge.add(*iv).mul(inv));
-        }
-
-        res.push(inv);
-    });
-
-    RowMajorMatrix::new(res, 4)
+    RowMajorMatrix::new(res, PERMUTATION_WIDTH)
 }
 
 fn main() -> Result<(), impl Debug> {
@@ -71,55 +60,69 @@ fn main() -> Result<(), impl Debug> {
         .with(ForestLayer::default())
         .init();
 
-    type Val = Mersenne31;
-    type Challenge = BinomialExtensionField<Val, 3>;
+    // TODO: should not be just random
+    let mut rng = thread_rng();
+    let challenge = rng.sample(Standard {});
+    println!("Challenge: {}", challenge);
 
-    type ByteHash = Keccak256Hash;
-    type FieldHash = SerializingHasher32<ByteHash>;
-    let byte_hash = ByteHash {};
-    let field_hash = FieldHash::new(Keccak256Hash {});
+    let log_n: usize = 2;
+    let a = vec![
+        Bls12_377Fr::from_canonical_u32(1),
+        Bls12_377Fr::from_canonical_u32(2),
+        Bls12_377Fr::from_canonical_u32(3),
+        Bls12_377Fr::from_canonical_u32(4),
+    ];
 
-    type MyCompress = CompressionFunctionFromHasher<u8, ByteHash, 2, 32>;
-    let compress = MyCompress::new(byte_hash);
+    let b = vec![
+        Bls12_377Fr::from_canonical_u32(3),
+        Bls12_377Fr::from_canonical_u32(1),
+        Bls12_377Fr::from_canonical_u32(4),
+        Bls12_377Fr::from_canonical_u32(2),
+    ];
 
-    type ValMmcs = FieldMerkleTreeMmcs<Val, u8, FieldHash, MyCompress, 32>;
-    let val_mmcs = ValMmcs::new(field_hash, compress);
+    let perm = Perm::new_from_rng(8, 22, &mut rng);
+    let hash = Hash::new(perm.clone());
 
-    type ChallengeMmcs = ExtensionMmcs<Val, Challenge, ValMmcs>;
-    let challenge_mmcs = ChallengeMmcs::new(val_mmcs.clone());
+    let dft = Dft::default();
 
-    type Challenger = SerializingChallenger32<Val, HashChallenger<u8, ByteHash, 32>>;
+    // TODO: use proper PCS configured with FRI config
+    //let compress = Compress::new(hash.clone());
+    //let val_mmcs = ValMmcs::new(hash.clone(), compress);
+    //let challenge_mmcs = ChallengeMmcs::new(val_mmcs.clone());
+    // let fri_config = FriConfig {
+    //     log_blowup: 1,
+    //     log_final_poly_len: 0,
+    //     num_queries: 128,
+    //     proof_of_work_bits: 0,
+    //     mmcs: challenge_mmcs,
+    // };
+    // let pcs = TwoAdicFriPcs::new(dft, val_mmcs, fri_config);
 
-    let fri_config = FriConfig {
-        log_blowup: 1,
-        num_queries: 100,
-        proof_of_work_bits: 16,
-        mmcs: challenge_mmcs,
-    };
-
-    type Pcs = CirclePcs<Val, ValMmcs, ChallengeMmcs>;
-    let pcs = Pcs {
-        mmcs: val_mmcs,
-        fri_config,
+    let pcs = TrivialPcs {
+        dft,
+        log_n,
         _phantom: PhantomData,
     };
 
-    type MyConfig = StarkConfig<Pcs, Challenge, Challenger>;
-    let config = MyConfig::new(pcs);
+    let config = Config::new(pcs);
 
-    let challenge = Mersenne31::from_canonical_u32(10);
-    let air = LineaAir { challenge };
+    let trace = generate_permutation_trace(a, b, challenge);
 
-    let f0 = Mersenne31::from_canonical_u32(0);
-    let f1 = Mersenne31::from_canonical_u32(1);
-    let f2 = Mersenne31::from_canonical_u32(2);
-    let f3 = Mersenne31::from_canonical_u32(3);
+    let mut challenger = Challenger::new(vec![], hash.clone());
+    let proof = prove(
+        &config,
+        &LineaPermutationAIR {},
+        &mut challenger,
+        trace,
+        &vec![challenge],
+    );
 
-    let trace = generate_permutation_trace(vec![f0, f1, f2, f3], vec![f3, f1, f0, f2], challenge);
-
-    let mut challenger = Challenger::from_hasher(vec![], byte_hash);
-    let proof = prove(&config, &air, &mut challenger, trace, &vec![]);
-
-    let mut challenger = Challenger::from_hasher(vec![], byte_hash);
-    verify(&config, &air, &mut challenger, &proof, &vec![])
+    let mut challenger = Challenger::new(vec![], hash.clone());
+    verify(
+        &config,
+        &LineaPermutationAIR {},
+        &mut challenger,
+        &proof,
+        &vec![challenge],
+    )
 }

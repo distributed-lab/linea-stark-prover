@@ -4,30 +4,19 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-p3-bn254-fr = "0.2.0"
-p3-challenger = "0.2.0"
-p3-air = "0.2.0"
-p3-field = "0.2.0"
-p3-matrix = "0.2.0"
-p3-maybe-rayon = "0.2.0"
-p3-poseidon2 = "0.2.0"
-p3-util = "0.2.0"
-p3-baby-bear = "0.2.0"
-p3-circle = "0.2.0"
-p3-commit = "0.2.0"
-p3-dft = "0.2.0"
-p3-fri = "0.2.0"
-p3-keccak = "0.2.0"
-p3-merkle-tree = "0.2.0"
-p3-mersenne-31 = "0.2.0"
-p3-symmetric = "0.2.0"
-p3-uni-stark = "0.2.0"
-serde = { version = "1.0.197", features = ["derive"] }
-serde_json = "1.0.114"
-corset = { git = "https://github.com/distributed-lab/corset/", features = ["default"], branch = "fix/value-backing-unwrap"}
-#corset = { path = "corset", features = ["default"] }
+p3-challenger = { git = "https://github.com/distributed-lab/Plonky3/", branch = "main" }
+p3-air = { git = "https://github.com/distributed-lab/Plonky3/", branch = "main" }
+p3-field = { git = "https://github.com/distributed-lab/Plonky3/", branch = "main" }
+p3-matrix = { git = "https://github.com/distributed-lab/Plonky3/", branch = "main" }
+p3-maybe-rayon = { git = "https://github.com/distributed-lab/Plonky3/", branch = "main" }
+p3-commit = { git = "https://github.com/distributed-lab/Plonky3/", branch = "main" }
+p3-dft = { git = "https://github.com/distributed-lab/Plonky3/", branch = "main" }
+p3-symmetric = { git = "https://github.com/distributed-lab/Plonky3/", branch = "main" }
+p3-uni-stark = { git = "https://github.com/distributed-lab/Plonky3/", branch = "main" }
+p3-bls12-377-fr = { git = "https://github.com/distributed-lab/Plonky3/", branch = "main" }
 tracing-subscriber = { version = "0.3.17", features = ["std", "env-filter"] }
 tracing-forest = { version = "0.1.6", features = ["ansi", "smallvec"] }
+rand = "0.8.5"
 
 [target.'cfg(not(target_env = "msvc"))'.dependencies]
 tikv-jemallocator = "0.6"
