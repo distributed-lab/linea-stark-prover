@@ -2,10 +2,8 @@ mod air;
 mod config;
 
 use air::LineaPermutationAIR;
-use config::*;
-use std::cmp::max;
-
 use ark_ff::PrimeField;
+use config::*;
 use p3_bls12_377_fr::{Bls12_377Fr, FF_Bls12_377Fr};
 use p3_commit::testing::TrivialPcs;
 use p3_field::{Field, FieldAlgebra};
@@ -13,6 +11,8 @@ use p3_matrix::dense::RowMajorMatrix;
 use p3_uni_stark::{prove, verify};
 use rand::distributions::Standard;
 use rand::{thread_rng, Rng};
+use std::cmp::max;
+use std::collections::HashMap;
 use std::fmt::Debug;
 use std::marker::PhantomData;
 use tracing_forest::util::LevelFilter;
@@ -46,7 +46,6 @@ pub fn generate_permutation_trace<F: Field>(
             res.push(b[j][i].clone());
             b_total = b_total * (b[j][i] + challenge);
         }
-
 
         let b_total_inverse = b_total.inverse();
         let prev_check = prev_check * a_total * b_total_inverse;
@@ -95,6 +94,12 @@ fn main() {
     .unwrap();
 
     let trace = Trace::from_constraints(&corset);
+    let mut indexes: HashMap<String, usize> = HashMap::new();
+    for i in 0..trace.columns.len() {
+        indexes.insert(trace.ids[i].clone(), i);
+    }
+
+    //println!("{:?}", corset.columns.cols);
 
     let mut a: Vec<Vec<Bls12_377Fr>> = Vec::new();
     let mut b: Vec<Vec<Bls12_377Fr>> = Vec::new();
@@ -108,17 +113,26 @@ fn main() {
 
                 for cref in from {
                     let mut column: Vec<Bls12_377Fr> = Vec::new();
-                    let trace_column = &trace.columns[cref.id.unwrap()];
+                    //println!("ref A {:?}", cref);
+                    let column_name = cref.h.unwrap().to_string();
+                    println!("Column A name: {}", column_name);
+                    let id = *indexes.get(&column_name).unwrap();
 
+                    let trace_column = &trace.columns[id];
+
+                    // TODO: should we use it
                     let padding_value = Bls12_377Fr::new(FF_Bls12_377Fr::from_be_bytes_mod_order(
                         &trace_column.padding_value,
                     ));
-                    let actual_size = trace_column.values.len();
-                    let target_size = actual_size.next_power_of_two();
-                    for _ in 0..(target_size - actual_size) {
-                        column.push(padding_value.clone());
-                    }
+                    // let actual_size = trace_column.values.len();
+                    // let target_size = actual_size.next_power_of_two();
+                    // for _ in 0..(target_size - actual_size) {
+                    //     column.push(padding_value.clone());
+                    // }
 
+
+                    //println!("trace column name {:?}", trace.ids[cref.id.unwrap()]);
+                    println!("padding value in A {:?}", padding_value);
                     for value in &trace_column.values {
                         column.push(Bls12_377Fr::new(FF_Bls12_377Fr::from_be_bytes_mod_order(
                             value.as_slice(),
@@ -126,22 +140,31 @@ fn main() {
                     }
 
                     a.push(column);
-                    trace_len = max(target_size, trace_len);
+                    trace_len = max(trace_column.values.len(), trace_len);
                 }
 
                 for cref in to {
                     let mut column: Vec<Bls12_377Fr> = Vec::new();
+                    let column_name = cref.h.unwrap().to_string();
+                    println!("Column B name: {}", column_name);
+                    let id = *indexes.get(&column_name).unwrap();
 
-                    let trace_column = &trace.columns[cref.id.unwrap()];
+                    let trace_column = &trace.columns[id];
+                    println!("Column B: {:?}", trace_column.values);
 
+                    // TODO: should we use it
                     let padding_value = Bls12_377Fr::new(FF_Bls12_377Fr::from_be_bytes_mod_order(
                         &trace_column.padding_value,
                     ));
-                    let actual_size = trace_column.values.len();
-                    let target_size = actual_size.next_power_of_two();
-                    for _ in 0..(target_size - actual_size) {
-                        column.push(padding_value.clone());
-                    }
+                    // let actual_size = trace_column.values.len();
+                    // let target_size = actual_size.next_power_of_two();
+                    // for _ in 0..(target_size - actual_size) {
+                    //     column.push(padding_value.clone());
+                    // }
+
+                   // println!("ref B {:?}", cref);
+                   // println!("trace column name {:?}", trace.ids[cref.id.unwrap()]);
+                    println!("padding value in B {:?}", padding_value);
 
                     for value in &trace_column.values {
                         column.push(Bls12_377Fr::new(FF_Bls12_377Fr::from_be_bytes_mod_order(
@@ -150,7 +173,7 @@ fn main() {
                     }
 
                     b.push(column);
-                    trace_len = max(target_size, trace_len);
+                    trace_len = max(trace_column.values.len(), trace_len);
                 }
 
                 break;
@@ -164,6 +187,11 @@ fn main() {
     assert_eq!(a.len(), b.len(), "trace must have the same sizes");
     let width = a.len();
 
+    trace_len = trace_len.next_power_of_two();
+
+    println!("{:?}", a);
+    println!("{:?}", b);
+
     for i in 0..width {
         while a[i].len() < trace_len {
             a[i].push(Bls12_377Fr::ZERO);
@@ -173,9 +201,6 @@ fn main() {
             b[i].push(Bls12_377Fr::ZERO);
         }
     }
-
-    println!("{:?}", a);
-    println!("{:?}", b);
 
     check(a, b);
 
