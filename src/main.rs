@@ -71,12 +71,8 @@ fn check<F: Field + std::cmp::Ord>(mut a: Vec<Vec<F>>, mut b: Vec<Vec<F>>) {
     b_all.sort();
 
     assert_eq!(a_all.len(), b_all.len());
-    println!("{}", a_all.len());
     for i in 0..a_all.len() {
-        // println!("{}", i);
-        println!("{} {}", a_all[i], b_all[i]);
         assert_eq!(a_all[i], b_all[i]);
-
     }
 }
 
@@ -90,6 +86,8 @@ fn main() {
         .with(env_filter)
         .with(ForestLayer::default())
         .init();
+
+    let order: Vec<&str> = vec!["mxp.CN", "mxp.CN_perm", "mxp.C_MEM", "mxp.C_MEM_NEW", "mxp.C_MEM_NEW_perm", "mxp.C_MEM_perm", "mxp.STAMP", "mxp.STAMP_perm", "mxp.WORDS", "mxp.WORDS_NEW", "mxp.WORDS_NEW_perm", "mxp.WORDS_perm"];
 
     let mut corset = cgo::corset_from_file("zkevm.bin").unwrap();
     // import::parse_binary_trace("traces/trace1.lt", &mut corset, false).unwrap();
@@ -119,9 +117,20 @@ fn main() {
         })
         .collect();
 
-    let field_columns: Vec<Vec<Bls12_377Fr>> = map_field.into_values().collect();
-    let a = field_columns[0..6].to_vec().clone();
-    let b = field_columns[6..].to_vec().clone();
+    let mut a: Vec<Vec<Bls12_377Fr>> = Vec::new();
+    let mut b: Vec<Vec<Bls12_377Fr>> = Vec::new();
+
+     order.iter().enumerate().for_each(|(i, o)| {
+        if i % 2 == 0 {
+            a.push(map_field[o.clone()].clone());
+        } else {
+            b.push(map_field[o.clone()].clone());
+        }
+    });
+
+
+    // let a = field_columns[0..6].to_vec().clone();
+    // let b = field_columns[6..].to_vec().clone();
 
     assert_eq!(a.len(), b.len(), "trace must have the same sizes");
 
