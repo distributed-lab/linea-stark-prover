@@ -19,6 +19,7 @@ tracing-forest = { version = "0.1.6", features = ["ansi", "smallvec"] }
 rand = "0.8.5"
 corset = { git = "https://github.com/distributed-lab/corset.git", branch = "fix/lib"}
 ark-ff = "0.5.0"
+serde_json = "1.0.135"
 
 [target.'cfg(not(target_env = "msvc"))'.dependencies]
 tikv-jemallocator = "0.6"

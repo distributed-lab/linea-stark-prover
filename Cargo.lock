@@ -1214,6 +1214,7 @@ dependencies = [
  "p3-symmetric",
  "p3-uni-stark",
  "rand",
+ "serde_json",
  "tikv-jemallocator",
  "tracing-forest",
  "tracing-subscriber",
