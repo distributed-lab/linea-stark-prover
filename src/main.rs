@@ -1,54 +1,30 @@
 mod air;
 mod config;
+mod trace;
 
+use crate::air::LineaPermutationAIR;
+use crate::config::*;
+use crate::trace::{generate_permutation_trace, read_trace};
 use ark_ff::PrimeField;
-use p3_bls12_377_fr::{Bls12_377Fr, FF_Bls12_377Fr};
+use corset::cgo;
+use corset::compiler::Constraint;
+use p3_bls12_377_fr::Bls12_377Fr;
+use p3_commit::testing::TrivialPcs;
 use p3_field::{Field, FieldAlgebra};
-use p3_matrix::dense::RowMajorMatrix;
-use rand::Rng;
-use std::collections::HashMap;
+use p3_matrix::Matrix;
+use p3_uni_stark::{prove, verify};
+use rand::distributions::Standard;
+use rand::{thread_rng, Rng};
+use std::cmp::max;
 use std::fmt::Debug;
-use std::fs;
+use std::marker::PhantomData;
 use tracing_forest::util::LevelFilter;
 use tracing_forest::ForestLayer;
 use tracing_subscriber::layer::SubscriberExt;
 use tracing_subscriber::util::SubscriberInitExt;
 use tracing_subscriber::{EnvFilter, Registry};
 
-use corset::{cgo, import};
-
-pub fn generate_permutation_trace<F: Field>(
-    a: Vec<Vec<F>>,
-    b: Vec<Vec<F>>,
-    challenge: F,
-    sz: usize,
-) -> RowMajorMatrix<F> {
-    let mut res: Vec<F> = Vec::new();
-
-    let prev_check = F::ONE;
-
-    for i in 0..sz {
-        let mut a_total = F::ONE;
-        let mut b_total = F::ONE;
-
-        for j in 0..a.len() {
-            res.push(a[j][i].clone());
-            a_total = a_total * (a[j][i] + challenge);
-
-            res.push(b[j][i].clone());
-            b_total = b_total * (b[j][i] + challenge);
-        }
-
-        let b_total_inverse = b_total.inverse();
-        let prev_check = prev_check * a_total * b_total_inverse;
-        res.push(prev_check);
-        res.push(b_total_inverse);
-    }
-
-    RowMajorMatrix::new(res, a.len() + b.len() + 2)
-}
-
-fn check<F: Field + std::cmp::Ord>(mut a: Vec<Vec<F>>, mut b: Vec<Vec<F>>) {
+fn dummy_check<F: Field + Ord>(mut a: Vec<Vec<F>>, mut b: Vec<Vec<F>>) {
     let mut a_all: Vec<F> = Vec::new();
     let mut b_all: Vec<F> = Vec::new();
 
@@ -66,8 +42,8 @@ fn check<F: Field + std::cmp::Ord>(mut a: Vec<Vec<F>>, mut b: Vec<Vec<F>>) {
     }
 }
 
-//fn main() -> Result<(), impl Debug> {
-fn main() {
+fn main() -> Result<(), impl Debug> {
+    //fn main() {
     let env_filter = EnvFilter::builder()
         .with_default_directive(LevelFilter::INFO.into())
         .from_env_lossy();
@@ -77,107 +53,164 @@ fn main() {
         .with(ForestLayer::default())
         .init();
 
-    let order: Vec<&str> = vec![
-        "mxp.CN",
-        "mxp.CN_perm",
-        "mxp.C_MEM",
-        "mxp.C_MEM_NEW",
-        "mxp.C_MEM_NEW_perm",
-        "mxp.C_MEM_perm",
-        "mxp.STAMP",
-        "mxp.STAMP_perm",
-        "mxp.WORDS",
-        "mxp.WORDS_NEW",
-        "mxp.WORDS_NEW_perm",
-        "mxp.WORDS_perm",
-    ];
-
-    let mut corset = cgo::corset_from_file("zkevm.bin").unwrap();
-    import::parse_json_trace("dump.json", &mut corset, true).unwrap();
-
-    let file_content = fs::read_to_string("dump.json").unwrap();
-    let v: HashMap<String, Vec<u32>> = serde_json::from_str(&file_content).unwrap();
-    let map_field: HashMap<String, Vec<Bls12_377Fr>> = v
-        .into_iter()
-        .map(|(key, vec_num)| {
-            let mut v: Vec<Bls12_377Fr> = vec_num
-                .into_iter()
-                .filter(|&num| num != 0)
-                .map(|num| Bls12_377Fr::from_canonical_u32(num))
-                .collect();
-
-            if v.len() != 1160 {
-                for _ in 0..(1160 - v.len()) {
-                    v.insert(0, Bls12_377Fr::from_canonical_u32(0))
-                }
-            }
-
-            (key, v)
-        })
-        .collect();
+    let corset = cgo::corset_from_file("zkevm.bin").unwrap();
+    let trace = read_trace("dump.json");
 
     let mut a: Vec<Vec<Bls12_377Fr>> = Vec::new();
     let mut b: Vec<Vec<Bls12_377Fr>> = Vec::new();
 
-    order.iter().enumerate().for_each(|(i, o)| {
-        if i % 2 == 0 {
-            a.push(map_field[o.clone()].clone());
-        } else {
-            b.push(map_field[o.clone()].clone());
-        }
-    });
+    let mut trace_len: usize = 0;
 
-    // let a = field_columns[0..6].to_vec().clone();
-    // let b = field_columns[6..].to_vec().clone();
+    for constraint in corset.constraints {
+        match constraint {
+            Constraint::Permutation { handle, from, to } => {
+                println!("Found a permutation constraint: {:?}", handle);
+
+                for cref in from {
+                    let column_name = cref.h.unwrap().to_string();
+                    let column = trace.get(&column_name).unwrap().clone();
+                    let column_size = column.len();
+                    println!(
+                        "Found 'from' column: {}, length: {}",
+                        column_name, column_size
+                    );
+
+                    a.push(column);
+                    trace_len = max(column_size, trace_len);
+                }
+
+                for cref in to {
+                    let column_name = cref.h.unwrap().to_string();
+                    let column = trace.get(&column_name).unwrap().clone();
+                    let column_size = column.len();
+                    println!(
+                        "Found 'to' column: {}, length: {}",
+                        column_name, column_size
+                    );
+
+                    b.push(column);
+                    trace_len = max(column_size, trace_len);
+                }
+
+                break;
+            }
+            _ => {}
+        }
+    }
 
     assert_eq!(a.len(), b.len(), "trace must have the same sizes");
+    let trace_width = a.len();
 
-    check(a, b);
+    assert_ne!(trace_len, 0, "trace length should not be 0");
+    trace_len = trace_len.next_power_of_two();
+
+    println!("Appending trace to {}", trace_len);
+
+    for i in 0..trace_width {
+        while a[i].len() < trace_len {
+            a[i].push(Bls12_377Fr::ZERO);
+        }
+
+        while b[i].len() < trace_len {
+            b[i].push(Bls12_377Fr::ZERO);
+        }
+    }
+
+    // println!("Checking (raw)...");
+    // dummy_check(a, b);
+    // return Ok(());
 
     // -----------------------------------------------------------
 
-    // // TODO: should not be just random
-    // let mut rng = thread_rng();
-    // let challenge = rng.sample(Standard {});
-    // println!("Challenge: {}", challenge);
+    // a.push(vec![
+    //     Bls12_377Fr::from_canonical_u32(1),
+    //     Bls12_377Fr::from_canonical_u32(5),
+    //     Bls12_377Fr::from_canonical_u32(4),
+    //     Bls12_377Fr::from_canonical_u32(8),
+    // ]);
     //
-    // let perm = Perm::new_from_rng(8, 22, &mut rng);
-    // let hash = Hash::new(perm.clone());
+    // b.push(vec![
+    //     Bls12_377Fr::from_canonical_u32(1),
+    //     Bls12_377Fr::from_canonical_u32(8),
+    //     Bls12_377Fr::from_canonical_u32(5),
+    //     Bls12_377Fr::from_canonical_u32(4),
+    // ]);
+
+    // let trace_len: usize = 4;
+    // let trace_width: usize = 1;
+
+    // -----------------------------------------------------------
+
+    // for i in 0..trace_width {
+    //     print!("{} ", a[i][523130]);
+    // }
     //
-    // let dft = Dft::default();
+    // for i in 0..trace_width {
+    //     print!("{} ", b[i][523130]);
+    // }
     //
-    // // TODO: use proper PCS configured with FRI config
-    // //let compress = Compress::new(hash.clone());
-    // //let val_mmcs = ValMmcs::new(hash.clone(), compress);
-    // //let challenge_mmcs = ChallengeMmcs::new(val_mmcs.clone());
-    // // let fri_config = FriConfig {
-    // //     log_blowup: 1,
-    // //     log_final_poly_len: 0,
-    // //     num_queries: 128,
-    // //     proof_of_work_bits: 0,
-    // //     mmcs: challenge_mmcs,
-    // // };
-    // // let pcs = TwoAdicFriPcs::new(dft, val_mmcs, fri_config);
+    // println!();
     //
-    // let pcs = TrivialPcs {
-    //     dft,
-    //     log_n: trace_len.ilog2() as usize,
-    //     _phantom: PhantomData,
+    // for i in 0..trace_width {
+    //     print!("{} ", a[i][523131]);
+    // }
+    //
+    // for i in 0..trace_width {
+    //     print!("{} ", b[i][523131]);
+    // }
+    //
+    // println!();
+
+    // TODO: should not be just random
+    let mut rng = thread_rng();
+    let challenge = rng.sample(Standard {});
+    println!("Challenge: {}", challenge);
+
+    let perm = Perm::new_from_rng(8, 22, &mut rng);
+    let hash = Hash::new(perm.clone());
+
+    let dft = Dft::default();
+
+    // TODO: use proper PCS configured with FRI config
+    //let compress = Compress::new(hash.clone());
+    //let val_mmcs = ValMmcs::new(hash.clone(), compress);
+    //let challenge_mmcs = ChallengeMmcs::new(val_mmcs.clone());
+    // let fri_config = FriConfig {
+    //     log_blowup: 1,
+    //     log_final_poly_len: 0,
+    //     num_queries: 128,
+    //     proof_of_work_bits: 0,
+    //     mmcs: challenge_mmcs,
     // };
-    //
-    // let config = Config::new(pcs);
-    //
-    // let trace = generate_permutation_trace(a, b, challenge, trace_len);
-    //
-    // let air = LineaPermutationAIR {
-    //     width,
-    //     check_column_index: width * 2,
-    //     inv_column_index: width * 2 + 1,
-    // };
-    //
-    // let mut challenger = Challenger::new(vec![], hash.clone());
-    // let proof = prove(&config, &air, &mut challenger, trace, &vec![challenge]);
-    //
-    // let mut challenger = Challenger::new(vec![], hash.clone());
-    // verify(&config, &air, &mut challenger, &proof, &vec![challenge])
+    // let pcs = TwoAdicFriPcs::new(dft, val_mmcs, fri_config);
+
+    let pcs = TrivialPcs {
+        dft,
+        log_n: trace_len.ilog2() as usize,
+        _phantom: PhantomData,
+    };
+
+    let config = Config::new(pcs);
+
+    println!("Generating trace...");
+    let trace = generate_permutation_trace(a, b, challenge, trace_len);
+
+    //println!("{:?}", trace.row(523130));
+    // Cloned { it: Iter([0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 3724799957963294218711052064958876578713795561741567537104928369642050772208]) }
+    // Cloned { it: Iter([22, 22, 1, 1, 0, 0,    9, 9, 0, 0, 3, 3,    1, 5828036812251416716565922346194646345472035493016471421852543913873111465780]) }
+    //println!("{:?}", trace.row(523131));
+
+    let air = LineaPermutationAIR {
+        width: trace_width,
+        check_column_index: trace_width * 2,
+        inv_column_index: trace_width * 2 + 1,
+    };
+
+    let mut challenger = Challenger::new(vec![], hash.clone());
+    println!("Proving...");
+    let proof = prove(&config, &air, &mut challenger, trace, &vec![challenge]);
+
+    let mut challenger = Challenger::new(vec![], hash.clone());
+    println!("Verification...");
+    verify(&config, &air, &mut challenger, &proof, &vec![challenge])
 }

@@ -29,8 +29,7 @@ impl<AB: AirBuilderWithPublicValues> Air<AB> for LineaPermutationAIR {
         let local = main.row_slice(0);
         let next = main.row_slice(1);
 
-        let pis = builder.public_values();
-        let challenge = pis[0].into();
+        let challenge = builder.public_values()[0].into();
 
         let mut local_a_total = AB::Expr::from(AB::F::ONE);
         for i in 0..self.width {
@@ -49,9 +48,7 @@ impl<AB: AirBuilderWithPublicValues> Air<AB> for LineaPermutationAIR {
         );
 
         // (b[i] + ch) * inv[i] == 1
-        builder
-            .when_transition()
-            .assert_eq(local_b_total * local[self.inv_column_index], AB::F::ONE);
+        builder.assert_eq(local_b_total * local[self.inv_column_index], AB::F::ONE);
 
         let mut next_a_total = AB::Expr::from(AB::F::ONE);
         for i in 0..self.width {
