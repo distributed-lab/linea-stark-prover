@@ -1,31 +1,21 @@
 mod air;
 mod config;
 
-use air::LineaPermutationAIR;
 use ark_ff::PrimeField;
-use config::*;
 use p3_bls12_377_fr::{Bls12_377Fr, FF_Bls12_377Fr};
-use p3_commit::testing::TrivialPcs;
 use p3_field::{Field, FieldAlgebra};
 use p3_matrix::dense::RowMajorMatrix;
-use p3_uni_stark::{prove, verify};
-use rand::distributions::Standard;
-use rand::{thread_rng, Rng};
-use std::cmp::max;
+use rand::Rng;
 use std::collections::HashMap;
 use std::fmt::Debug;
 use std::fs;
-use std::marker::PhantomData;
 use tracing_forest::util::LevelFilter;
 use tracing_forest::ForestLayer;
 use tracing_subscriber::layer::SubscriberExt;
 use tracing_subscriber::util::SubscriberInitExt;
 use tracing_subscriber::{EnvFilter, Registry};
 
-use corset::cgo::Trace;
-use corset::compiler::Constraint;
 use corset::{cgo, import};
-use corset::column::{Value, ValueBacking};
 
 pub fn generate_permutation_trace<F: Field>(
     a: Vec<Vec<F>>,
@@ -87,10 +77,22 @@ fn main() {
         .with(ForestLayer::default())
         .init();
 
-    let order: Vec<&str> = vec!["mxp.CN", "mxp.CN_perm", "mxp.C_MEM", "mxp.C_MEM_NEW", "mxp.C_MEM_NEW_perm", "mxp.C_MEM_perm", "mxp.STAMP", "mxp.STAMP_perm", "mxp.WORDS", "mxp.WORDS_NEW", "mxp.WORDS_NEW_perm", "mxp.WORDS_perm"];
+    let order: Vec<&str> = vec![
+        "mxp.CN",
+        "mxp.CN_perm",
+        "mxp.C_MEM",
+        "mxp.C_MEM_NEW",
+        "mxp.C_MEM_NEW_perm",
+        "mxp.C_MEM_perm",
+        "mxp.STAMP",
+        "mxp.STAMP_perm",
+        "mxp.WORDS",
+        "mxp.WORDS_NEW",
+        "mxp.WORDS_NEW_perm",
+        "mxp.WORDS_perm",
+    ];
 
     let mut corset = cgo::corset_from_file("zkevm.bin").unwrap();
-    // import::parse_binary_trace("traces/trace1.lt", &mut corset, false).unwrap();
     import::parse_json_trace("dump.json", &mut corset, true).unwrap();
 
     let file_content = fs::read_to_string("dump.json").unwrap();
@@ -110,17 +112,14 @@ fn main() {
                 }
             }
 
-            (
-                key,
-                v
-            )
+            (key, v)
         })
         .collect();
 
     let mut a: Vec<Vec<Bls12_377Fr>> = Vec::new();
     let mut b: Vec<Vec<Bls12_377Fr>> = Vec::new();
 
-     order.iter().enumerate().for_each(|(i, o)| {
+    order.iter().enumerate().for_each(|(i, o)| {
         if i % 2 == 0 {
             a.push(map_field[o.clone()].clone());
         } else {
@@ -128,15 +127,12 @@ fn main() {
         }
     });
 
-
     // let a = field_columns[0..6].to_vec().clone();
     // let b = field_columns[6..].to_vec().clone();
 
     assert_eq!(a.len(), b.len(), "trace must have the same sizes");
 
-
     check(a, b);
-
 
     // -----------------------------------------------------------
 
