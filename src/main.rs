@@ -71,8 +71,12 @@ fn check<F: Field + std::cmp::Ord>(mut a: Vec<Vec<F>>, mut b: Vec<Vec<F>>) {
     b_all.sort();
 
     assert_eq!(a_all.len(), b_all.len());
+    println!("{}", a_all.len());
     for i in 0..a_all.len() {
+        // println!("{}", i);
+        println!("{} {}", a_all[i], b_all[i]);
         assert_eq!(a_all[i], b_all[i]);
+
     }
 }
 
@@ -88,163 +92,42 @@ fn main() {
         .init();
 
     let mut corset = cgo::corset_from_file("zkevm.bin").unwrap();
-    // import::parse_binary_trace("traces/trace1.lt", &mut corset, true).unwrap();
+    // import::parse_binary_trace("traces/trace1.lt", &mut corset, false).unwrap();
     import::parse_json_trace("dump.json", &mut corset, true).unwrap();
-
-    // let file_content = fs::read_to_string("dump.json").unwrap();
-    // let v: HashMap<String, Vec<u32>> = serde_json::from_str(&file_content).unwrap();
-    // let map_field: HashMap<String, Vec<Bls12_377Fr>> = v
-    //     .into_iter()
-    //     .map(|(key, vec_u32)| (key, vec_u32.into_iter().map(|num| Bls12_377Fr::from_canonical_u32(num)).collect()))
-    //
 
     let file_content = fs::read_to_string("dump.json").unwrap();
     let v: HashMap<String, Vec<u32>> = serde_json::from_str(&file_content).unwrap();
     let map_field: HashMap<String, Vec<Bls12_377Fr>> = v
         .into_iter()
         .map(|(key, vec_num)| {
+            let mut v: Vec<Bls12_377Fr> = vec_num
+                .into_iter()
+                .filter(|&num| num != 0)
+                .map(|num| Bls12_377Fr::from_canonical_u32(num))
+                .collect();
+
+            if v.len() != 1160 {
+                for _ in 0..(1160 - v.len()) {
+                    v.insert(0, Bls12_377Fr::from_canonical_u32(0))
+                }
+            }
+
             (
                 key,
-                vec_num
-                    .into_iter()
-                    .filter(|&num| num != 0)
-                    .map(|num| Bls12_377Fr::from_canonical_u32(num))
-                    .collect(),
+                v
             )
         })
         .collect();
 
-    map_field.iter().for_each(|(_, a)| println!("{}", a.len()));
+    let field_columns: Vec<Vec<Bls12_377Fr>> = map_field.into_values().collect();
+    let a = field_columns[0..6].to_vec().clone();
+    let b = field_columns[6..].to_vec().clone();
+
+    assert_eq!(a.len(), b.len(), "trace must have the same sizes");
 
 
-    // let trace = Trace::from_constraints(&corset);
-    // let mut indexes: HashMap<String, usize> = HashMap::new();
-    // for i in 0..trace.columns.len() {
-    //     indexes.insert(trace.ids[i].clone(), i);
-    // }
-    //
-    // //println!("{:?}", corset.columns.cols);
-    //
-    // let mut a: Vec<Vec<Bls12_377Fr>> = Vec::new();
-    // let mut b: Vec<Vec<Bls12_377Fr>> = Vec::new();
-    //
-    // let mut trace_len = 0;
-    //
-    // for constraint in corset.constraints {
-    //     match constraint {
-    //         Constraint::Permutation { handle, from, to } => {
-    //             println!("found permutation constraint {:?}", handle);
-    //
-    //             for cref in from {
-    //                 let mut column: Vec<Bls12_377Fr> = Vec::new();
-    //                 //println!("ref A {:?}", cref);
-    //                 let column_name = cref.h.unwrap().to_string();
-    //                 println!("Column A name: {}", column_name);
-    //                 let id = *indexes.get(&column_name).unwrap();
-    //
-    //                 let trace_column = &trace.columns[id];
-    //
-    //                 // TODO: should we use it
-    //                 let padding_value = Bls12_377Fr::new(FF_Bls12_377Fr::from_be_bytes_mod_order(
-    //                     &trace_column.padding_value,
-    //                 ));
-    //
-    //                 // let actual_size = trace_column.values.len();
-    //                 // let target_size = actual_size.next_power_of_two();
-    //                 // for _ in 0..(target_size - actual_size) {
-    //                 //     column.push(padding_value.clone());
-    //                 // }
-    //
-    //
-    //                 //println!("trace column name {:?}", trace.ids[cref.id.unwrap()]);
-    //                 println!("padding value in A {:?}", padding_value);
-    //                 for value in &trace_column.values {
-    //                     column.push(Bls12_377Fr::new(FF_Bls12_377Fr::from_be_bytes_mod_order(
-    //                         value.as_slice(),
-    //                     )));
-    //                 }
-    //
-    //                 a.push(column.clone());
-    //                 trace_len = max(trace_column.values.len(), trace_len);
-    //                 println!("{}", column.len());
-    //             }
-    //
-    //             // for cref in to {
-    //             //     let column = corset.columns._cols.get(cref.as_id()).unwrap();
-    //             //     let reg_id = column.register.unwrap();
-    //             //     let reg = corset.columns.registers.get(reg_id).unwrap();
-    //             //     println!("{:?}", reg);
-    //             //     // let mut column: Vec<Bls12_377Fr> = Vec::new();
-    //             //     // let column_name = cref.h.unwrap().to_string();
-    //             //     // println!("Column B name: {}", column_name);
-    //             //     // let id = *indexes.get(&column_name).unwrap();
-    //             //     //
-    //             //     // let trace_column = &trace.columns[id];
-    //             //     // println!("Column B: {:?}", trace_column.values);
-    //             //     //
-    //             //     // // TODO: should we use it
-    //             //     // let padding_value = Bls12_377Fr::new(FF_Bls12_377Fr::from_be_bytes_mod_order(
-    //             //     //     &trace_column.padding_value,
-    //             //     // ));
-    //             //     // // let actual_size = trace_column.values.len();
-    //             //     // // let target_size = actual_size.next_power_of_two();
-    //             //     // // for _ in 0..(target_size - actual_size) {
-    //             //     // //     column.push(padding_value.clone());
-    //             //     // // }
-    //             //     //
-    //             //     // // println!("ref B {:?}", cref);
-    //             //     // // println!("trace column name {:?}", trace.ids[cref.id.unwrap()]);
-    //             //     // println!("padding value in B {:?}", padding_value);
-    //             //     //
-    //             //     // for value in &trace_column.values {
-    //             //     //     column.push(Bls12_377Fr::new(FF_Bls12_377Fr::from_be_bytes_mod_order(
-    //             //     //         value.as_slice(),
-    //             //     //     )));
-    //             //     // }
-    //             //     //
-    //             //     // b.push(column);
-    //             //     // trace_len = max(trace_column.values.len(), trace_len);
-    //             // }
-    //
-    //             break;
-    //         }
-    //         _ => {}
-    //     }
-    // }
+    check(a, b);
 
-    // assert_ne!(trace_len, 0, "trace is empty");
-
-    // assert_eq!(a.len(), b.len(), "trace must have the same sizes");
-    // let width = a.len();
-
-    // trace_len = trace_len.next_power_of_two();
-
-    // a.reverse().iter().for_each(|v| println!("{}", v.len()));
-    // println!("{:?}", b.len());
-    //
-    // // for i in 0..a.len() {
-    // //     while a[i].len() < trace_len {
-    // //         a[i].push(Bls12_377Fr::ZERO);
-    // //     }
-    // // }
-    // //
-    // // for i in 0..b.len() {
-    // //     while b[i].len() < trace_len {
-    // //         b[i].push(Bls12_377Fr::ZERO);
-    // //     }
-    // // }
-    //
-    // for i in 0..width {
-    //     while a[i].len() < trace_len {
-    //         a[i].push(Bls12_377Fr::ZERO);
-    //     }
-    //
-    //     while b[i].len() < trace_len {
-    //         b[i].push(Bls12_377Fr::ZERO);
-    //     }
-    // }
-    //
-    // check(a, b);
 
     // -----------------------------------------------------------
 
