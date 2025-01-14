@@ -43,7 +43,6 @@ fn dummy_check<F: Field + Ord>(mut a: Vec<Vec<F>>, mut b: Vec<Vec<F>>) {
 }
 
 fn main() -> Result<(), impl Debug> {
-    //fn main() {
     let env_filter = EnvFilter::builder()
         .with_default_directive(LevelFilter::INFO.into())
         .from_env_lossy();
@@ -116,11 +115,11 @@ fn main() -> Result<(), impl Debug> {
         }
     }
 
-    // println!("Checking (raw)...");
     // dummy_check(a, b);
-    // return Ok(());
 
     // -----------------------------------------------------------
+
+    // Test on small vectors
 
     // a.push(vec![
     //     Bls12_377Fr::from_canonical_u32(1),
@@ -140,26 +139,6 @@ fn main() -> Result<(), impl Debug> {
     // let trace_width: usize = 1;
 
     // -----------------------------------------------------------
-
-    // for i in 0..trace_width {
-    //     print!("{} ", a[i][523130]);
-    // }
-    //
-    // for i in 0..trace_width {
-    //     print!("{} ", b[i][523130]);
-    // }
-    //
-    // println!();
-    //
-    // for i in 0..trace_width {
-    //     print!("{} ", a[i][523131]);
-    // }
-    //
-    // for i in 0..trace_width {
-    //     print!("{} ", b[i][523131]);
-    // }
-    //
-    // println!();
 
     // TODO: should not be just random
     let mut rng = thread_rng();
@@ -194,11 +173,6 @@ fn main() -> Result<(), impl Debug> {
 
     println!("Generating trace...");
     let trace = generate_permutation_trace(a, b, challenge, trace_len);
-
-    //println!("{:?}", trace.row(523130));
-    // Cloned { it: Iter([0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 3724799957963294218711052064958876578713795561741567537104928369642050772208]) }
-    // Cloned { it: Iter([22, 22, 1, 1, 0, 0,    9, 9, 0, 0, 3, 3,    1, 5828036812251416716565922346194646345472035493016471421852543913873111465780]) }
-    //println!("{:?}", trace.row(523131));
 
     let air = LineaPermutationAIR {
         width: trace_width,
