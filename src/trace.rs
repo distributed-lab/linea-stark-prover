@@ -48,7 +48,7 @@ pub fn read_trace(path: &str) -> HashMap<String, Vec<Bls12_377Fr>> {
     raw_trace
         .into_iter()
         .map(|(name, column)| {
-            let mut parsed_column: Vec<Bls12_377Fr> = column
+            let parsed_column: Vec<Bls12_377Fr> = column
                 .into_iter()
                 .map(|num| Bls12_377Fr::new(FF_Bls12_377Fr::from(num)))
                 .collect();
