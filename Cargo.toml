@@ -8,9 +8,11 @@ p3-challenger = { git = "https://github.com/distributed-lab/Plonky3/", branch = 
 p3-air = { git = "https://github.com/distributed-lab/Plonky3/", branch = "main" }
 p3-field = { git = "https://github.com/distributed-lab/Plonky3/", branch = "main" }
 p3-matrix = { git = "https://github.com/distributed-lab/Plonky3/", branch = "main" }
+p3-merkle-tree = { git = "https://github.com/distributed-lab/Plonky3/", branch = "main" }
 p3-maybe-rayon = { git = "https://github.com/distributed-lab/Plonky3/", branch = "main" }
 p3-commit = { git = "https://github.com/distributed-lab/Plonky3/", branch = "main" }
 p3-dft = { git = "https://github.com/distributed-lab/Plonky3/", branch = "main" }
+p3-fri = { git = "https://github.com/distributed-lab/Plonky3/", branch = "main" }
 p3-symmetric = { git = "https://github.com/distributed-lab/Plonky3/", branch = "main" }
 p3-uni-stark = { git = "https://github.com/distributed-lab/Plonky3/", branch = "main" }
 p3-bls12-377-fr = { git = "https://github.com/distributed-lab/Plonky3/", branch = "main" }

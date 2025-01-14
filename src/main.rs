@@ -18,6 +18,7 @@ use rand::{thread_rng, Rng};
 use std::cmp::max;
 use std::fmt::Debug;
 use std::marker::PhantomData;
+use p3_fri::{FriConfig, TwoAdicFriPcs};
 use tracing_forest::util::LevelFilter;
 use tracing_forest::ForestLayer;
 use tracing_subscriber::layer::SubscriberExt;
@@ -151,23 +152,24 @@ fn main() -> Result<(), impl Debug> {
     let dft = Dft::default();
 
     // TODO: use proper PCS configured with FRI config
-    //let compress = Compress::new(hash.clone());
-    //let val_mmcs = ValMmcs::new(hash.clone(), compress);
-    //let challenge_mmcs = ChallengeMmcs::new(val_mmcs.clone());
-    // let fri_config = FriConfig {
-    //     log_blowup: 1,
-    //     log_final_poly_len: 0,
-    //     num_queries: 128,
-    //     proof_of_work_bits: 0,
-    //     mmcs: challenge_mmcs,
-    // };
-    // let pcs = TwoAdicFriPcs::new(dft, val_mmcs, fri_config);
-
-    let pcs = TrivialPcs {
-        dft,
-        log_n: trace_len.ilog2() as usize,
-        _phantom: PhantomData,
+    let compress = Compress::new(hash.clone());
+    let val_mmcs = ValMmcs::new(hash.clone(), compress.clone());
+    let challenge_mmcs = ChallengeMmcs::new(hash.clone(), compress.clone());
+    let fri_config = FriConfig {
+        log_blowup: 2,
+        log_final_poly_len: 0,
+        num_queries: 55,
+        proof_of_work_bits: 18,
+        mmcs: challenge_mmcs,
     };
+
+    let pcs = TwoAdicFriPcs::new(dft, val_mmcs, fri_config);
+
+    // let pcs = TrivialPcs {
+    //     dft,
+    //     log_n: trace_len.ilog2() as usize,
+    //     _phantom: PhantomData,
+    // };
 
     let config = Config::new(pcs);
 
