@@ -158,8 +158,8 @@ fn main() -> Result<(), impl Debug> {
     let fri_config = FriConfig {
         log_blowup: 3,
         log_final_poly_len: 0,
-        num_queries: 55,
-        proof_of_work_bits: 18,
+        num_queries: 33,
+        proof_of_work_bits: 29,
         mmcs: challenge_mmcs,
     };
 
