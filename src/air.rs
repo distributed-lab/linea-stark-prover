@@ -1,35 +1,37 @@
 use p3_air::{Air, AirBuilder, AirBuilderWithPublicValues, BaseAir};
-use p3_field::{Field, FieldAlgebra};
+use p3_bls12_377_fr::Bls12_377Fr;
+use p3_field::{Field, FieldAlgebra, TwoAdicField};
 use p3_matrix::Matrix;
 
 /// Processes the permutation for two columns
-pub struct LineaPermutationAIR {
+pub struct LineaPermutationAIR<F: Field> {
     // Tables has the same sizes
     pub(crate) width: usize,
     // width * 2 + 1
     pub(crate) inv_column_index: usize,
     // width * 2
     pub(crate) check_column_index: usize,
+    pub(crate) challenge: F,
 }
 
 /// | 0.       | 1.       | 2.                     | 3.                         |
 /// |`Column A`|`Column B`|`Constrain check column`|`B+challenge inverse column`|
 
-impl<F: Field> BaseAir<F> for LineaPermutationAIR {
+impl<F: Field> BaseAir<F> for LineaPermutationAIR<F> {
     fn width(&self) -> usize {
         // a cols + b cols + check col + inv col
         self.width * 2 + 2
     }
 }
 
-impl<AB: AirBuilderWithPublicValues> Air<AB> for LineaPermutationAIR {
+impl<AB: AirBuilderWithPublicValues> Air<AB> for LineaPermutationAIR<AB::F> {
     fn eval(&self, builder: &mut AB) {
         let main = builder.main();
 
         let local = main.row_slice(0);
         let next = main.row_slice(1);
 
-        let challenge = builder.public_values()[0].into();
+        let challenge = AB::F::from_f(self.challenge.clone());
 
         let mut local_a_total = AB::Expr::from(AB::F::ONE);
         for i in 0..self.width {
@@ -48,7 +50,7 @@ impl<AB: AirBuilderWithPublicValues> Air<AB> for LineaPermutationAIR {
         );
 
         // (b[i] + ch) * inv[i] == 1
-        builder.assert_eq(local_b_total * local[self.inv_column_index], AB::F::ONE);
+        builder.when_transition().assert_eq(local_b_total * local[self.inv_column_index], AB::F::ONE);
 
         let mut next_a_total = AB::Expr::from(AB::F::ONE);
         for i in 0..self.width {

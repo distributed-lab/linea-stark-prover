@@ -37,7 +37,7 @@ pub fn generate_permutation_trace(
         res.get(res.len() - 2).unwrap().is_one(),
         "failed to check constrain: check column should be 1 on the last row"
     );
-    assert_eq!(a.len(), b.len(), "a 'from' number of columns should be equal to the 'to'");
+    assert_eq!(a.len(), b.len(), "the number of columns in 'from' should be equal to the 'to'");
     RowMajorMatrix::new(res, a.len() + b.len() + 2)
 }
 

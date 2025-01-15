@@ -156,7 +156,7 @@ fn main() -> Result<(), impl Debug> {
     let val_mmcs = ValMmcs::new(hash.clone(), compress.clone());
     let challenge_mmcs = ChallengeMmcs::new(hash.clone(), compress.clone());
     let fri_config = FriConfig {
-        log_blowup: 2,
+        log_blowup: 3,
         log_final_poly_len: 0,
         num_queries: 55,
         proof_of_work_bits: 18,
@@ -180,13 +180,14 @@ fn main() -> Result<(), impl Debug> {
         width: trace_width,
         check_column_index: trace_width * 2,
         inv_column_index: trace_width * 2 + 1,
+        challenge: challenge.clone(),
     };
 
     let mut challenger = Challenger::new(vec![], hash.clone());
     println!("Proving...");
-    let proof = prove(&config, &air, &mut challenger, trace, &vec![challenge]);
+    let proof = prove(&config, &air, &mut challenger, trace, &vec![]);
 
     let mut challenger = Challenger::new(vec![], hash.clone());
     println!("Verification...");
-    verify(&config, &air, &mut challenger, &proof, &vec![challenge])
+    verify(&config, &air, &mut challenger, &proof, &vec![])
 }
