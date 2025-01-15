@@ -1,0 +1,70 @@
+Found a permutation constraint: mxp.CN_STAMP_C_MEM_C_MEM_NEW_WORDS_WORDS_NEW_intrld_CN_perm_STAMP_perm_C_MEM_perm_C_MEM_NEW_perm_WORDS_perm_WORDS_NEW_perm%None
+Found 'from' column: mxp.CN, length: 524288
+Found 'from' column: mxp.STAMP, length: 524288
+Found 'from' column: mxp.C_MEM, length: 524288
+Found 'from' column: mxp.C_MEM_NEW, length: 524288
+Found 'from' column: mxp.WORDS, length: 524288
+Found 'from' column: mxp.WORDS_NEW, length: 524288
+Found 'to' column: mxp.CN_perm, length: 524288
+Found 'to' column: mxp.STAMP_perm, length: 524288
+Found 'to' column: mxp.C_MEM_perm, length: 524288
+Found 'to' column: mxp.C_MEM_NEW_perm, length: 524288
+Found 'to' column: mxp.WORDS_perm, length: 524288
+Found 'to' column: mxp.WORDS_NEW_perm, length: 524288
+Appending trace to 524288
+Challenge: 3477182086299317365765362242845730771869226605243130759570080187834646313846
+Generating trace...
+Proving...
+INFO     prove [ 342s | 0.31% / 100.00% ]
+INFO     ┝━ commit to trace data [ 166s | 45.26% / 48.46% ]
+INFO     │  ┕━ coset_lde_batch [ 10.9s | 3.20% ] dims: 14x524288 | added_bits: 3
+INFO     ┝━ compute quotient polynomial [ 5.83s | 1.71% ]
+INFO     ┝━ commit to quotient poly chunks [ 103s | 27.86% / 30.16% ]
+INFO     │  ┝━ coset_lde_batch [ 1.56s | 0.46% ] dims: 1x524288 | added_bits: 3
+INFO     │  ┝━ coset_lde_batch [ 937ms | 0.27% ] dims: 1x524288 | added_bits: 3
+INFO     │  ┝━ coset_lde_batch [ 896ms | 0.26% ] dims: 1x524288 | added_bits: 3
+INFO     │  ┝━ coset_lde_batch [ 880ms | 0.26% ] dims: 1x524288 | added_bits: 3
+INFO     │  ┝━ coset_lde_batch [ 907ms | 0.27% ] dims: 1x524288 | added_bits: 3
+INFO     │  ┝━ coset_lde_batch [ 882ms | 0.26% ] dims: 1x524288 | added_bits: 3
+INFO     │  ┝━ coset_lde_batch [ 930ms | 0.27% ] dims: 1x524288 | added_bits: 3
+INFO     │  ┕━ coset_lde_batch [ 880ms | 0.26% ] dims: 1x524288 | added_bits: 3
+INFO     ┕━ open [ 66.2s | 0.05% / 19.37% ]
+INFO        ┝━ compute_inverse_denominators [ 1.85s | 0.54% ]
+INFO        ┝━ reduce matrix quotient [ 1.28s | 0.00% / 0.38% ] dims: 14x4194304
+INFO        │  ┝━ compute opened values with Lagrange interpolation [ 307ms | 0.09% ]
+INFO        │  ┕━ reduce rows [ 977ms | 0.29% ]
+INFO        ┝━ reduce matrix quotient [ 1.25s | 0.00% / 0.37% ] dims: 14x4194304
+INFO        │  ┝━ compute opened values with Lagrange interpolation [ 292ms | 0.09% ]
+INFO        │  ┕━ reduce rows [ 957ms | 0.28% ]
+INFO        ┝━ reduce matrix quotient [ 385ms | 0.00% / 0.11% ] dims: 1x4194304
+INFO        │  ┝━ compute opened values with Lagrange interpolation [ 212ms | 0.06% ]
+INFO        │  ┕━ reduce rows [ 173ms | 0.05% ]
+INFO        ┝━ reduce matrix quotient [ 371ms | 0.00% / 0.11% ] dims: 1x4194304
+INFO        │  ┝━ compute opened values with Lagrange interpolation [ 201ms | 0.06% ]
+INFO        │  ┕━ reduce rows [ 170ms | 0.05% ]
+INFO        ┝━ reduce matrix quotient [ 379ms | 0.00% / 0.11% ] dims: 1x4194304
+INFO        │  ┝━ compute opened values with Lagrange interpolation [ 202ms | 0.06% ]
+INFO        │  ┕━ reduce rows [ 177ms | 0.05% ]
+INFO        ┝━ reduce matrix quotient [ 376ms | 0.00% / 0.11% ] dims: 1x4194304
+INFO        │  ┝━ compute opened values with Lagrange interpolation [ 205ms | 0.06% ]
+INFO        │  ┕━ reduce rows [ 172ms | 0.05% ]
+INFO        ┝━ reduce matrix quotient [ 394ms | 0.00% / 0.12% ] dims: 1x4194304
+INFO        │  ┝━ compute opened values with Lagrange interpolation [ 219ms | 0.06% ]
+INFO        │  ┕━ reduce rows [ 175ms | 0.05% ]
+INFO        ┝━ reduce matrix quotient [ 383ms | 0.00% / 0.11% ] dims: 1x4194304
+INFO        │  ┝━ compute opened values with Lagrange interpolation [ 208ms | 0.06% ]
+INFO        │  ┕━ reduce rows [ 175ms | 0.05% ]
+INFO        ┝━ reduce matrix quotient [ 376ms | 0.00% / 0.11% ] dims: 1x4194304
+INFO        │  ┝━ compute opened values with Lagrange interpolation [ 204ms | 0.06% ]
+INFO        │  ┕━ reduce rows [ 172ms | 0.05% ]
+INFO        ┝━ reduce matrix quotient [ 402ms | 0.00% / 0.12% ] dims: 1x4194304
+INFO        │  ┝━ compute opened values with Lagrange interpolation [ 228ms | 0.07% ]
+INFO        │  ┕━ reduce rows [ 174ms | 0.05% ]
+INFO        ┕━ FRI prover [ 58.6s | 0.02% / 17.14% ]
+INFO           ┝━ commit phase [ 39.2s | 11.47% / 11.47% ]
+INFO           │  ┕━ divide_by_height [ 177µs | 0.00% ] dims: 1x8
+INFO           ┝━ grind for proof-of-work witness [ 19.3s | 5.64% ]
+INFO           ┕━ query phase [ 12.6ms | 0.00% ]
+Verification...
+INFO     verify [ 944ms | 99.99% / 100.00% ]
+INFO     ┕━ infer log of constraint degree [ 78.0µs | 0.01% ]
