@@ -76,7 +76,7 @@ fn main() -> Result<(), impl Debug> {
     let val_mmcs = ValMmcs::new(hash.clone(), compress.clone());
     let challenge_mmcs = ChallengeMmcs::new(hash.clone(), compress.clone());
     let fri_config = FriConfig {
-        log_blowup: 3,
+        log_blowup: 2,
         log_final_poly_len: 0,
         num_queries: 33,
         proof_of_work_bits: 29,
