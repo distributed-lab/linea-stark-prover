@@ -81,8 +81,8 @@ impl<AB: AirBuilderWithPublicValues> Air<AB> for LineaLookupAIR<AB::F> {
 
         let mut local_b_total = AB::Expr::from(AB::F::ZERO);
         for i in 0..self.b_width {
-            local_b_total =
-                local_b_total + (local[self.check_column_shift] * local[self.b_inv_shift + i]);
+            local_b_total = local_b_total
+                + (local[self.occurrences_column_shift + i] * local[self.b_inv_shift + i]);
         }
 
         // check[0] == 1/(a[0] + ch) - s[0]/(b[0] + ch)
@@ -98,8 +98,8 @@ impl<AB: AirBuilderWithPublicValues> Air<AB> for LineaLookupAIR<AB::F> {
 
         let mut next_b_total = AB::Expr::from(AB::F::ZERO);
         for i in 0..self.b_width {
-            next_b_total =
-                next_b_total + (next[self.check_column_shift] * next[self.b_inv_shift + i]);
+            next_b_total = next_b_total
+                + (next[self.occurrences_column_shift + i] * next[self.b_inv_shift + i]);
         }
 
         // check[i+1] ==  1/(a[i+1] + ch) - s[i+1]/(b[i+1] + ch)  + check[i]
