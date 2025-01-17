@@ -3,7 +3,7 @@
 ## How to run?
 
 ```bash
-cargo run --release --feature parallel
+cargo run --release --features parallel
 ```
 
 ## Benchmarks
