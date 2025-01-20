@@ -19,12 +19,11 @@ p3-bls12-377-fr = { git = "https://github.com/distributed-lab/Plonky3/", branch 
 tracing-subscriber = { version = "0.3.17", features = ["std", "env-filter"] }
 tracing-forest = { version = "0.1.6", features = ["ansi", "smallvec"] }
 rand = "0.8.5"
-corset = { git = "https://github.com/distributed-lab/corset.git", branch = "fix/lib"}
 ark-ff = "0.5.0"
-serde_json = "1.0.135"
+num-bigint = { version = "0.4.6", features = ["serde"] }
+serde = { version = "1.0.217", features = ["derive"] }
+ciborium = "0.2.2"
 
-[target.'cfg(not(target_env = "msvc"))'.dependencies]
-tikv-jemallocator = "0.6"
 
 [features]
 parallel = ["p3-maybe-rayon/parallel"]
