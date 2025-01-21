@@ -8,6 +8,8 @@ use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::fs;
 use std::str::FromStr;
+use p3_matrix::Matrix;
+use crate::air::{AirConfig, AirLookupConfig};
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct RawPermutationTrace {
@@ -16,12 +18,17 @@ pub struct RawPermutationTrace {
     pub name: String,
 }
 
+enum Constraint {
+    Permutation(RawPermutationTrace),
+    Lookup(RawLookupTrace),
+}
+
 impl RawPermutationTrace {
     pub fn column_width(&self) -> usize {
         self.a.len()
     }
 
-    pub fn get_permutation_trace(&self, challenge: Bls12_377Fr) -> RowMajorMatrix<Bls12_377Fr> {
+    fn get_trace(&self, challenge: Bls12_377Fr) -> RowMajorMatrix<Bls12_377Fr> {
         let sz = self.a[0].len();
         let width = self.a.len();
         let mut res: Vec<Bls12_377Fr> = Vec::new();
@@ -62,7 +69,6 @@ impl RawPermutationTrace {
 }
 
 impl RawLookupTrace {
-
     pub fn a_width(&self) -> usize {
         self.a.len()
     }
@@ -71,7 +77,7 @@ impl RawLookupTrace {
         self.b.len()
     }
 
-    pub fn get_permutation_trace(&self, challenge: Bls12_377Fr) -> RowMajorMatrix<Bls12_377Fr> {
+    pub(crate) fn get_trace(&self, challenge: Bls12_377Fr) -> RowMajorMatrix<Bls12_377Fr> {
         let mut a: Vec<Vec<Bls12_377Fr>> = Vec::new();
         let mut b: Vec<Vec<Bls12_377Fr>> = Vec::new();
 
@@ -154,13 +160,85 @@ impl RawLookupTrace {
     }
 }
 
-#[derive(Serialize, Deserialize, Debug)]
-pub struct RawLookupTrace {
-    pub a: Vec<Vec<Vec<u8>>>,
-    pub b: Vec<Vec<Vec<u8>>>,
-    pub name: String,
-    pub a_filter: Vec<Vec<u8>>,
-    pub b_filter: Vec<Vec<u8>>,
+#[derive(Default)]
+pub struct RawTrace {
+    pub constraints: Vec<Constraint>
+}
+
+impl RawTrace {
+    pub fn new(constraints: Vec<Constraint>) -> Self {
+        Self{
+            constraints
+        }
+    }
+
+    pub fn push_lookup(&mut self, lookup: RawLookupTrace) {
+        self.constraints.push(Constraint::Lookup(lookup))
+    }
+
+    pub fn get_trace(&self, challange: Bls12_377Fr) -> RowMajorMatrix<Bls12_377Fr> {
+        // let mut values = vec![];
+        // let mut final_width = 0;
+
+        // for c in &self.constraints {
+        //
+        //     let mut matrix = match c {
+        //         // Constraint::Permutation(p) => p.get_trace(challange),
+        //         Constraint::Lookup(l) => { l.get_trace(challange) },
+        //         _ => unimplemented!("for now only Lookup constraint is implemented"),
+        //     };
+        //
+        //     values.append(&mut matrix.values);
+        //     final_width += matrix.width;
+        // }
+
+        let mut matrixes = vec![];
+        let mut final_width = 0;
+
+        for c in &self.constraints {
+            let matrix = match c {
+                // Constraint::Permutation(p) => p.get_trace(challange),
+                Constraint::Lookup(l) => { l.get_trace(challange) },
+                _ => unimplemented!("for now only Lookup constraint is implemented"),
+            };
+
+            final_width += matrix.width;
+            matrixes.push(matrix);
+        }
+
+        // TODO: we need to define max height
+        let mut max_height = matrixes[0].height();
+
+        let mut values = vec![];
+
+        for row in 0..max_height {
+            for matrix in &matrixes {
+                let rows = matrix.values.len() / matrix.width;
+                if row < rows {
+                    // Append the current row's data
+                    let start = row * matrix.width;
+                    let end = start + usize::min(start + matrix.width, matrix.values.len());
+                    values.append(&mut matrix.values[start..end].to_vec());
+                } else {
+                    // If the current matrix has fewer rows, pad with zeros
+                    values.extend(vec![Bls12_377Fr::ZERO; matrix.width]);
+                }
+            }
+        }
+
+        println!("final_width {}", final_width);
+
+        return RowMajorMatrix::new(values, final_width);
+    }
+
+    pub fn get_air_configs(&self) -> Vec<AirConfig> {
+        self.constraints.iter().map(|c| {
+            match c {
+                Constraint::Permutation(_) => unimplemented!("permutation constraint is not currently implemented"),
+                Constraint::Lookup(l) => AirConfig::Lookup(AirLookupConfig::new(l.a_width(), l.b_width()))
+            }
+        }).collect()
+    }
 }
 
 pub fn read_permutation(path: &str) -> RawPermutationTrace {
@@ -170,9 +248,19 @@ pub fn read_permutation(path: &str) -> RawPermutationTrace {
     raw_trace
 }
 
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct RawLookupTrace {
+    pub a: Vec<Vec<Vec<u8>>>,
+    pub b: Vec<Vec<Vec<u8>>>,
+    pub name: String,
+    pub a_filter: Vec<Vec<u8>>,
+    pub b_filter: Vec<Vec<u8>>,
+}
+
 pub fn read_lookup(path: &str) -> RawLookupTrace {
     let file_content = fs::read(path).unwrap();
-    let raw_trace: RawLookupTrace =
+    let mut raw_trace: RawLookupTrace =
         ciborium::from_reader(std::io::Cursor::new(file_content)).unwrap();
+
     raw_trace
 }
