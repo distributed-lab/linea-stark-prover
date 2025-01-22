@@ -53,11 +53,12 @@ fn main() -> Result<(), impl Debug> {
 
     let lookup0 = read_lookup("trace/lookup_0_0.bin");
     let lookup1 = read_lookup("trace/lookup_1_0.bin");
-    let lookup2 = read_lookup("trace/lookup_2_0.bin");
+    // let lookup2 = read_lookup("trace/lookup_2_0.bin");
 
     let mut raw_trace = RawTrace::default();
     raw_trace.push_lookup(lookup0);
     raw_trace.push_lookup(lookup1);
+    // raw_trace.push_lookup(lookup1);
     // raw_trace.push_lookup(lookup2);
 
     // dummy_check(a, b);

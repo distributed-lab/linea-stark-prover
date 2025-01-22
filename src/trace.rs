@@ -217,7 +217,7 @@ impl RawTrace {
                 if row < rows {
                     // Append the current row's data
                     let start = row * matrix.width;
-                    let end = start + usize::min(start + matrix.width, matrix.values.len());
+                    let end = usize::min(start + matrix.width, matrix.values.len());
                     values.append(&mut matrix.values[start..end].to_vec());
                 } else {
                     // If the current matrix has fewer rows, pad with zeros
