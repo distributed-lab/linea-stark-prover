@@ -43,7 +43,7 @@ fn dummy_check<F: Field + Ord>(mut a: Vec<Vec<F>>, mut b: Vec<Vec<F>>) {
 }
 
 /// Returns true if the check is passed. Otherwise, returns true.
-fn dummy_lookup_check<F: Field + Ord>(mut a: Vec<Vec<F>>, mut b: Vec<Vec<F>>) -> bool {
+fn dummy_lookup_check<F: Field + Ord + PartialEq>(mut a: Vec<Vec<F>>, mut b: Vec<Vec<F>>) -> bool {
     let mut b_all = HashSet::new();
 
     for i in 0..b.len() {
@@ -55,6 +55,7 @@ fn dummy_lookup_check<F: Field + Ord>(mut a: Vec<Vec<F>>, mut b: Vec<Vec<F>>) ->
     for i in 0..a.len() {
         for e in &a[i] {
             if b_all.get(e).is_none() {
+                println!("{:?}", e);
                 return false
             }
         }
@@ -75,20 +76,31 @@ fn main() -> Result<(), impl Debug> {
 
     let mut raw_trace = RawTrace::default();
 
-    let skip_indexes = vec![8, 11, 12, 13, 15, 19, 22, 33, 36, 39, 40];
-    for i in 8..=8 {
-        // if skip_indexes.contains(&i) {
-        //     continue
-        // }
+    // let skip_indexes = vec![8, 11, 12, 13, 15, 19, 22, 33, 36, 39, 40];
+    // for i in 8..=8 {
+    //     // if skip_indexes.contains(&i) {
+    //     //     continue
+    //     // }
+    //
+    //     let name = format!("trace/lookup_{}_0.bin", i);
+    //     println!("reading {}", name);
+    //
+    //     let lookup = read_lookup(&name);
+    //     raw_trace.push_lookup(lookup.clone());
+    //
+    //     println!("max height: {}", raw_trace.max_height);
+    // }
 
-        let name = format!("trace/lookup_{}_0.bin", i);
-        println!("reading {}", name);
 
-        let lookup = read_lookup(&name);
-        raw_trace.push_lookup(lookup.clone());
+    let name = format!("lookup_{}_0.bin", 8);
+    println!("reading {}", name);
 
-        println!("max height: {}", raw_trace.max_height);
-    }
+    let lookup = read_lookup(&name);
+    let (a, b) = lookup.get_columns();
+    let res = dummy_lookup_check(a, b);
+
+    raw_trace.push_lookup(lookup.clone());
+
 
     // let mut failed_files = vec![];
     // for i in 0..=40 {

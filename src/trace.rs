@@ -189,13 +189,13 @@ impl RawTrace {
             let new_size = lookup.a[0].len();
 
             l.b.iter_mut().for_each(|e| {
-                e.resize(new_size, vec![0]);
+                e.resize(new_size, [0u8; 32]);
             });
         } else if lookup.a[0].len() < lookup.b[0].len() {
             let new_size = lookup.b[0].len();
 
             l.a.iter_mut().for_each(|e| {
-                e.resize(new_size, vec![0]);
+                e.resize(new_size, [0u8; 32]);
             });
         }
 
@@ -292,22 +292,22 @@ pub fn read_permutation(path: &str) -> RawPermutationTrace {
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct RawLookupTrace {
-    pub a: Vec<Vec<Vec<u8>>>,
-    pub b: Vec<Vec<Vec<u8>>>,
+    pub a: Vec<Vec<[u8;32]>>,
+    pub b: Vec<Vec<[u8;32]>>,
     pub name: String,
-    pub a_filter: Vec<Vec<u8>>,
-    pub b_filter: Vec<Vec<u8>>,
+    pub a_filter: Vec<[u8;32]>,
+    pub b_filter: Vec<[u8;32]>,
 }
 
 impl RawLookupTrace {
     pub fn resize(&mut self, size: usize) {
         // TODO: we might need to push a vector of 10 elements
         for e in &mut self.a {
-            e.resize(size, vec![0]);
+            e.resize(size, [0u8; 32]);
         }
 
         for e in &mut self.b {
-            e.resize(size, vec![0]);
+            e.resize(size, [0u8; 32]);
         }
 
         // TODO: resize filters
@@ -317,8 +317,6 @@ impl RawLookupTrace {
         let mut a: Vec<Vec<Bls12_377Fr>> = Vec::new();
         let mut b: Vec<Vec<Bls12_377Fr>> = Vec::new();
 
-        let mut a_occurrences: HashMap<Bls12_377Fr, usize> = HashMap::new();
-
         for i in 0..self.a.len() {
             a.push(Vec::new());
             for j in 0..self.a[i].len() {
@@ -327,12 +325,6 @@ impl RawLookupTrace {
                 ));
 
                 a[i].push(aij.clone());
-
-                if let Some(cnt) = a_occurrences.get(&aij) {
-                    a_occurrences.insert(aij, cnt + 1);
-                } else {
-                    a_occurrences.insert(aij, 1);
-                }
             }
         }
 
