@@ -6,12 +6,12 @@ use p3_matrix::Matrix;
 /// Processes the permutation for two columns
 pub struct LineaPermutationAIR<F: Field> {
     // Tables has the same sizes
-    pub(crate) width: usize,
+    pub width: usize,
     // width * 2 + 1
-    pub(crate) inv_column_index: usize,
+    pub inv_column_index: usize,
     // width * 2
-    pub(crate) check_column_index: usize,
-    pub(crate) challenge: F,
+    pub check_column_index: usize,
+    pub challenge: F,
 }
 
 /// | 0.       | 1.       | 2.                     | 3.                         |
@@ -50,7 +50,9 @@ impl<AB: AirBuilderWithPublicValues> Air<AB> for LineaPermutationAIR<AB::F> {
         );
 
         // (b[i] + ch) * inv[i] == 1
-        builder.when_transition().assert_eq(local_b_total * local[self.inv_column_index], AB::F::ONE);
+        builder
+            .when_transition()
+            .assert_eq(local_b_total * local[self.inv_column_index], AB::F::ONE);
 
         let mut next_a_total = AB::Expr::from(AB::F::ONE);
         for i in 0..self.width {

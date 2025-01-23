@@ -1,4 +1,3 @@
-use crate::config::Challenge;
 use p3_air::{Air, AirBuilder, AirBuilderWithPublicValues, BaseAir};
 use p3_bls12_377_fr::Bls12_377Fr;
 use p3_field::{Field, FieldAlgebra, TwoAdicField};
@@ -7,29 +6,29 @@ use p3_matrix::Matrix;
 /// Processes the permutation for two columns
 pub struct LineaLookupAIR<F: Field> {
     // 0...a-1 it is the A columns
-    pub(crate) a_shift: usize,
+    pub a_shift: usize,
     // a...2a-1 it is the A[i]+challenge inverse
-    pub(crate) a_inv_shift: usize,
+    pub a_inv_shift: usize,
     //
-    pub(crate) a_width: usize,
+    pub a_width: usize,
     // 2a...2a+b-1 it is the B columns
-    pub(crate) b_shift: usize,
+    pub b_shift: usize,
     // 2a+b...2a+2b-1 it is the B[i]+challenge inverse
-    pub(crate) b_inv_shift: usize,
+    pub b_inv_shift: usize,
     //
-    pub(crate) b_width: usize,
+    pub b_width: usize,
     // 2a+2b ...2a+3b-1 it is the occurrences of B[i] in A
-    pub(crate) occurrences_column_shift: usize,
+    pub occurrences_column_shift: usize,
     // 2a+3b it is a check lookup constrain column
-    pub(crate) check_column_shift: usize,
-    pub(crate) challenge: F,
+    pub check_column_shift: usize,
+    pub challenge: F,
 }
 
 /// | 0.       | 1.                        | 2.       | 3.                      | 4.                        | 5.                      |
 /// |`Column A`| `A[i] + challenge inverse`|`Column B`| `B[i]+challenge inverse`| `Occurrences of b[i] in a`| `Constrain check column`|
 
 impl<F: Field> LineaLookupAIR<F> {
-    pub(crate) fn new(a_width: usize, b_width: usize, challenge: F) -> Self {
+    pub fn new(a_width: usize, b_width: usize, challenge: F) -> Self {
         LineaLookupAIR {
             a_shift: 0,
             a_inv_shift: a_width,
