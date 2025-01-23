@@ -89,6 +89,7 @@ impl<F: Field> BaseAir<F> for LineaAIR<F> {
 
 impl<AB: AirBuilderWithPublicValues> Air<AB> for LineaAIR<AB::F> {
     fn eval(&self, builder: &mut AB)  {
+        // println!("row index: {}", builder.row_index());
         let mut offset = 0;
 
         let main = builder.main();

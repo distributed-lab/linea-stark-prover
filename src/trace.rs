@@ -23,6 +23,15 @@ enum Constraint {
     Lookup(RawLookupTrace),
 }
 
+impl Constraint {
+    pub fn resize(&mut self, new_size: usize) {
+        match self {
+            Constraint::Permutation(_) => {unimplemented!("permutation is not implemented")}
+            Constraint::Lookup(l) => l.resize(new_size)
+        };
+    }
+}
+
 impl RawPermutationTrace {
     pub fn column_width(&self) -> usize {
         self.a.len()
@@ -162,18 +171,50 @@ impl RawLookupTrace {
 
 #[derive(Default)]
 pub struct RawTrace {
-    pub constraints: Vec<Constraint>
+    pub constraints: Vec<Constraint>,
+    pub max_height: usize,
 }
 
 impl RawTrace {
-    pub fn new(constraints: Vec<Constraint>) -> Self {
-        Self{
-            constraints
-        }
-    }
+    // pub fn new(constraints: Vec<Constraint>) -> Self {
+    //     Self{
+    //         constraints
+    //     }
+    // }
 
     pub fn push_lookup(&mut self, lookup: RawLookupTrace) {
-        self.constraints.push(Constraint::Lookup(lookup))
+        let mut l = lookup.clone();
+
+        if lookup.a[0].len() > lookup.b[0].len() {
+            let new_size = lookup.a[0].len();
+
+            l.b.iter_mut().for_each(|e| {
+                e.resize(new_size, vec![0]);
+            });
+        } else if lookup.a[0].len() < lookup.b[0].len() {
+            let new_size = lookup.b[0].len();
+
+            l.a.iter_mut().for_each(|e| {
+                e.resize(new_size, vec![0]);
+            });
+        }
+
+        if l.a[0].len() > self.max_height {
+            let new_size = l.a[0].len();
+            // New lookup height bigger than existing
+            self.constraints.iter_mut().for_each(|c| {
+                c.resize(new_size)
+            });
+
+            self.max_height = l.a[0].len();
+            self.constraints.push(Constraint::Lookup(l));
+        } else if l.a[0].len() < self.max_height {
+            let new_size = self.max_height;
+
+            // Existing lookup height bigger than a new onw
+            l.resize(new_size);
+            self.constraints.push(Constraint::Lookup(l));
+        }
     }
 
     pub fn get_trace(&self, challange: Bls12_377Fr) -> RowMajorMatrix<Bls12_377Fr> {
@@ -219,10 +260,11 @@ impl RawTrace {
                     let start = row * matrix.width;
                     let end = usize::min(start + matrix.width, matrix.values.len());
                     values.append(&mut matrix.values[start..end].to_vec());
-                } else {
-                    // If the current matrix has fewer rows, pad with zeros
-                    values.extend(vec![Bls12_377Fr::ZERO; matrix.width]);
                 }
+                // else {
+                //     If the current matrix has fewer rows, pad with zeros
+                    // values.extend(vec![Bls12_377Fr::ZERO; matrix.width]);
+                // }
             }
         }
 
@@ -255,6 +297,59 @@ pub struct RawLookupTrace {
     pub name: String,
     pub a_filter: Vec<Vec<u8>>,
     pub b_filter: Vec<Vec<u8>>,
+}
+
+impl RawLookupTrace {
+    pub fn resize(&mut self, size: usize) {
+        // TODO: we might need to push a vector of 10 elements
+        for e in &mut self.a {
+            e.resize(size, vec![0]);
+        }
+
+        for e in &mut self.b {
+            e.resize(size, vec![0]);
+        }
+
+        // TODO: resize filters
+    }
+
+    pub fn get_columns(&self) -> (Vec<Vec<Bls12_377Fr>>, Vec<Vec<Bls12_377Fr>>) {
+        let mut a: Vec<Vec<Bls12_377Fr>> = Vec::new();
+        let mut b: Vec<Vec<Bls12_377Fr>> = Vec::new();
+
+        let mut a_occurrences: HashMap<Bls12_377Fr, usize> = HashMap::new();
+
+        for i in 0..self.a.len() {
+            a.push(Vec::new());
+            for j in 0..self.a[i].len() {
+                let aij = Bls12_377Fr::new(FF_Bls12_377Fr::from_be_bytes_mod_order(
+                    self.a[i][j].as_slice(),
+                ));
+
+                a[i].push(aij.clone());
+
+                if let Some(cnt) = a_occurrences.get(&aij) {
+                    a_occurrences.insert(aij, cnt + 1);
+                } else {
+                    a_occurrences.insert(aij, 1);
+                }
+            }
+        }
+
+        for i in 0..self.b.len() {
+            b.push(Vec::new());
+
+            for j in 0..self.b[i].len() {
+                let bij = Bls12_377Fr::new(FF_Bls12_377Fr::from_be_bytes_mod_order(
+                    self.b[i][j].as_slice(),
+                ));
+
+                b[i].push(bij.clone());
+            }
+        }
+
+        (a, b)
+    }
 }
 
 pub fn read_lookup(path: &str) -> RawLookupTrace {

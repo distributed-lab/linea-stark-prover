@@ -4,6 +4,7 @@ mod trace;
 mod air_lookup;
 mod air;
 
+use std::collections::HashSet;
 use crate::air_permutation::LineaPermutationAIR;
 use crate::config::*;
 use crate::trace::{RawTrace, read_lookup};
@@ -41,6 +42,27 @@ fn dummy_check<F: Field + Ord>(mut a: Vec<Vec<F>>, mut b: Vec<Vec<F>>) {
     }
 }
 
+/// Returns true if the check is passed. Otherwise, returns true.
+fn dummy_lookup_check<F: Field + Ord>(mut a: Vec<Vec<F>>, mut b: Vec<Vec<F>>) -> bool {
+    let mut b_all = HashSet::new();
+
+    for i in 0..b.len() {
+        for e in &b[i] {
+            b_all.insert(e);
+        }
+    }
+
+    for i in 0..a.len() {
+        for e in &a[i] {
+            if b_all.get(e).is_none() {
+                return false
+            }
+        }
+    }
+
+    return true
+}
+
 fn main() -> Result<(), impl Debug> {
     let env_filter = EnvFilter::builder()
         .with_default_directive(LevelFilter::INFO.into())
@@ -51,15 +73,40 @@ fn main() -> Result<(), impl Debug> {
         .with(ForestLayer::default())
         .init();
 
-    let lookup0 = read_lookup("trace/lookup_0_0.bin");
-    let lookup1 = read_lookup("trace/lookup_1_0.bin");
-    // let lookup2 = read_lookup("trace/lookup_2_0.bin");
-
     let mut raw_trace = RawTrace::default();
-    raw_trace.push_lookup(lookup0);
-    raw_trace.push_lookup(lookup1);
-    // raw_trace.push_lookup(lookup1);
-    // raw_trace.push_lookup(lookup2);
+
+    let skip_indexes = vec![8, 11, 12, 13, 15, 19, 22, 33, 36, 39, 40];
+    for i in 8..=8 {
+        // if skip_indexes.contains(&i) {
+        //     continue
+        // }
+
+        let name = format!("trace/lookup_{}_0.bin", i);
+        println!("reading {}", name);
+
+        let lookup = read_lookup(&name);
+        raw_trace.push_lookup(lookup.clone());
+
+        println!("max height: {}", raw_trace.max_height);
+    }
+
+    // let mut failed_files = vec![];
+    // for i in 0..=40 {
+    //     let name = format!("trace/lookup_{}_0.bin", i);
+    //
+    //     let lookup = read_lookup(&name);
+    //     let (a, b) = lookup.get_columns();
+    //
+    //     if dummy_lookup_check(a, b) {
+    //         println!("Passed: {}", name);
+    //     } else {
+    //         println!("FAILED: {} <----------------- Failed file", name);
+    //         failed_files.push(name)
+    //     }
+    // }
+
+    // println!("Failed {} files", failed_files.len());
+    // println!("Failed files names: {:?}", failed_files);
 
     // dummy_check(a, b);
 
