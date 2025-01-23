@@ -1,6 +1,5 @@
 use p3_air::{Air, AirBuilder, AirBuilderWithPublicValues, BaseAir};
-use p3_bls12_377_fr::Bls12_377Fr;
-use p3_field::{Field, FieldAlgebra, TwoAdicField};
+use p3_field::{Field, FieldAlgebra};
 use p3_matrix::Matrix;
 
 /// Processes the permutation for two columns
@@ -27,21 +26,21 @@ pub struct LineaLookupAIR<F: Field> {
 /// | 0.       | 1.                        | 2.       | 3.                      | 4.                        | 5.                      |
 /// |`Column A`| `A[i] + challenge inverse`|`Column B`| `B[i]+challenge inverse`| `Occurrences of b[i] in a`| `Constrain check column`|
 
-impl<F: Field> LineaLookupAIR<F> {
-    pub fn new(a_width: usize, b_width: usize, challenge: F) -> Self {
-        LineaLookupAIR {
-            a_shift: 0,
-            a_inv_shift: a_width,
-            a_width,
-            b_shift: a_width * 2,
-            b_inv_shift: a_width * 2 + b_width,
-            b_width,
-            occurrences_column_shift: a_width * 2 + 2 * b_width,
-            check_column_shift: a_width * 2 + 3 * b_width,
-            challenge,
-        }
-    }
-}
+// impl<F: Field> LineaLookupAIR<F> {
+//     pub fn new(a_width: usize, b_width: usize, challenge: F) -> Self {
+//         LineaLookupAIR {
+//             a_shift: 0,
+//             a_inv_shift: a_width,
+//             a_width,
+//             b_shift: a_width * 2,
+//             b_inv_shift: a_width * 2 + b_width,
+//             b_width,
+//             occurrences_column_shift: a_width * 2 + 2 * b_width,
+//             check_column_shift: a_width * 2 + 3 * b_width,
+//             challenge,
+//         }
+//     }
+// }
 impl<F: Field> BaseAir<F> for LineaLookupAIR<F> {
     fn width(&self) -> usize {
         self.a_width * 2 + self.b_width * 3 + 1
@@ -55,13 +54,13 @@ impl<AB: AirBuilderWithPublicValues> Air<AB> for LineaLookupAIR<AB::F> {
         let local = main.row_slice(0);
         let next = main.row_slice(1);
 
-        let challenge = AB::F::from_f(self.challenge.clone());
+        let challenge = AB::F::from_f(self.challenge);
 
         for i in 0..self.a_width {
             // 1 == (a[i] + ch) * inv_a[i]
             builder.assert_eq(
                 AB::F::ONE,
-                (local[self.a_shift + i] + challenge.clone()) * local[self.a_inv_shift + i],
+                (local[self.a_shift + i] + challenge) * local[self.a_inv_shift + i],
             );
         }
 
@@ -69,7 +68,7 @@ impl<AB: AirBuilderWithPublicValues> Air<AB> for LineaLookupAIR<AB::F> {
             // 1 == (b[i] + ch) * inv_b[i]
             builder.assert_eq(
                 AB::F::ONE,
-                (local[self.b_shift + i] + challenge.clone()) * local[self.b_inv_shift + i],
+                (local[self.b_shift + i] + challenge) * local[self.b_inv_shift + i],
             );
         }
 
@@ -80,8 +79,7 @@ impl<AB: AirBuilderWithPublicValues> Air<AB> for LineaLookupAIR<AB::F> {
 
         let mut local_b_total = AB::Expr::from(AB::F::ZERO);
         for i in 0..self.b_width {
-            local_b_total = local_b_total
-                + (local[self.occurrences_column_shift + i] * local[self.b_inv_shift + i]);
+            local_b_total += local[self.occurrences_column_shift + i] * local[self.b_inv_shift + i];
         }
 
         // check[0] == 1/(a[0] + ch) - s[0]/(b[0] + ch)
@@ -97,8 +95,7 @@ impl<AB: AirBuilderWithPublicValues> Air<AB> for LineaLookupAIR<AB::F> {
 
         let mut next_b_total = AB::Expr::from(AB::F::ZERO);
         for i in 0..self.b_width {
-            next_b_total = next_b_total
-                + (next[self.occurrences_column_shift + i] * next[self.b_inv_shift + i]);
+            next_b_total += next[self.occurrences_column_shift + i] * next[self.b_inv_shift + i];
         }
 
         // check[i+1] ==  1/(a[i+1] + ch) - s[i+1]/(b[i+1] + ch)  + check[i]

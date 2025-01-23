@@ -2,7 +2,7 @@ mod air_lookup;
 mod air_permutation;
 
 use p3_air::{Air, AirBuilder, AirBuilderWithPublicValues, BaseAir};
-use p3_field::{Field, FieldAlgebra, TwoAdicField};
+use p3_field::{Field, FieldAlgebra};
 use p3_matrix::Matrix;
 
 #[derive(Clone)]
@@ -16,13 +16,11 @@ pub struct AirLookupConfig {
     pub a_shift: usize,
     /// a...2a-1 it is the A\[i]+challenge inverse
     pub a_inv_shift: usize,
-    ///
     pub a_width: usize,
     /// 2a...2a+b-1 it is the B columns
     pub b_shift: usize,
     /// 2a+b...2a+2b-1 it is the B\[i]+challenge inverse
     pub b_inv_shift: usize,
-    ///
     pub b_width: usize,
     /// 2a+2b ...2a+3b-1 it is the occurrences of B\[i] in A
     pub occurrences_column_shift: usize,
@@ -99,7 +97,7 @@ impl<AB: AirBuilderWithPublicValues> Air<AB> for LineaAIR<AB::F> {
         let local = main.row_slice(0);
         let next = main.row_slice(1);
 
-        let challenge = AB::F::from_f(self.challenge.clone());
+        let challenge = AB::F::from_f(self.challenge);
 
         self.configs.iter().for_each(|c| {
             match c {
@@ -108,7 +106,7 @@ impl<AB: AirBuilderWithPublicValues> Air<AB> for LineaAIR<AB::F> {
                         // 1 == (a[i] + ch) * inv_a[i]
                         builder.assert_eq(
                             AB::F::ONE,
-                            (local[l.a_shift + i + offset] + challenge.clone())
+                            (local[l.a_shift + i + offset] + challenge)
                                 * local[l.a_inv_shift + i + offset],
                         );
                     }
@@ -117,7 +115,7 @@ impl<AB: AirBuilderWithPublicValues> Air<AB> for LineaAIR<AB::F> {
                         // 1 == (b[i] + ch) * inv_b[i]
                         builder.assert_eq(
                             AB::F::ONE,
-                            (local[l.b_shift + i + offset] + challenge.clone())
+                            (local[l.b_shift + i + offset] + challenge)
                                 * local[l.b_inv_shift + i + offset],
                         );
                     }
@@ -129,9 +127,8 @@ impl<AB: AirBuilderWithPublicValues> Air<AB> for LineaAIR<AB::F> {
 
                     let mut local_b_total = AB::Expr::from(AB::F::ZERO);
                     for i in 0..l.b_width {
-                        local_b_total = local_b_total
-                            + (local[l.occurrences_column_shift + i + offset]
-                                * local[l.b_inv_shift + i + offset]);
+                        local_b_total += local[l.occurrences_column_shift + i + offset]
+                            * local[l.b_inv_shift + i + offset];
                     }
 
                     // check[0] == 1/(a[0] + ch) - s[0]/(b[0] + ch)
@@ -147,9 +144,8 @@ impl<AB: AirBuilderWithPublicValues> Air<AB> for LineaAIR<AB::F> {
 
                     let mut next_b_total = AB::Expr::from(AB::F::ZERO);
                     for i in 0..l.b_width {
-                        next_b_total +=
-                            (next[l.occurrences_column_shift + i + offset]
-                                * next[l.b_inv_shift + i + offset]);
+                        next_b_total += next[l.occurrences_column_shift + i + offset]
+                            * next[l.b_inv_shift + i + offset];
                     }
 
                     // check[i+1] ==  1/(a[i+1] + ch) - s[i+1]/(b[i+1] + ch)  + check[i]

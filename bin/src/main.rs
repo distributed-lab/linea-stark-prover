@@ -1,22 +1,20 @@
 mod config;
 
 use crate::config::*;
-use ark_ff::PrimeField;
-use p3_field::{Field, FieldAlgebra};
+use air::LineaAIR;
+use p3_field::Field;
 use p3_fri::{FriConfig, TwoAdicFriPcs};
-use p3_matrix::Matrix;
 use p3_uni_stark::{prove, verify};
 use rand::distributions::Standard;
-use rand::{Rng, thread_rng};
+use rand::{thread_rng, Rng};
 use std::collections::HashSet;
 use std::fmt::Debug;
+use trace::{RawLookupTrace, RawTrace};
 use tracing_forest::util::LevelFilter;
 use tracing_forest::ForestLayer;
 use tracing_subscriber::layer::SubscriberExt;
 use tracing_subscriber::util::SubscriberInitExt;
 use tracing_subscriber::{EnvFilter, Registry};
-use air::LineaAIR;
-use trace::{RawLookupTrace, RawTrace};
 
 fn dummy_permutation_check<F: Field + Ord>(mut a: Vec<Vec<F>>, mut b: Vec<Vec<F>>) {
     let mut a_all: Vec<F> = Vec::new();
@@ -37,24 +35,24 @@ fn dummy_permutation_check<F: Field + Ord>(mut a: Vec<Vec<F>>, mut b: Vec<Vec<F>
 }
 
 /// Returns true if the check is passed. Otherwise, returns true.
-fn dummy_lookup_check<F: Field + Ord>(mut a: Vec<Vec<F>>, mut b: Vec<Vec<F>>) -> bool {
+fn dummy_lookup_check<F: Field + Ord>(a: Vec<Vec<F>>, b: Vec<Vec<F>>) -> bool {
     let mut b_all = HashSet::new();
 
-    for i in 0..b.len() {
-        for e in &b[i] {
-            b_all.insert(e);
+    for col in b {
+        for element in col {
+            b_all.insert(element);
         }
     }
 
-    for i in 0..a.len() {
-        for e in &a[i] {
-            if b_all.get(e).is_none() {
+    for col in a {
+        for element in &col {
+            if !b_all.contains(element) {
                 return false;
             }
         }
     }
 
-    return true;
+    true
 }
 
 fn main() -> Result<(), impl Debug> {
@@ -74,7 +72,7 @@ fn main() -> Result<(), impl Debug> {
     // let (a, b, _) = lookup.get_columns();
     // dummy_lookup_check(a, b);
 
-    let skip_indexes = vec![8, 11, 12, 13, 15, 19, 22, 33, 36, 39, 40];
+    let skip_indexes = [8, 11, 12, 13, 15, 19, 22, 33, 36, 39, 40];
     for i in 8..=8 {
         // if skip_indexes.contains(&i) {
         //     continue

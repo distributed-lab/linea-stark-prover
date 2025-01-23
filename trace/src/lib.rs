@@ -1,5 +1,5 @@
+use air::{AirConfig, AirLookupConfig};
 use ark_ff::PrimeField;
-use num_bigint::BigUint;
 use p3_bls12_377_fr::{Bls12_377Fr, FF_Bls12_377Fr};
 use p3_field::{Field, FieldAlgebra};
 use p3_matrix::dense::RowMajorMatrix;
@@ -7,13 +7,11 @@ use p3_matrix::Matrix;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::fs;
-use std::str::FromStr;
-use air::{AirConfig, AirLookupConfig};
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct RawPermutationTrace {
-    pub a: Vec<Vec<[u8;32]>>,
-    pub b: Vec<Vec<[u8;32]>>,
+    pub a: Vec<Vec<[u8; 32]>>,
+    pub b: Vec<Vec<[u8; 32]>>,
     pub name: String,
 }
 
@@ -43,15 +41,15 @@ impl RawPermutationTrace {
                 let aji = Bls12_377Fr::new(FF_Bls12_377Fr::from_be_bytes_mod_order(
                     self.a[j][i].as_slice(),
                 ));
-                a_total = a_total * (aji + challenge);
+                a_total *= aji + challenge;
                 res.push(aji);
             }
 
             for j in 0..self.b.len() {
                 let bji = Bls12_377Fr::new(FF_Bls12_377Fr::from_be_bytes_mod_order(
-                    &self.b[j][i].as_slice(),
+                    self.b[j][i].as_slice(),
                 ));
-                b_total = b_total * (bji + challenge);
+                b_total *= bji + challenge;
                 res.push(bji);
             }
 
@@ -81,7 +79,7 @@ pub struct RawLookupTrace {
 impl RawLookupTrace {
     pub fn read_file(path: &str) -> Self {
         let file_content = fs::read(path).unwrap();
-        let mut raw_trace: RawLookupTrace =
+        let raw_trace: RawLookupTrace =
             ciborium::from_reader(std::io::Cursor::new(file_content)).unwrap();
 
         raw_trace
@@ -105,11 +103,11 @@ impl RawLookupTrace {
         for i in 0..sz {
             let mut a_inverses = Vec::new();
 
-            for j in 0..a.len() {
-                let aji_inv = (a[j][i] + challenge).inverse();
-                sum = sum + aji_inv;
+            for col in &a {
+                let aji_inv = (col[i] + challenge).inverse();
+                sum += aji_inv;
                 a_inverses.push(aji_inv);
-                res.push(a[j][i]);
+                res.push(col[i]);
             }
 
             res.append(&mut a_inverses);
@@ -117,29 +115,29 @@ impl RawLookupTrace {
             let mut b_inverses = Vec::new();
             let mut b_occurrences: Vec<Bls12_377Fr> = Vec::new();
 
-            for j in 0..b.len() {
-                let bji_inv = (b[j][i] + challenge).inverse();
+            for col in &b {
+                let bji_inv = (col[i] + challenge).inverse();
 
                 let mut occurrence = Bls12_377Fr::from_canonical_usize(0);
 
-                if let Some(cnt) = a_occurrences.get(&b[j][i]) {
+                if let Some(cnt) = a_occurrences.get(&col[i]) {
                     occurrence = Bls12_377Fr::from_canonical_usize(*cnt);
-                    sum = sum - bji_inv * occurrence;
-                    a_occurrences.insert(b[j][i], 0);
+                    sum -= bji_inv * occurrence;
+                    a_occurrences.insert(col[i], 0);
                 }
 
                 b_occurrences.push(occurrence);
                 b_inverses.push(bji_inv);
-                res.push(b[j][i]);
+                res.push(col[i]);
             }
 
             res.append(&mut b_inverses);
             res.append(&mut b_occurrences);
-            res.push(sum.clone());
+            res.push(sum);
         }
 
         assert!(
-            res.get(res.len() - 1).unwrap().is_zero(),
+            res.last().unwrap().is_zero(),
             "failed to check constrain: check column should be 0 on the last row"
         );
         RowMajorMatrix::new(res, 2 * a.len() + 3 * b.len() + 1)
@@ -157,8 +155,13 @@ impl RawLookupTrace {
         // TODO: resize filters
     }
 
-
-    pub fn get_columns(&self) -> (Vec<Vec<Bls12_377Fr>>, Vec<Vec<Bls12_377Fr>>, HashMap<Bls12_377Fr, usize>) {
+    pub fn get_columns(
+        &self,
+    ) -> (
+        Vec<Vec<Bls12_377Fr>>,
+        Vec<Vec<Bls12_377Fr>>,
+        HashMap<Bls12_377Fr, usize>,
+    ) {
         let mut a: Vec<Vec<Bls12_377Fr>> = Vec::new();
         let mut b: Vec<Vec<Bls12_377Fr>> = Vec::new();
 
@@ -171,7 +174,7 @@ impl RawLookupTrace {
                     self.a[i][j].as_slice(),
                 ));
 
-                a[i].push(aij.clone());
+                a[i].push(aij);
 
                 if let Some(cnt) = a_occurrences.get(&aij) {
                     a_occurrences.insert(aij, cnt + 1);
@@ -189,7 +192,7 @@ impl RawLookupTrace {
                     self.b[i][j].as_slice(),
                 ));
 
-                b[i].push(bij.clone());
+                b[i].push(bij);
             }
         }
 
@@ -197,7 +200,7 @@ impl RawLookupTrace {
     }
 }
 
-enum Constraint {
+pub enum Constraint {
     Permutation(RawPermutationTrace),
     Lookup(RawLookupTrace),
 }
@@ -223,33 +226,37 @@ impl RawTrace {
     pub fn push_lookup(&mut self, lookup: RawLookupTrace) {
         let mut l = lookup.clone();
 
-        if lookup.a[0].len() > lookup.b[0].len() {
-            let new_size = lookup.a[0].len();
-
-            l.b.iter_mut().for_each(|e| {
-                e.resize(new_size, [0_u8; 32]);
-            });
-        } else if lookup.a[0].len() < lookup.b[0].len() {
-            let new_size = lookup.b[0].len();
-
-            l.a.iter_mut().for_each(|e| {
-                e.resize(new_size, [0_u8; 32]);
-            });
+        match lookup.a[0].len().cmp(&lookup.b[0].len()) {
+            std::cmp::Ordering::Greater => {
+                let new_size = lookup.a[0].len();
+                l.b.iter_mut().for_each(|e| {
+                    e.resize(new_size, [0_u8; 32]);
+                });
+            }
+            std::cmp::Ordering::Less => {
+                let new_size = lookup.b[0].len();
+                l.a.iter_mut().for_each(|e| {
+                    e.resize(new_size, [0_u8; 32]);
+                });
+            }
+            std::cmp::Ordering::Equal => {}
         }
 
-        if l.a[0].len() > self.max_height {
-            let new_size = l.a[0].len();
-            // New lookup height bigger than existing
-            self.constraints.iter_mut().for_each(|c| c.resize(new_size));
-
-            self.max_height = l.a[0].len();
-            self.constraints.push(Constraint::Lookup(l));
-        } else if l.a[0].len() < self.max_height {
-            let new_size = self.max_height;
-
-            // Existing lookup height bigger than a new onw
-            l.resize(new_size);
-            self.constraints.push(Constraint::Lookup(l));
+        match l.a[0].len().cmp(&self.max_height) {
+            std::cmp::Ordering::Greater => {
+                let new_size = l.a[0].len();
+                self.constraints.iter_mut().for_each(|c| c.resize(new_size));
+                self.max_height = new_size;
+                self.constraints.push(Constraint::Lookup(l));
+            }
+            std::cmp::Ordering::Less => {
+                let new_size = self.max_height;
+                l.resize(new_size);
+                self.constraints.push(Constraint::Lookup(l));
+            }
+            std::cmp::Ordering::Equal => {
+                self.constraints.push(Constraint::Lookup(l));
+            }
         }
     }
 
@@ -269,7 +276,7 @@ impl RawTrace {
         }
 
         // TODO: we need to define max height
-        let mut max_height = matrixes[0].height();
+        let max_height = matrixes[0].height();
 
         let mut values = vec![];
 
@@ -289,7 +296,7 @@ impl RawTrace {
             }
         }
 
-        return RowMajorMatrix::new(values, final_width);
+        RowMajorMatrix::new(values, final_width)
     }
 
     pub fn get_air_configs(&self) -> Vec<AirConfig> {

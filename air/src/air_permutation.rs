@@ -1,6 +1,5 @@
 use p3_air::{Air, AirBuilder, AirBuilderWithPublicValues, BaseAir};
-use p3_bls12_377_fr::Bls12_377Fr;
-use p3_field::{Field, FieldAlgebra, TwoAdicField};
+use p3_field::{Field, FieldAlgebra};
 use p3_matrix::Matrix;
 
 /// Processes the permutation for two columns
@@ -31,16 +30,16 @@ impl<AB: AirBuilderWithPublicValues> Air<AB> for LineaPermutationAIR<AB::F> {
         let local = main.row_slice(0);
         let next = main.row_slice(1);
 
-        let challenge = AB::F::from_f(self.challenge.clone());
+        let challenge = AB::F::from_f(self.challenge);
 
         let mut local_a_total = AB::Expr::from(AB::F::ONE);
         for i in 0..self.width {
-            local_a_total = local_a_total * (local[i] + challenge.clone());
+            local_a_total *= local[i] + challenge;
         }
 
         let mut local_b_total = AB::Expr::from(AB::F::ONE);
         for i in self.width..self.width * 2 {
-            local_b_total = local_b_total * (local[i] + challenge.clone());
+            local_b_total *= local[i] + challenge;
         }
 
         // check[0] == (a[0] + ch) * inv[0]
@@ -56,12 +55,12 @@ impl<AB: AirBuilderWithPublicValues> Air<AB> for LineaPermutationAIR<AB::F> {
 
         let mut next_a_total = AB::Expr::from(AB::F::ONE);
         for i in 0..self.width {
-            next_a_total = next_a_total * (next[i] + challenge.clone());
+            next_a_total *= next[i] + challenge;
         }
 
         let mut next_b_total = AB::Expr::from(AB::F::ONE);
         for i in self.width..self.width * 2 {
-            next_b_total = next_b_total * (next[i] + challenge.clone());
+            next_b_total *= next[i] + challenge;
         }
 
         // check[i+1] == inv[i+1] * (a[i+1] + ch) * check[i]

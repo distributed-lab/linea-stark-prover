@@ -1,9 +1,6 @@
 use p3_bls12_377_fr::{Bls12_377Fr, Poseidon2Bls12337};
 use p3_challenger::HashChallenger;
-use p3_commit::testing::TrivialPcs;
-use p3_commit::ExtensionMmcs;
 use p3_dft::Radix2DitParallel;
-use p3_field::Field;
 use p3_fri::TwoAdicFriPcs;
 use p3_merkle_tree::MerkleTreeMmcs;
 use p3_symmetric::{CompressionFunctionFromHasher, PaddingFreeSponge};
