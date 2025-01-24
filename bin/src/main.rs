@@ -1,5 +1,4 @@
 mod config;
-
 use crate::config::*;
 use air::LineaAIR;
 use p3_field::Field;
@@ -9,12 +8,13 @@ use rand::distributions::Standard;
 use rand::{thread_rng, Rng};
 use std::collections::HashSet;
 use std::fmt::Debug;
-use trace::{RawLookupTrace, RawTrace};
+use trace::{RawLookupTrace, RawPermutationTrace, RawTrace};
 use tracing_forest::util::LevelFilter;
 use tracing_forest::ForestLayer;
 use tracing_subscriber::layer::SubscriberExt;
 use tracing_subscriber::util::SubscriberInitExt;
 use tracing_subscriber::{EnvFilter, Registry};
+use air::air_permutation::LineaPermutationAIR;
 
 fn dummy_permutation_check<F: Field + Ord>(mut a: Vec<Vec<F>>, mut b: Vec<Vec<F>>) {
     let mut a_all: Vec<F> = Vec::new();
@@ -55,6 +55,26 @@ fn dummy_lookup_check<F: Field + Ord>(a: Vec<Vec<F>>, b: Vec<Vec<F>>) -> bool {
     true
 }
 
+// let mut failed_files = vec![];
+// for i in 7..=7 {
+//     let name = format!("trace/lookup_{}_0.bin", i);
+//
+//     let lookup = read_lookup(&name);
+//     let (a, b, _) = lookup.get_columns();
+//
+//     if dummy_lookup_check(a, b) {
+//         println!("Passed: {}", name);
+//     } else {
+//         println!("FAILED: {} <----------------- Failed file", name);
+//         failed_files.push(name)
+//     }
+// }
+
+// println!("Failed {} files", failed_files.len());
+// println!("Failed files names: {:?}", failed_files);
+
+// dummy_check(a, b);
+
 fn main() -> Result<(), impl Debug> {
     let env_filter = EnvFilter::builder()
         .with_default_directive(LevelFilter::INFO.into())
@@ -66,46 +86,17 @@ fn main() -> Result<(), impl Debug> {
         .init();
 
     let mut raw_trace = RawTrace::default();
+    let lookup0_trace = RawLookupTrace::read_file("../traces/lookup_0_0.bin");
+    let lookup1_trace = RawLookupTrace::read_file("../traces/lookup_1_0.bin");
+    let lookup2_trace = RawLookupTrace::read_file("../traces/lookup_2_0.bin");
+    let perm_trace = RawPermutationTrace::read_file("../traces/permutation_0.bin");
 
-    // let name = format!("../traces/lookup_{}_0.bin", 8);
-    // let lookup = RawLookupTrace::read_file(&name);
-    // let (a, b, _) = lookup.get_columns();
-    // dummy_lookup_check(a, b);
-
-    let skip_indexes = [8, 11, 12, 13, 15, 19, 22, 33, 36, 39, 40];
-    for i in 8..=8 {
-        // if skip_indexes.contains(&i) {
-        //     continue
-        // }
-
-        let name = format!("../traces/lookup_{}_0.bin", i);
-        println!("reading {}", name);
-
-        let lookup = RawLookupTrace::read_file(&name);
-        raw_trace.push_lookup(lookup.clone());
-
-        println!("max height: {}", raw_trace.max_height);
-    }
-
-    // let mut failed_files = vec![];
-    // for i in 7..=7 {
-    //     let name = format!("trace/lookup_{}_0.bin", i);
-    //
-    //     let lookup = read_lookup(&name);
-    //     let (a, b, _) = lookup.get_columns();
-    //
-    //     if dummy_lookup_check(a, b) {
-    //         println!("Passed: {}", name);
-    //     } else {
-    //         println!("FAILED: {} <----------------- Failed file", name);
-    //         failed_files.push(name)
-    //     }
-    // }
-
-    // println!("Failed {} files", failed_files.len());
-    // println!("Failed files names: {:?}", failed_files);
-
-    // dummy_check(a, b);
+    raw_trace.push_permutation(perm_trace.clone());
+    raw_trace.push_lookup(lookup0_trace.clone());
+    raw_trace.push_lookup(lookup1_trace.clone());
+    raw_trace.push_permutation(perm_trace.clone());
+    raw_trace.push_lookup(lookup2_trace.clone());
+    raw_trace.push_permutation(perm_trace.clone());
 
     // -----------------------------------------------------------
 
@@ -124,7 +115,7 @@ fn main() -> Result<(), impl Debug> {
     let val_mmcs = ValMmcs::new(hash.clone(), compress.clone());
     let challenge_mmcs = ChallengeMmcs::new(hash.clone(), compress.clone());
     let fri_config = FriConfig {
-        log_blowup: 2,
+        log_blowup: 3,
         log_final_poly_len: 0,
         num_queries: 33,
         proof_of_work_bits: 0, //29
@@ -136,16 +127,18 @@ fn main() -> Result<(), impl Debug> {
     let config = Config::new(pcs);
 
     println!("Generating trace...");
-    let trace = raw_trace.get_trace(challenge);
+
+    let t = raw_trace.get_trace(challenge);
 
     println!("Creating LineaAir...");
-    let air = LineaAIR::new(raw_trace.get_air_configs(), challenge);
+
+    let air = LineaAIR::new(raw_trace.get_air_configs());
 
     let mut challenger = Challenger::new(vec![], hash.clone());
     println!("Proving...");
-    let proof = prove(&config, &air, &mut challenger, trace, &vec![]);
+    let proof = prove(&config, &air, &mut challenger, t, &vec![challenge]);
 
     let mut challenger = Challenger::new(vec![], hash.clone());
     println!("Verification...");
-    verify(&config, &air, &mut challenger, &proof, &vec![])
+    verify(&config, &air, &mut challenger, &proof, &vec![challenge])
 }
