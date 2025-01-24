@@ -1,12 +1,12 @@
 pub mod air_lookup;
 pub mod air_permutation;
 
+use std::ops::{Add, Mul, Sub};
 use crate::air_permutation::AirPermutationConfig;
 use air_lookup::AirLookupConfig;
 use p3_air::{Air, AirBuilder, AirBuilderWithPublicValues, BaseAir};
 use p3_field::{Field, FieldAlgebra};
 use p3_matrix::Matrix;
-// use air_permutation::AirPermutationConfig;
 
 #[derive(Clone, Debug)]
 pub enum AirConfig {
@@ -61,59 +61,49 @@ impl<AB: AirBuilderWithPublicValues> Air<AB> for LineaAIR {
         self.configs.iter().for_each(|c| {
             match c {
                 AirConfig::Lookup(l) => {
+                    // f[i] = F[i][0]*1 + F[i][1]*alpha + F[i][2]*alpha^2 + …
+                    let mut f = AB::Expr::from(AB::F::ZERO);
                     for i in 0..l.a_width {
-                        // 1 == (a[i] + ch) * inv_a[i]
-                        builder.assert_eq(
-                            AB::F::ONE,
-                            (local[l.a_shift + i + offset] + challenge.clone())
-                                * local[l.a_inv_shift + i + offset],
+                        f = f + local[l.a_shift + i + offset] * challenge.exp_u64(i as u64);
+                    }
+
+                    // t[i] = T[i][0]*1 + T[i][1]*alpha + T[i][2]*alpha^2 + …
+                    let mut t = AB::Expr::from(AB::F::ZERO);
+                    for i in 0..l.b_width {
+                        t = t + local[l.b_shift + i + offset] * challenge.exp_u64(i as u64);
+                    }
+
+                    // f[i] + u
+                    let f_u = f.clone() + challenge.clone();
+
+                    // t[i] + u
+                    let t_u = t.clone() + challenge.clone();
+
+                    // с[i] == filter_f[i]/(f[i] + u) - filter_t[i] * s[i]/(t[i]+u)
+                    builder
+                        .when_first_row()
+                        .assert_eq(
+                            local[l.check_column_shift + offset] * f_u.clone() * t_u.clone(),
+                            local[l.a_filter_column_shift + offset] * t_u -
+                               local[l.b_filter_column_shift + offset] *
+                                   local[l.occurrences_column_shift + offset] * f_u
                         );
-                    }
 
-                    for i in 0..l.b_width {
-                        // 1 == (b[i] + ch) * inv_b[i]
-                        builder.assert_eq(
-                            AB::F::ONE,
-                            (local[l.b_shift + i + offset] + challenge.clone())
-                                * local[l.b_inv_shift + i + offset],
+                    // f[i + 1] + u
+                    let f_u_next = f.add(challenge.clone());
+
+                    // t[i + 1] + u
+                    let t_u_next = t.add(challenge.clone());
+                    builder.when_transition()
+                        .assert_eq(
+                            next[l.check_column_shift + offset] - local[l.check_column_shift + offset]
+                                * f_u_next.clone() * t_u_next.clone(),
+                            next[l.a_filter_column_shift + offset] * t_u_next -
+                                next[l.b_filter_column_shift + offset] *
+                                    next[l.occurrences_column_shift + offset] * f_u_next
                         );
-                    }
 
-                    let mut local_a_total = AB::Expr::from(AB::F::ZERO);
-                    for i in 0..l.a_width {
-                        local_a_total = local_a_total + local[l.a_inv_shift + i + offset];
-                    }
-
-                    let mut local_b_total = AB::Expr::from(AB::F::ZERO);
-                    for i in 0..l.b_width {
-                        local_b_total += local[l.occurrences_column_shift + i + offset]
-                            * local[l.b_inv_shift + i + offset];
-                    }
-
-                    // check[0] == 1/(a[0] + ch) - s[0]/(b[0] + ch)
-                    builder.when_first_row().assert_eq(
-                        local[l.check_column_shift + offset],
-                        local_a_total - local_b_total,
-                    );
-
-                    let mut next_a_total = AB::Expr::from(AB::F::ZERO);
-                    for i in 0..l.a_width {
-                        next_a_total = next_a_total + next[l.a_inv_shift + i + offset];
-                    }
-
-                    let mut next_b_total = AB::Expr::from(AB::F::ZERO);
-                    for i in 0..l.b_width {
-                        next_b_total += next[l.occurrences_column_shift + i + offset]
-                            * next[l.b_inv_shift + i + offset];
-                    }
-
-                    // check[i+1] ==  1/(a[i+1] + ch) - s[i+1]/(b[i+1] + ch)  + check[i]
-                    builder.when_transition().assert_eq(
-                        next[l.check_column_shift + offset],
-                        next_a_total - next_b_total + local[l.check_column_shift + offset],
-                    );
-
-                    // check[i] == 1
+                    // c[i] == 0
                     builder
                         .when_last_row()
                         .assert_eq(local[l.check_column_shift + offset], AB::F::ZERO);

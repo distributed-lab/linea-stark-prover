@@ -8,7 +8,7 @@ use rand::distributions::Standard;
 use rand::{thread_rng, Rng};
 use std::collections::HashSet;
 use std::fmt::Debug;
-use trace::{RawLookupTrace, RawPermutationTrace, RawTrace};
+use trace::{lookup::RawLookupTrace, permutation::RawPermutationTrace, RawTrace};
 use tracing_forest::util::LevelFilter;
 use tracing_forest::ForestLayer;
 use tracing_subscriber::layer::SubscriberExt;
@@ -55,26 +55,6 @@ fn dummy_lookup_check<F: Field + Ord>(a: Vec<Vec<F>>, b: Vec<Vec<F>>) -> bool {
     true
 }
 
-// let mut failed_files = vec![];
-// for i in 7..=7 {
-//     let name = format!("trace/lookup_{}_0.bin", i);
-//
-//     let lookup = read_lookup(&name);
-//     let (a, b, _) = lookup.get_columns();
-//
-//     if dummy_lookup_check(a, b) {
-//         println!("Passed: {}", name);
-//     } else {
-//         println!("FAILED: {} <----------------- Failed file", name);
-//         failed_files.push(name)
-//     }
-// }
-
-// println!("Failed {} files", failed_files.len());
-// println!("Failed files names: {:?}", failed_files);
-
-// dummy_check(a, b);
-
 fn main() -> Result<(), impl Debug> {
     let env_filter = EnvFilter::builder()
         .with_default_directive(LevelFilter::INFO.into())
@@ -86,17 +66,21 @@ fn main() -> Result<(), impl Debug> {
         .init();
 
     let mut raw_trace = RawTrace::default();
-    let lookup0_trace = RawLookupTrace::read_file("../traces/lookup_0_0.bin");
-    let lookup1_trace = RawLookupTrace::read_file("../traces/lookup_1_0.bin");
-    let lookup2_trace = RawLookupTrace::read_file("../traces/lookup_2_0.bin");
+    // let lookup0_trace = RawLookupTrace::read_file("../traces/lookup_0_0.bin");
+    // let lookup1_trace = RawLookupTrace::read_file("../traces/lookup_1_0.bin");
+    // let lookup2_trace = RawLookupTrace::read_file("../traces/lookup_2_0.bin");
     let perm_trace = RawPermutationTrace::read_file("../traces/permutation_0.bin");
 
-    raw_trace.push_permutation(perm_trace.clone());
-    raw_trace.push_lookup(lookup0_trace.clone());
-    raw_trace.push_lookup(lookup1_trace.clone());
-    raw_trace.push_permutation(perm_trace.clone());
-    raw_trace.push_lookup(lookup2_trace.clone());
-    raw_trace.push_permutation(perm_trace.clone());
+    // raw_trace.push_permutation(perm_trace.clone());
+    // raw_trace.push_lookup(lookup0_trace.clone());
+    // raw_trace.push_lookup(lookup1_trace.clone());
+    // raw_trace.push_permutation(perm_trace.clone());
+    // raw_trace.push_lookup(lookup2_trace.clone());
+    // raw_trace.push_permutation(perm_trace.clone());
+
+    // println!("{:?}", perm_trace);
+    //
+    // return Ok(());
 
     // -----------------------------------------------------------
 

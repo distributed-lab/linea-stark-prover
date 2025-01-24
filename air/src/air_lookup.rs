@@ -18,6 +18,8 @@ pub struct AirLookupConfig {
     pub occurrences_column_shift: usize,
     /// 2a+3b it is a check lookup constrain column
     pub check_column_shift: usize,
+    pub a_filter_column_shift: usize,
+    pub b_filter_column_shift: usize,
     /// constraint matrix width
     pub width: usize,
 }
@@ -33,6 +35,8 @@ impl AirLookupConfig {
             b_width,
             occurrences_column_shift: a_width * 2 + 2 * b_width,
             check_column_shift: a_width * 2 + 3 * b_width,
+            a_filter_column_shift: unimplemented!("implement a_filter_column_shift"),
+            b_filter_column_shift: unimplemented!("implement b_filter_column_shift"),
             width: a_width * 2 + 3 * b_width + 1,
         }
     }
