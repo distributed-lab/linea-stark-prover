@@ -5,9 +5,10 @@ edition = "2021"
 
 [[bin]]
 name = "bin"
-path = "bin/src/main.rs"
+path = "src/main.rs"
 
 [workspace]
+resolver = "2"
 members = [
     "air",
     "bin",

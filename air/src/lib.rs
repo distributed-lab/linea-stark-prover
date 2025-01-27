@@ -116,7 +116,7 @@ impl<AB: AirBuilderWithPublicValues> Air<AB> for LineaAIR {
                     // Check first row calculated correctly
                     builder
                         .when_first_row()
-                        .assert_eq(local[p.check_id], a_local_challenge + local[p.b_inverse_id]);
+                        .assert_eq(local[p.check_id], a_local_challenge * local[p.b_inverse_id]);
 
                     let mut a_next_comb = AB::Expr::from(AB::F::ZERO);
                     for i in &p.a_columns_ids {

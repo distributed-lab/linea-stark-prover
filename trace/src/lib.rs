@@ -68,6 +68,7 @@ impl RawTrace {
         // then we have to resize other constraints
         if max_height > self.height {
             self.resize(max_height);
+            self.height = max_height;
         }
 
         let (mut cfg, mut lookup_columns) = l.get_trace(self.challenges.clone());
@@ -98,11 +99,12 @@ impl RawTrace {
         // then we have to resize other constraints
         if max_height > self.height {
             self.resize(max_height);
+            self.height = max_height;
         }
 
-        let (mut cfg, mut lookup_columns) = p.get_trace(self.challenges.clone());
+        let (mut cfg, mut permutation_columns) = p.get_trace(self.challenges.clone());
         cfg.shift(self.columns.len());
-        self.columns.append(&mut lookup_columns);
+        self.columns.append(&mut permutation_columns);
 
         AirConfig::Permutation(cfg)
     }
@@ -112,11 +114,9 @@ impl RawTrace {
         // The final trace
         let mut values = vec![];
 
-        // Iterate over each row
-        for row in 0..self.height {
-            // Iterate over each column. Add the current fixed row element from trace into the final trace.
-            for column in &self.columns {
-                values.push(column[row]);
+        for col in 0..self.height {
+            for row_element in 0..width {
+                values.push(self.columns[row_element][col]);
             }
         }
 
