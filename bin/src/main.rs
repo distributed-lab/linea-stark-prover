@@ -14,7 +14,6 @@ use tracing_forest::ForestLayer;
 use tracing_subscriber::layer::SubscriberExt;
 use tracing_subscriber::util::SubscriberInitExt;
 use tracing_subscriber::{EnvFilter, Registry};
-use air::air_permutation::LineaPermutationAIR;
 
 fn dummy_permutation_check<F: Field + Ord>(mut a: Vec<Vec<F>>, mut b: Vec<Vec<F>>) {
     let mut a_all: Vec<F> = Vec::new();
@@ -65,29 +64,31 @@ fn main() -> Result<(), impl Debug> {
         .with(ForestLayer::default())
         .init();
 
-    let mut raw_trace = RawTrace::default();
-    // let lookup0_trace = RawLookupTrace::read_file("../traces/lookup_0_0.bin");
-    // let lookup1_trace = RawLookupTrace::read_file("../traces/lookup_1_0.bin");
-    // let lookup2_trace = RawLookupTrace::read_file("../traces/lookup_2_0.bin");
+    let mut rng = thread_rng();
+    let alpha_challenge = rng.sample(Standard {});
+    let delta_challenge = rng.sample(Standard {});
+    println!("Challenge delta: {}", delta_challenge);
+    println!("Challenge alpha: {}", alpha_challenge);
+
+    let mut raw_trace = RawTrace::new(vec![alpha_challenge, delta_challenge]);
+
+    let lookup0_trace = RawLookupTrace::read_file("../traces/lookup_0_0.bin");
+    let lookup1_trace = RawLookupTrace::read_file("../traces/lookup_1_0.bin");
+    let lookup2_trace = RawLookupTrace::read_file("../traces/lookup_2_0.bin");
     let perm_trace = RawPermutationTrace::read_file("../traces/permutation_0.bin");
 
-    // raw_trace.push_permutation(perm_trace.clone());
-    // raw_trace.push_lookup(lookup0_trace.clone());
-    // raw_trace.push_lookup(lookup1_trace.clone());
-    // raw_trace.push_permutation(perm_trace.clone());
-    // raw_trace.push_lookup(lookup2_trace.clone());
-    // raw_trace.push_permutation(perm_trace.clone());
+    let mut cfgs = Vec::new();
 
-    // println!("{:?}", perm_trace);
-    //
-    // return Ok(());
+    cfgs.push(raw_trace.push_permutation(perm_trace.clone()));
+    cfgs.push(raw_trace.push_lookup(lookup0_trace.clone()));
+    cfgs.push(raw_trace.push_lookup(lookup1_trace.clone()));
+    cfgs.push(raw_trace.push_permutation(perm_trace.clone()));
+    cfgs.push(raw_trace.push_lookup(lookup2_trace.clone()));
+    cfgs.push(raw_trace.push_permutation(perm_trace.clone()));
 
     // -----------------------------------------------------------
 
     // TODO: should not be just random
-    let mut rng = thread_rng();
-    let challenge = rng.sample(Standard {});
-    println!("Challenge: {}", challenge);
 
     let perm = Perm::new_from_rng(8, 22, &mut rng);
     let hash = Hash::new(perm.clone());
@@ -112,17 +113,29 @@ fn main() -> Result<(), impl Debug> {
 
     println!("Generating trace...");
 
-    let t = raw_trace.get_trace(challenge);
+    let t = raw_trace.get_trace();
 
     println!("Creating LineaAir...");
 
-    let air = LineaAIR::new(raw_trace.get_air_configs());
+    let air = LineaAIR::new(cfgs);
 
     let mut challenger = Challenger::new(vec![], hash.clone());
     println!("Proving...");
-    let proof = prove(&config, &air, &mut challenger, t, &vec![challenge]);
+    let proof = prove(
+        &config,
+        &air,
+        &mut challenger,
+        t,
+        &vec![alpha_challenge, delta_challenge],
+    );
 
     let mut challenger = Challenger::new(vec![], hash.clone());
     println!("Verification...");
-    verify(&config, &air, &mut challenger, &proof, &vec![challenge])
+    verify(
+        &config,
+        &air,
+        &mut challenger,
+        &proof,
+        &vec![alpha_challenge, delta_challenge],
+    )
 }

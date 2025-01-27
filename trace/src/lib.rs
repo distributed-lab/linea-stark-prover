@@ -1,16 +1,17 @@
 pub mod lookup;
 pub mod permutation;
 
+use crate::lookup::RawLookupTrace;
+use crate::permutation::RawPermutationTrace;
 use air::air_lookup::AirLookupConfig;
 use air::air_permutation::AirPermutationConfig;
 use air::AirConfig;
 use ark_ff::PrimeField;
-use p3_bls12_377_fr::{Bls12_377Fr, FF_Bls12_377Fr};
+use p3_bls12_377_fr::Bls12_377Fr;
 use p3_field::{Field, FieldAlgebra};
 use p3_matrix::dense::RowMajorMatrix;
 use serde::{Deserialize, Serialize};
-use crate::lookup::RawLookupTrace;
-use crate::permutation::RawPermutationTrace;
+use std::cmp::max;
 
 pub enum Constraint {
     Permutation(RawPermutationTrace),
@@ -26,132 +27,99 @@ impl Constraint {
     }
 }
 
-#[derive(Default)]
 pub struct RawTrace {
-    pub constraints: Vec<Constraint>,
-    pub max_height: usize,
+    pub columns: Vec<Vec<Bls12_377Fr>>,
+    pub height: usize,
+    pub challenges: Vec<Bls12_377Fr>,
 }
 
 impl RawTrace {
-    pub fn push_lookup(&mut self, lookup: RawLookupTrace) {
+    pub fn new(challenges: Vec<Bls12_377Fr>) -> Self {
+        RawTrace {
+            columns: vec![],
+            height: 0,
+            challenges,
+        }
+    }
+    pub fn resize(&mut self, new_size: usize) {
+        for e in &mut self.columns {
+            e.resize(new_size, Bls12_377Fr::ZERO);
+        }
+    }
+
+    pub fn push_lookup(&mut self, lookup: RawLookupTrace) -> AirConfig {
         let mut l = lookup.clone();
 
-        match lookup.a[0].len().cmp(&lookup.b[0].len()) {
-            std::cmp::Ordering::Greater => {
-                let new_size = lookup.a[0].len();
-                l.b.iter_mut().for_each(|e| {
-                    e.resize(new_size, [0_u8; 32]);
-                });
-            }
-            std::cmp::Ordering::Less => {
-                let new_size = lookup.b[0].len();
-                l.a.iter_mut().for_each(|e| {
-                    e.resize(new_size, [0_u8; 32]);
-                });
-            }
-            std::cmp::Ordering::Equal => {}
+        // Determine local maximum height (can not be less than current max height)
+        let mut max_height = self.height;
+
+        lookup.a.iter().for_each(|ai| {
+            max_height = max(max_height, ai.len());
+        });
+
+        lookup.b.iter().for_each(|bi| {
+            max_height = max(max_height, bi.len());
+        });
+
+        // Resize trace according to the max height
+        l.resize(max_height);
+
+        // If max height in our lookup exceeds the current one
+        // then we have to resize other constraints
+        if max_height > self.height {
+            self.resize(max_height);
         }
 
-        match l.a[0].len().cmp(&self.max_height) {
-            std::cmp::Ordering::Greater => {
-                let new_size = l.a[0].len();
-                self.constraints.iter_mut().for_each(|c| c.resize(new_size));
-                self.max_height = new_size;
-                self.constraints.push(Constraint::Lookup(l));
-            }
-            std::cmp::Ordering::Less => {
-                let new_size = self.max_height;
-                l.resize(new_size);
-                self.constraints.push(Constraint::Lookup(l));
-            }
-            std::cmp::Ordering::Equal => {
-                self.constraints.push(Constraint::Lookup(l));
-            }
-        }
+        let (mut cfg, mut lookup_columns) = l.get_trace(self.challenges.clone());
+        cfg.shift(self.columns.len());
+        self.columns.append(&mut lookup_columns);
+
+        AirConfig::Lookup(cfg)
     }
 
-    // TODO: refactor
-    pub fn push_permutation(&mut self, permutation: RawPermutationTrace) {
+    pub fn push_permutation(&mut self, permutation: RawPermutationTrace) -> AirConfig {
         let mut p = permutation.clone();
 
-        match permutation.a[0].len().cmp(&permutation.b[0].len()) {
-            std::cmp::Ordering::Greater => {
-                let new_size = permutation.a[0].len();
-                p.b.iter_mut().for_each(|e| {
-                    e.resize(new_size, [0_u8; 32]);
-                });
-            }
-            std::cmp::Ordering::Less => {
-                let new_size = permutation.b[0].len();
-                p.a.iter_mut().for_each(|e| {
-                    e.resize(new_size, [0_u8; 32]);
-                });
-            }
-            std::cmp::Ordering::Equal => {}
+        // Determine local maximum height (can not be less than current max height)
+        let mut max_height = self.height;
+
+        permutation.a.iter().for_each(|ai| {
+            max_height = max(max_height, ai.len());
+        });
+
+        permutation.b.iter().for_each(|bi| {
+            max_height = max(max_height, bi.len());
+        });
+
+        // Resize trace according to the max height
+        p.resize(max_height);
+
+        // If max height in our lookup exceeds the current one
+        // then we have to resize other constraints
+        if max_height > self.height {
+            self.resize(max_height);
         }
 
-        match p.a[0].len().cmp(&self.max_height) {
-            std::cmp::Ordering::Greater => {
-                let new_size = p.a[0].len();
-                self.constraints.iter_mut().for_each(|c| c.resize(new_size));
-                self.max_height = new_size;
-                self.constraints.push(Constraint::Permutation(p));
-            }
-            std::cmp::Ordering::Less => {
-                let new_size = self.max_height;
-                p.resize(new_size);
-                self.constraints.push(Constraint::Permutation(p));
-            }
-            std::cmp::Ordering::Equal => {
-                self.constraints.push(Constraint::Permutation(p));
-            }
-        }
+        let (mut cfg, mut lookup_columns) = p.get_trace(self.challenges.clone());
+        cfg.shift(self.columns.len());
+        self.columns.append(&mut lookup_columns);
+
+        AirConfig::Permutation(cfg)
     }
 
-    pub fn get_trace(&self, challange: Bls12_377Fr) -> RowMajorMatrix<Bls12_377Fr> {
-        let mut matrixes = vec![];
-        let mut final_width = 0;
-
-        for c in &self.constraints {
-            let matrix = match c {
-                Constraint::Lookup(l) => l.get_trace(challange),
-                Constraint::Permutation(p) => p.get_trace(challange),
-            };
-
-            final_width += matrix.width;
-            matrixes.push(matrix);
-        }
-
-        let max_height = self.max_height;
-
+    pub fn get_trace(&self) -> RowMajorMatrix<Bls12_377Fr> {
+        let width = self.columns.len();
+        // The final trace
         let mut values = vec![];
 
-        for row in 0..max_height {
-            for matrix in &matrixes {
-                let rows = matrix.values.len() / matrix.width;
-                if row < rows {
-                    // Append the current row's data
-                    let start = row * matrix.width;
-                    let end = usize::min(start + matrix.width, matrix.values.len());
-                    values.append(&mut matrix.values[start..end].to_vec());
-                }
+        // Iterate over each row
+        for row in 0..self.height {
+            // Iterate over each column. Add the current fixed row element from trace into the final trace.
+            for column in &self.columns {
+                values.push(column[row]);
             }
         }
 
-        RowMajorMatrix::new(values, final_width)
-    }
-
-    pub fn get_air_configs(&self) -> Vec<AirConfig> {
-        self.constraints
-            .iter()
-            .map(|c| match c {
-                Constraint::Permutation(p) => {
-                    AirConfig::Permutation(AirPermutationConfig::new(p.a_width()))
-                }
-                Constraint::Lookup(l) => {
-                    AirConfig::Lookup(AirLookupConfig::new(l.a_width(), l.b_width()))
-                }
-            })
-            .collect()
+        RowMajorMatrix::new(values, width)
     }
 }
