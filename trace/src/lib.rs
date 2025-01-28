@@ -114,9 +114,9 @@ impl RawTrace {
         // The final trace
         let mut values = vec![];
 
-        for col in 0..self.height {
-            for row_element in 0..width {
-                values.push(self.columns[row_element][col]);
+        for row in 0..self.height {
+            for col in 0..width {
+                values.push(self.columns[col][row]);
             }
         }
 

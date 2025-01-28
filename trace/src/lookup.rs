@@ -192,13 +192,11 @@ impl RawLookupTrace {
                 a[i].push(Bls12_377Fr::new(FF_Bls12_377Fr::from_be_bytes_mod_order(
                     self.a[i][j].as_slice(),
                 )));
-            }
-        }
 
-        for i in 0..self.a_filter.len() {
-            a_filter.push(Bls12_377Fr::new(FF_Bls12_377Fr::from_be_bytes_mod_order(
-                self.a_filter[i].as_slice(),
-            )))
+                a_filter.push(Bls12_377Fr::new(FF_Bls12_377Fr::from_be_bytes_mod_order(
+                    self.a_filter[i].as_slice(),
+                )));
+            }
         }
 
         for i in 0..self.b.len() {
@@ -207,13 +205,11 @@ impl RawLookupTrace {
                 b[i].push(Bls12_377Fr::new(FF_Bls12_377Fr::from_be_bytes_mod_order(
                     self.b[i][j].as_slice(),
                 )));
-            }
-        }
 
-        for i in 0..self.b_filter.len() {
-            b_filter.push(Bls12_377Fr::new(FF_Bls12_377Fr::from_be_bytes_mod_order(
-                self.b_filter[i].as_slice(),
-            )))
+                b_filter.push(Bls12_377Fr::new(FF_Bls12_377Fr::from_be_bytes_mod_order(
+                    self.b_filter[i].as_slice(),
+                )));
+            }
         }
 
         (a, b, a_filter, b_filter)
