@@ -72,18 +72,11 @@ fn main() -> Result<(), impl Debug> {
 
     let mut raw_trace = RawTrace::new(vec![alpha_challenge, delta_challenge]);
 
-    let lookup_trace = RawLookupTrace::read_file("../lookup_1_0.bin");
-    let lookup2_trace = RawLookupTrace::read_file("../lookup_2_0.bin");
-    let perm_trace = RawPermutationTrace::read_file("../permutation_0.bin");
+    let lookup_trace = RawLookupTrace::read_file("../lookup_0.bin");
 
     let mut cfgs = Vec::new();
 
-    cfgs.push(raw_trace.push_permutation(perm_trace.clone()));
-    cfgs.push(raw_trace.push_permutation(perm_trace.clone()));
     cfgs.push(raw_trace.push_lookup(lookup_trace.clone()));
-    cfgs.push(raw_trace.push_permutation(perm_trace.clone()));
-    cfgs.push(raw_trace.push_lookup(lookup2_trace.clone()));
-    cfgs.push(raw_trace.push_permutation(perm_trace.clone()));
 
     // -----------------------------------------------------------
 

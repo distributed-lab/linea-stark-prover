@@ -9,10 +9,10 @@ use std::fs;
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct RawLookupTrace {
     pub a: Vec<Vec<[u8; 32]>>,
-    pub b: Vec<Vec<[u8; 32]>>,
+    pub b: Vec<Vec<Vec<[u8; 32]>>>,
     pub name: String,
     pub a_filter: Vec<[u8; 32]>,
-    pub b_filter: Vec<[u8; 32]>,
+    pub b_filter: Vec<Vec<[u8; 32]>>,
 }
 
 impl RawLookupTrace {
@@ -25,7 +25,7 @@ impl RawLookupTrace {
     }
 
     pub(crate) fn get_trace(
-        &self,
+        &mut self,
         challenges: Vec<Bls12_377Fr>,
     ) -> (AirLookupConfig, Vec<Vec<Bls12_377Fr>>) {
         assert_eq!(
@@ -38,15 +38,24 @@ impl RawLookupTrace {
         let (alpha, delta) = (challenges[0], challenges[1]);
 
         // a columns, b columns, and corresponding filters
-        let (a, b, a_filter, b_filter) = self.get_columns();
+        let (a, mut b, a_filter, b_filter) = self.get_columns();
 
         // Resulting trace in one-dimensional array
         let mut res: Vec<Vec<Bls12_377Fr>> = Vec::new();
 
         res.append(&mut a.clone());
-        res.append(&mut b.clone());
+
+        for b_element in b.iter_mut() {
+            res.append(b_element);
+        }
+
         res.push(a_filter.clone());
-        res.push(b_filter.clone());
+
+        for mut b_element in b.iter_mut() {
+            res.append(&mut b_element);
+        }
+
+        res.append(&mut b_filter.clone());
 
         // Trace height
         // !IMPORTANT: should be equal per all columns.
@@ -105,32 +114,32 @@ impl RawLookupTrace {
                 log_derivative_sum += a_row_comb_inverse
             }
 
-            let mut b_row_comb = Bls12_377Fr::ZERO;
-
-            for b_column in &b {
-                // Iterate over all B columns and collect linear combination of the row
-                // `b_row_comb = b[i][j] * alpha^j` per all `j`
-                b_row_comb = b_row_comb * alpha + b_column[i];
-            }
-
-            let b_row_comb_inverse = (b_row_comb + delta).inverse();
-            b_inverses_column.push(b_row_comb_inverse);
-
-            // Get multiplicity for current B row
-            let mut occurrence = Bls12_377Fr::ZERO;
-            if let Some(cnt) = occurrences.get(&b_row_comb) {
-                if b_filter[i] != Bls12_377Fr::ZERO {
-                    // If multiplicity is non-zero and B row is not disabled by filter, then:
-                    // - subtract from sum the corresponding log-derivative term
-                    // - remove multiplicity from occurrences
-                    occurrence = Bls12_377Fr::from_canonical_usize(*cnt);
-                    log_derivative_sum -= b_row_comb_inverse * occurrence;
-                    occurrences.remove(&b_row_comb);
+            for (b_table_ind, b_table) in b.iter().enumerate() {
+                let mut b_row_comb = Bls12_377Fr::ZERO;
+                for b_column in b_table {
+                    // Iterate over all B columns and collect linear combination of the row
+                    // `b_row_comb = b[i][j] * alpha^j` per all `j`
+                    b_row_comb = b_row_comb * alpha + b_column[i];
                 }
-            }
 
-            multiplicities_column.push(occurrence);
-            prefix_sum_column.push(log_derivative_sum);
+                let b_row_comb_inverse = (b_row_comb + delta).inverse();
+                b_inverses_column.push(b_row_comb_inverse);
+
+                let mut occurrence = Bls12_377Fr::ZERO;
+                if let Some(cnt) = occurrences.get(&b_row_comb) {
+                    if b_filter[b_table_ind][i] != Bls12_377Fr::ZERO {
+                        // If multiplicity is non-zero and B row is not disabled by filter, then:
+                        // - subtract from sum the corresponding log-derivative term
+                        // - remove multiplicity from occurrences
+                        occurrence = Bls12_377Fr::from_canonical_usize(*cnt);
+                        log_derivative_sum -= b_row_comb_inverse * occurrence;
+                        occurrences.remove(&b_row_comb);
+                    }
+                }
+
+                multiplicities_column.push(occurrence);
+                prefix_sum_column.push(log_derivative_sum);
+            }
         }
 
         assert!(
@@ -143,16 +152,23 @@ impl RawLookupTrace {
         res.push(multiplicities_column);
         res.push(prefix_sum_column);
 
+        let b_tables_len = b.len() * b[0].len();
+        let b_filter_end = a.len() + b.len() * b[0].len() + b_filter.len() * b_filter[0].len();
+
         (
             AirLookupConfig {
                 a_columns_ids: (0..a.len()).collect(),
-                b_columns_ids: (a.len()..a.len() + b.len()).collect(),
-                a_filter_id: a.len() + b.len(),
-                b_filter_id: a.len() + b.len() + 1,
-                a_inverses_id: a.len() + b.len() + 2,
-                b_inverses_id: a.len() + b.len() + 3,
-                occurrences_id: a.len() + b.len() + 4,
-                check_id: a.len() + b.len() + 5,
+                b_columns_ids: (a.len()..a.len() + b_tables_len).collect(),
+                a_filter_id: a.len() + b_tables_len,
+                b_filter_id: (a.len() + b_tables_len..b_filter_end).collect(),
+                a_inverses_id: b_filter_end + 1,
+                b_inverses_id: (b_filter_end + 1..b_filter_end + 1 + b_tables_len).collect(),
+                occurrences_id: (b_filter_end + 1 + b_tables_len
+                    ..b_filter_end + 1 + b_tables_len * 2)
+                    .collect(),
+                check_id: (b_filter_end + 1 + b_tables_len * 2 + 1
+                    ..b_filter_end + 1 + b_tables_len * 3 + 1)
+                    .collect(),
             },
             res,
         )
@@ -165,26 +181,30 @@ impl RawLookupTrace {
 
         self.a_filter.resize(size, [0u8; 32]);
 
-        for e in &mut self.b {
-            e.resize(size, [0u8; 32]);
+        for b_element in &mut self.b {
+            for e in b_element {
+                e.resize(size, [0u8; 32]);
+            }
         }
 
-        self.b_filter.resize(size, [0u8; 32]);
+        for b_filter in &mut self.b_filter {
+            b_filter.resize(size, [0u8; 32]);
+        }
     }
 
     pub fn get_columns(
-        &self,
+        &mut self,
     ) -> (
         Vec<Vec<Bls12_377Fr>>,
+        Vec<Vec<Vec<Bls12_377Fr>>>,
+        Vec<Bls12_377Fr>,
         Vec<Vec<Bls12_377Fr>>,
-        Vec<Bls12_377Fr>,
-        Vec<Bls12_377Fr>,
     ) {
         let mut a: Vec<Vec<Bls12_377Fr>> = Vec::new();
-        let mut b: Vec<Vec<Bls12_377Fr>> = Vec::new();
+        let mut b: Vec<Vec<Vec<Bls12_377Fr>>> = Vec::new();
 
         let mut a_filter: Vec<Bls12_377Fr> = Vec::new();
-        let mut b_filter: Vec<Bls12_377Fr> = Vec::new();
+        let mut b_filter: Vec<Vec<Bls12_377Fr>> = Vec::new();
 
         for i in 0..self.a.len() {
             a.push(Vec::new());
@@ -201,14 +221,19 @@ impl RawLookupTrace {
 
         for i in 0..self.b.len() {
             b.push(Vec::new());
-            for j in 0..self.b[i].len() {
-                b[i].push(Bls12_377Fr::new(FF_Bls12_377Fr::from_be_bytes_mod_order(
-                    self.b[i][j].as_slice(),
-                )));
 
-                b_filter.push(Bls12_377Fr::new(FF_Bls12_377Fr::from_be_bytes_mod_order(
-                    self.b_filter[i].as_slice(),
-                )));
+            b_filter.push(Vec::new());
+            for j in 0..self.b[i].len() {
+                b[i].push(Vec::new());
+                for k in 0..self.b[i][j].len() {
+                    b[i][j].push(Bls12_377Fr::new(FF_Bls12_377Fr::from_be_bytes_mod_order(
+                        self.b[i][j][k].as_slice(),
+                    )));
+
+                    b_filter[i].push(Bls12_377Fr::new(FF_Bls12_377Fr::from_be_bytes_mod_order(
+                        self.b_filter[i][j].as_slice(),
+                    )));
+                }
             }
         }
 
