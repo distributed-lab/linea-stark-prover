@@ -156,8 +156,9 @@ impl RawLookupTrace {
                 }
 
                 multiplicities_table[b_table_ind].push(occurrence);
-                prefix_sum_column.push(log_derivative_sum);
             }
+
+            prefix_sum_column.push(log_derivative_sum);
         }
 
         assert!(
@@ -244,11 +245,13 @@ impl RawLookupTrace {
                 a[i].push(Bls12_377Fr::new(FF_Bls12_377Fr::from_be_bytes_mod_order(
                     self.a[i][j].as_slice(),
                 )));
-
-                a_filter.push(Bls12_377Fr::new(FF_Bls12_377Fr::from_be_bytes_mod_order(
-                    self.a_filter[i].as_slice(),
-                )));
             }
+        }
+
+        for i in 0..self.a[0].len() {
+            a_filter.push(Bls12_377Fr::new(FF_Bls12_377Fr::from_be_bytes_mod_order(
+                self.a_filter[i].as_slice(),
+            )));
         }
 
         for i in 0..self.b.len() {
@@ -261,11 +264,15 @@ impl RawLookupTrace {
                     b[i][j].push(Bls12_377Fr::new(FF_Bls12_377Fr::from_be_bytes_mod_order(
                         self.b[i][j][k].as_slice(),
                     )));
-
-                    b_filter[i].push(Bls12_377Fr::new(FF_Bls12_377Fr::from_be_bytes_mod_order(
-                        self.b_filter[i][j].as_slice(),
-                    )));
                 }
+            }
+        }
+
+        for i in 0..self.b.len() {
+            for j in 0..self.b[i][0].len() {
+                b_filter[i].push(Bls12_377Fr::new(FF_Bls12_377Fr::from_be_bytes_mod_order(
+                    self.b_filter[i][j].as_slice(),
+                )));
             }
         }
 

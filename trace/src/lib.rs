@@ -44,7 +44,9 @@ impl RawTrace {
         });
 
         lookup.b.iter().for_each(|bi| {
-            max_height = max(max_height, bi.len());
+            bi.iter().for_each(|bij| {
+                max_height = max(max_height, bij.len());
+            })
         });
 
         // Resize trace according to the max height
