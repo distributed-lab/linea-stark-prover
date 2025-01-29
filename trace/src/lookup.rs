@@ -25,12 +25,16 @@ impl RawLookupTrace {
         let mut one = [0u8; 32];
         one[31] = 1;
 
-        while raw_trace.a_filter.len() < raw_trace.a.len() {
+        while raw_trace.a_filter.len() < raw_trace.a[0].len() {
             raw_trace.a_filter.push(one);
         }
 
+        while raw_trace.b_filter.len() < raw_trace.b.len() {
+            raw_trace.b_filter.push(Vec::new());
+        }
+
         for (b_filter_ind, b_filter) in raw_trace.b_filter.iter_mut().enumerate() {
-            while b_filter.len() < raw_trace.b[b_filter_ind].len() {
+            while b_filter.len() < raw_trace.b[b_filter_ind][0].len() {
                 b_filter.push(one);
             }
         }
@@ -59,8 +63,8 @@ impl RawLookupTrace {
 
         res.append(&mut a.clone());
 
-        for b_element in b.iter_mut() {
-            res.append(b_element);
+        for b_element in b.iter() {
+            res.append(&mut b_element.clone());
         }
 
         res.push(a_filter.clone());
@@ -170,7 +174,7 @@ impl RawLookupTrace {
 
         let mut b_columns_ids: Vec<Vec<usize>> = (0..b.len()).map(|_| Vec::new()).collect();
         for i in 0..b.len() * b[0].len() {
-            b_columns_ids[i / b.len()].push(i + a.len());
+            b_columns_ids[i / b[0].len()].push(i + a.len());
         }
 
         let a_filter_id = *b_columns_ids.last().unwrap().last().unwrap() + 1;
