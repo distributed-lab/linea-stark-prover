@@ -1,3 +1,4 @@
+use std::cmp::max;
 use air::air_permutation::AirPermutationConfig;
 use ark_ff::PrimeField;
 use p3_bls12_377_fr::{Bls12_377Fr, FF_Bls12_377Fr};
@@ -114,6 +115,20 @@ impl RawPermutationTrace {
         }
 
         (a, b)
+    }
+
+    pub fn get_max_height(&self) -> usize {
+        let mut max_height = 0_usize;
+
+        self.a.iter().for_each(|ai| {
+            max_height = max(max_height, ai.len());
+        });
+
+        self.b.iter().for_each(|bi| {
+            max_height = max(max_height, bi.len());
+        });
+
+        max_height
     }
 
     pub fn resize(&mut self, size: usize) {

@@ -12,6 +12,7 @@ use p3_field::{Field, FieldAlgebra};
 use p3_matrix::dense::RowMajorMatrix;
 use serde::{Deserialize, Serialize};
 use std::cmp::max;
+use p3_air::Air;
 
 pub struct RawTrace {
     pub columns: Vec<Vec<Bls12_377Fr>>,
@@ -52,13 +53,6 @@ impl RawTrace {
         // Resize trace according to the max height
         l.resize(max_height);
 
-        // If max height in our lookup exceeds the current one
-        // then we have to resize other constraints
-        if max_height > self.height {
-            self.resize(max_height);
-            self.height = max_height;
-        }
-
         let (mut cfg, mut lookup_columns) = l.get_trace(self.challenges.clone());
         cfg.shift(self.columns.len());
         self.columns.append(&mut lookup_columns);
@@ -82,13 +76,6 @@ impl RawTrace {
 
         // Resize trace according to the max height
         p.resize(max_height);
-
-        // If max height in our lookup exceeds the current one
-        // then we have to resize other constraints
-        if max_height > self.height {
-            self.resize(max_height);
-            self.height = max_height;
-        }
 
         let (mut cfg, mut permutation_columns) = p.get_trace(self.challenges.clone());
         cfg.shift(self.columns.len());

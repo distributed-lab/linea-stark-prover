@@ -1,4 +1,6 @@
 mod config;
+
+use std::cmp::max;
 use crate::config::*;
 use air::LineaAIR;
 use p3_field::Field;
@@ -72,11 +74,36 @@ fn main() -> Result<(), impl Debug> {
 
     let mut raw_trace = RawTrace::new(vec![alpha_challenge, delta_challenge]);
 
-    let lookup_trace = RawLookupTrace::read_file("/Users/olegfomenko/RustroverProjects/linea-stark-prover/lookup_949.bin");
+    let lookup_trace0 = RawLookupTrace::read_file("../lookup_0.bin");
+    let lookup_trace2 = RawLookupTrace::read_file("../lookup_2.bin");
+    let lookup_traces = vec![lookup_trace0, lookup_trace2];
+
+    // Get max height of all lookup traces.
+    let mut lookup_max_height = 0;
+    lookup_traces.iter().for_each(|lt| {
+        lookup_max_height = max(lookup_max_height, lt.get_max_height());
+    });
+
+    let permutation_trace = RawPermutationTrace::read_file("../permutation_0.bin");
+    let permutation_traces = vec![permutation_trace];
+
+    // Get max height of all permutation traces.
+    let mut permutation_max_height = 0;
+    permutation_traces.iter().for_each(|pt| {
+        permutation_max_height = max(permutation_max_height, pt.get_max_height());
+    });
+
+    // Get trace max height.
+    raw_trace.height = max(permutation_max_height, lookup_max_height);
 
     let mut cfgs = Vec::new();
+    lookup_traces.iter().for_each(|lt| {
+        cfgs.push(raw_trace.push_lookup(lt.clone()));
+    });
 
-    cfgs.push(raw_trace.push_lookup(lookup_trace.clone()));
+    permutation_traces.iter().for_each(|pt| {
+        cfgs.push(raw_trace.push_permutation(pt.clone()));
+    });
 
     // -----------------------------------------------------------
 
