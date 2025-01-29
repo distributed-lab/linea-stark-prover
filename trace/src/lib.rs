@@ -7,12 +7,12 @@ use air::air_lookup::AirLookupConfig;
 use air::air_permutation::AirPermutationConfig;
 use air::AirConfig;
 use ark_ff::PrimeField;
+use p3_air::Air;
 use p3_bls12_377_fr::Bls12_377Fr;
 use p3_field::{Field, FieldAlgebra};
 use p3_matrix::dense::RowMajorMatrix;
 use serde::{Deserialize, Serialize};
 use std::cmp::max;
-use p3_air::Air;
 
 pub struct RawTrace {
     pub columns: Vec<Vec<Bls12_377Fr>>,
@@ -57,6 +57,38 @@ impl RawTrace {
         self.columns.append(&mut permutation_columns);
 
         AirConfig::Permutation(cfg)
+    }
+
+    pub fn push_traces(
+        &mut self,
+        permutation_traces: Vec<RawPermutationTrace>,
+        lookup_traces: Vec<RawLookupTrace>,
+    ) -> Vec<AirConfig> {
+        // Get max height of all lookup traces.
+        let mut lookup_max_height = 0;
+        lookup_traces.iter().for_each(|lt| {
+            lookup_max_height = max(lookup_max_height, lt.get_max_height());
+        });
+
+        // Get max height of all permutation traces.
+        let mut permutation_max_height = 0;
+        permutation_traces.iter().for_each(|pt| {
+            permutation_max_height = max(permutation_max_height, pt.get_max_height());
+        });
+
+        // Get trace max height.
+        self.height = max(permutation_max_height, lookup_max_height);
+
+        let mut cfgs = Vec::new();
+        lookup_traces.iter().for_each(|lt| {
+            cfgs.push(self.push_lookup(lt.clone()));
+        });
+
+        permutation_traces.iter().for_each(|pt| {
+            cfgs.push(self.push_permutation(pt.clone()));
+        });
+
+        cfgs
     }
 
     pub fn get_trace(&self) -> RowMajorMatrix<Bls12_377Fr> {

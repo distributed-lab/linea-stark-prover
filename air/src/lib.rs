@@ -46,11 +46,9 @@ impl<F: Field> BaseAir<F> for LineaAIR {
 
 impl<AB: AirBuilderWithPublicValues> Air<AB> for LineaAIR {
     fn eval(&self, builder: &mut AB) {
-        self.configs.iter().for_each(|c| {
-            match c {
-                AirConfig::Lookup(l) => self.eval_lookup(builder, l),
-                AirConfig::Permutation(p) => self.eval_permutation(builder, p),
-            }
+        self.configs.iter().for_each(|c| match c {
+            AirConfig::Lookup(l) => self.eval_lookup(builder, l),
+            AirConfig::Permutation(p) => self.eval_permutation(builder, p),
         });
     }
 }
@@ -115,7 +113,11 @@ impl LineaAIR {
             .assert_eq(local[l.check_id], AB::F::ZERO);
     }
 
-    fn eval_permutation<AB: AirBuilderWithPublicValues>(&self, builder: &mut AB, p: &AirPermutationConfig) {
+    fn eval_permutation<AB: AirBuilderWithPublicValues>(
+        &self,
+        builder: &mut AB,
+        p: &AirPermutationConfig,
+    ) {
         let main = builder.main();
 
         let local = main.row_slice(0);
