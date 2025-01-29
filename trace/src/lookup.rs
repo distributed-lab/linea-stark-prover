@@ -18,8 +18,22 @@ pub struct RawLookupTrace {
 impl RawLookupTrace {
     pub fn read_file(path: &str) -> Self {
         let file_content = fs::read(path).unwrap();
-        let raw_trace: RawLookupTrace =
+        let mut raw_trace: RawLookupTrace =
             ciborium::from_reader(std::io::Cursor::new(file_content)).unwrap();
+
+        // We have to append filters (enabled) in case of filters have been passed empty
+        let mut one = [0u8; 32];
+        one[31] = 1;
+
+        while raw_trace.a_filter.len() < raw_trace.a.len() {
+            raw_trace.a_filter.push(one);
+        }
+
+        for (b_filter_ind, b_filter) in raw_trace.b_filter.iter_mut().enumerate() {
+            while b_filter.len() < raw_trace.b[b_filter_ind].len() {
+                b_filter.push(one);
+            }
+        }
 
         raw_trace
     }
@@ -50,11 +64,6 @@ impl RawLookupTrace {
         }
 
         res.push(a_filter.clone());
-
-        for mut b_element in b.iter_mut() {
-            res.append(&mut b_element);
-        }
-
         res.append(&mut b_filter.clone());
 
         // Trace height
@@ -152,23 +161,39 @@ impl RawLookupTrace {
         res.push(multiplicities_column);
         res.push(prefix_sum_column);
 
-        let b_tables_len = b.len() * b[0].len();
-        let b_filter_end = a.len() + b.len() * b[0].len() + b_filter.len() * b_filter[0].len();
+        let a_columns_ids = (0..a.len()).collect();
+
+        let mut b_columns_ids: Vec<Vec<usize>> = (0..b.len()).map(|_| Vec::new()).collect();
+        for i in 0..b.len() * b[0].len() {
+            b_columns_ids[i / b.len()].push(i + a.len());
+        }
+
+        let a_filter_id = *b_columns_ids.last().unwrap().last().unwrap() + 1;
+
+        let b_filter_id: Vec<usize> = (0..b.len()).map(|i| i + 1 + a_filter_id).collect();
+
+        let a_inverses_id = b_filter_id.last().unwrap() + 1;
+
+        let b_inverses_id: Vec<usize> = (0..b.len()).map(|i| i + 1 + a_inverses_id).collect();
+
+        let occurrences_id: Vec<usize> = (0..b.len())
+            .map(|i| i + 1 + b_inverses_id.last().unwrap())
+            .collect();
+
+        let check_id: Vec<usize> = (0..b.len())
+            .map(|i| i + 1 + occurrences_id.last().unwrap())
+            .collect();
 
         (
             AirLookupConfig {
-                a_columns_ids: (0..a.len()).collect(),
-                b_columns_ids: (a.len()..a.len() + b_tables_len).collect(),
-                a_filter_id: a.len() + b_tables_len,
-                b_filter_id: (a.len() + b_tables_len..b_filter_end).collect(),
-                a_inverses_id: b_filter_end + 1,
-                b_inverses_id: (b_filter_end + 1..b_filter_end + 1 + b_tables_len).collect(),
-                occurrences_id: (b_filter_end + 1 + b_tables_len
-                    ..b_filter_end + 1 + b_tables_len * 2)
-                    .collect(),
-                check_id: (b_filter_end + 1 + b_tables_len * 2 + 1
-                    ..b_filter_end + 1 + b_tables_len * 3 + 1)
-                    .collect(),
+                a_columns_ids,
+                b_columns_ids,
+                a_filter_id,
+                b_filter_id,
+                a_inverses_id,
+                b_inverses_id,
+                occurrences_id,
+                check_id,
             },
             res,
         )

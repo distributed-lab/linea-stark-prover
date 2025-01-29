@@ -13,20 +13,6 @@ use p3_matrix::dense::RowMajorMatrix;
 use serde::{Deserialize, Serialize};
 use std::cmp::max;
 
-pub enum Constraint {
-    Permutation(RawPermutationTrace),
-    Lookup(RawLookupTrace),
-}
-
-impl Constraint {
-    pub fn resize(&mut self, new_size: usize) {
-        match self {
-            Constraint::Permutation(p) => p.resize(new_size),
-            Constraint::Lookup(l) => l.resize(new_size),
-        };
-    }
-}
-
 pub struct RawTrace {
     pub columns: Vec<Vec<Bls12_377Fr>>,
     pub height: usize,
