@@ -37,21 +37,8 @@ impl RawTrace {
     pub fn push_lookup(&mut self, lookup: RawLookupTrace) -> AirConfig {
         let mut l = lookup.clone();
 
-        // Determine local maximum height (can not be less than current max height)
-        let mut max_height = self.height;
-
-        lookup.a.iter().for_each(|ai| {
-            max_height = max(max_height, ai.len());
-        });
-
-        lookup.b.iter().for_each(|bi| {
-            bi.iter().for_each(|bij| {
-                max_height = max(max_height, bij.len());
-            })
-        });
-
         // Resize trace according to the max height
-        l.resize(max_height);
+        l.resize(self.height);
 
         let (mut cfg, mut lookup_columns) = l.get_trace(self.challenges.clone());
         cfg.shift(self.columns.len());
@@ -62,20 +49,8 @@ impl RawTrace {
 
     pub fn push_permutation(&mut self, permutation: RawPermutationTrace) -> AirConfig {
         let mut p = permutation.clone();
-
-        // Determine local maximum height (can not be less than current max height)
-        let mut max_height = self.height;
-
-        permutation.a.iter().for_each(|ai| {
-            max_height = max(max_height, ai.len());
-        });
-
-        permutation.b.iter().for_each(|bi| {
-            max_height = max(max_height, bi.len());
-        });
-
         // Resize trace according to the max height
-        p.resize(max_height);
+        p.resize(self.height);
 
         let (mut cfg, mut permutation_columns) = p.get_trace(self.challenges.clone());
         cfg.shift(self.columns.len());
