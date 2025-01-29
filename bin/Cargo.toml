@@ -1,0 +1,33 @@
+[package]
+name = "bin"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+p3-challenger   = { workspace = true }
+p3-air          = { workspace = true }
+p3-field        = { workspace = true }
+p3-matrix       = { workspace = true }
+p3-merkle-tree  = { workspace = true }
+p3-maybe-rayon  = { workspace = true }
+p3-commit       = { workspace = true }
+p3-dft          = { workspace = true }
+p3-fri          = { workspace = true }
+p3-symmetric    = { workspace = true }
+p3-uni-stark    = { workspace = true }
+p3-bls12-377-fr = { workspace = true }
+
+tracing-subscriber = { workspace = true }
+tracing-forest     = { workspace = true, features = ["ansi", "smallvec"] }
+rand               = { workspace = true }
+ark-ff             = { workspace = true }
+num-bigint         = { workspace = true, features = ["serde"] }
+serde              = { workspace = true, features = ["derive"] }
+ciborium           = { workspace = true }
+
+trace = { path = "../trace" }
+air   = { path = "../air" }
+
+
+[features]
+parallel = ["p3-maybe-rayon/parallel"]

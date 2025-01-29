@@ -1,0 +1,160 @@
+mod config;
+
+use std::cmp::max;
+use crate::config::*;
+use air::LineaAIR;
+use p3_field::Field;
+use p3_fri::{FriConfig, TwoAdicFriPcs};
+use p3_uni_stark::{prove, verify};
+use rand::distributions::Standard;
+use rand::{thread_rng, Rng};
+use std::collections::HashSet;
+use std::fmt::Debug;
+use trace::{lookup::RawLookupTrace, permutation::RawPermutationTrace, RawTrace};
+use tracing_forest::util::LevelFilter;
+use tracing_forest::ForestLayer;
+use tracing_subscriber::layer::SubscriberExt;
+use tracing_subscriber::util::SubscriberInitExt;
+use tracing_subscriber::{EnvFilter, Registry};
+
+fn dummy_permutation_check<F: Field + Ord>(mut a: Vec<Vec<F>>, mut b: Vec<Vec<F>>) {
+    let mut a_all: Vec<F> = Vec::new();
+    let mut b_all: Vec<F> = Vec::new();
+
+    for i in 0..a.len() {
+        a_all.append(&mut a[i]);
+        b_all.append(&mut b[i]);
+    }
+
+    a_all.sort();
+    b_all.sort();
+
+    assert_eq!(a_all.len(), b_all.len());
+    for i in 0..a_all.len() {
+        assert_eq!(a_all[i], b_all[i]);
+    }
+}
+
+/// Returns true if the check is passed. Otherwise, returns true.
+fn dummy_lookup_check<F: Field + Ord>(a: Vec<Vec<F>>, b: Vec<Vec<F>>) -> bool {
+    let mut b_all = HashSet::new();
+
+    for col in b {
+        for element in col {
+            b_all.insert(element);
+        }
+    }
+
+    for col in a {
+        for element in &col {
+            if !b_all.contains(element) {
+                return false;
+            }
+        }
+    }
+
+    true
+}
+
+fn main() -> Result<(), impl Debug> {
+    let env_filter = EnvFilter::builder()
+        .with_default_directive(LevelFilter::INFO.into())
+        .from_env_lossy();
+
+    Registry::default()
+        .with(env_filter)
+        .with(ForestLayer::default())
+        .init();
+
+    let mut rng = thread_rng();
+    let alpha_challenge = rng.sample(Standard {});
+    let delta_challenge = rng.sample(Standard {});
+    println!("Challenge delta: {}", delta_challenge);
+    println!("Challenge alpha: {}", alpha_challenge);
+
+    let mut raw_trace = RawTrace::new(vec![alpha_challenge, delta_challenge]);
+
+    let lookup_trace0 = RawLookupTrace::read_file("../lookup_0.bin");
+    let lookup_trace2 = RawLookupTrace::read_file("../lookup_2.bin");
+    let lookup_traces = vec![lookup_trace0, lookup_trace2];
+
+    // Get max height of all lookup traces.
+    let mut lookup_max_height = 0;
+    lookup_traces.iter().for_each(|lt| {
+        lookup_max_height = max(lookup_max_height, lt.get_max_height());
+    });
+
+    let permutation_trace = RawPermutationTrace::read_file("../permutation_0.bin");
+    let permutation_traces = vec![permutation_trace];
+
+    // Get max height of all permutation traces.
+    let mut permutation_max_height = 0;
+    permutation_traces.iter().for_each(|pt| {
+        permutation_max_height = max(permutation_max_height, pt.get_max_height());
+    });
+
+    // Get trace max height.
+    raw_trace.height = max(permutation_max_height, lookup_max_height);
+
+    let mut cfgs = Vec::new();
+    lookup_traces.iter().for_each(|lt| {
+        cfgs.push(raw_trace.push_lookup(lt.clone()));
+    });
+
+    permutation_traces.iter().for_each(|pt| {
+        cfgs.push(raw_trace.push_permutation(pt.clone()));
+    });
+
+    // -----------------------------------------------------------
+
+    // TODO: should not be just random
+
+    let perm = Perm::new_from_rng(8, 22, &mut rng);
+    let hash = Hash::new(perm.clone());
+
+    let dft = Dft::default();
+
+    // TODO: use proper PCS configured with FRI config
+    let compress = Compress::new(hash.clone());
+    let val_mmcs = ValMmcs::new(hash.clone(), compress.clone());
+    let challenge_mmcs = ChallengeMmcs::new(hash.clone(), compress.clone());
+    let fri_config = FriConfig {
+        log_blowup: 3,
+        log_final_poly_len: 0,
+        num_queries: 33,
+        proof_of_work_bits: 0, //29
+        mmcs: challenge_mmcs,
+    };
+
+    let pcs = TwoAdicFriPcs::new(dft, val_mmcs, fri_config);
+
+    let config = Config::new(pcs);
+
+    println!("Generating trace...");
+
+    let t = raw_trace.get_trace();
+
+    println!("Creating LineaAir...");
+
+    let air = LineaAIR::new(cfgs);
+
+    let mut challenger = Challenger::new(vec![], hash.clone());
+    println!("Proving...");
+    let proof = prove(
+        &config,
+        &air,
+        &mut challenger,
+        t,
+        &vec![alpha_challenge, delta_challenge],
+    );
+
+    let mut challenger = Challenger::new(vec![], hash.clone());
+    println!("Verification...");
+    verify(
+        &config,
+        &air,
+        &mut challenger,
+        &proof,
+        &vec![alpha_challenge, delta_challenge],
+    )
+}

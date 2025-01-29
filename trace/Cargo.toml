@@ -1,0 +1,16 @@
+[package]
+name = "trace"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+p3-air          = { workspace = true }
+p3-field        = { workspace = true }
+p3-matrix       = { workspace = true }
+p3-bls12-377-fr = { workspace = true }
+
+ark-ff   = { workspace = true }
+serde    = { workspace = true, features = ["derive"] }
+ciborium = { workspace = true }
+
+air = { path = "../air" }
