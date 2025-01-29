@@ -97,8 +97,13 @@ impl RawLookupTrace {
         }
 
         let mut a_inverses_column = Vec::new();
-        let mut b_inverses_column = Vec::new();
-        let mut multiplicities_column = Vec::new();
+
+        let mut b_inverses_table: Vec<Vec<Bls12_377Fr>> =
+            (0..b.len()).map(|_| Vec::new()).collect();
+
+        let mut multiplicities_table: Vec<Vec<Bls12_377Fr>> =
+            (0..b.len()).map(|_| Vec::new()).collect();
+
         let mut prefix_sum_column = Vec::new();
 
         // Total sum of the log-derivative terms with corresponding multiplicities:
@@ -132,7 +137,7 @@ impl RawLookupTrace {
                 }
 
                 let b_row_comb_inverse = (b_row_comb + delta).inverse();
-                b_inverses_column.push(b_row_comb_inverse);
+                b_inverses_table[b_table_ind].push(b_row_comb_inverse);
 
                 let mut occurrence = Bls12_377Fr::ZERO;
                 if let Some(cnt) = occurrences.get(&b_row_comb) {
@@ -146,7 +151,7 @@ impl RawLookupTrace {
                     }
                 }
 
-                multiplicities_column.push(occurrence);
+                multiplicities_table[b_table_ind].push(occurrence);
                 prefix_sum_column.push(log_derivative_sum);
             }
         }
@@ -157,8 +162,8 @@ impl RawLookupTrace {
         );
 
         res.push(a_inverses_column);
-        res.push(b_inverses_column);
-        res.push(multiplicities_column);
+        res.append(&mut b_inverses_table);
+        res.append(&mut multiplicities_table);
         res.push(prefix_sum_column);
 
         let a_columns_ids = (0..a.len()).collect();
@@ -180,9 +185,7 @@ impl RawLookupTrace {
             .map(|i| i + 1 + b_inverses_id.last().unwrap())
             .collect();
 
-        let check_id: Vec<usize> = (0..b.len())
-            .map(|i| i + 1 + occurrences_id.last().unwrap())
-            .collect();
+        let check_id = occurrences_id.last().unwrap() + 1;
 
         (
             AirLookupConfig {

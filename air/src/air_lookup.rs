@@ -7,7 +7,7 @@ pub struct AirLookupConfig {
     pub a_inverses_id: usize,
     pub b_inverses_id: Vec<usize>,
     pub occurrences_id: Vec<usize>,
-    pub check_id: Vec<usize>,
+    pub check_id: usize,
 }
 
 impl AirLookupConfig {
@@ -31,12 +31,10 @@ impl AirLookupConfig {
         self.occurrences_id
             .iter_mut()
             .for_each(|i_column| *i_column = *i_column + shift);
-        self.check_id
-            .iter_mut()
-            .for_each(|i_column| *i_column = *i_column + shift);
+        self.check_id += shift;
     }
 
     pub fn width(&self) -> usize {
-        self.a_columns_ids.len() + self.b_columns_ids.len() * (self.b_columns_ids[0].len() + 4) + 2
+        self.a_columns_ids.len() + self.b_columns_ids.len() * (self.b_columns_ids[0].len() + 3) + 3
     }
 }

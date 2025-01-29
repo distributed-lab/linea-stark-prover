@@ -67,6 +67,9 @@ impl<AB: AirBuilderWithPublicValues> Air<AB> for LineaAIR {
                     // Check inverse calculated correctly
                     builder.assert_eq(a_local_challenge * local[l.a_inverses_id], AB::F::ONE);
 
+                    let mut local_check = local[l.a_filter_id] * local[l.a_inverses_id];
+                    let mut next_check = next[l.a_filter_id] * next[l.a_inverses_id];
+
                     for (b_table_ind, b_columns_ids) in l.b_columns_ids.iter().enumerate() {
                         let mut b_local_comb = AB::Expr::from(AB::F::ZERO);
                         for i in b_columns_ids {
@@ -79,29 +82,29 @@ impl<AB: AirBuilderWithPublicValues> Air<AB> for LineaAIR {
                             AB::F::ONE,
                         );
 
-                        // Check first row calculated correctly
-                        builder.when_first_row().assert_eq(
-                            local[l.check_id[b_table_ind]],
-                            local[l.a_filter_id] * local[l.a_inverses_id]
-                                - local[l.b_filter_id[b_table_ind]]
-                                    * local[l.occurrences_id[b_table_ind]]
-                                    * local[l.b_inverses_id[b_table_ind]],
-                        );
+                        local_check -= local[l.b_filter_id[b_table_ind]]
+                            * local[l.occurrences_id[b_table_ind]]
+                            * local[l.b_inverses_id[b_table_ind]];
 
-                        // Check each row transition
-                        builder.when_transition().assert_eq(
-                            next[l.check_id[b_table_ind]] - local[l.check_id[b_table_ind]],
-                            next[l.a_filter_id] * next[l.a_inverses_id]
-                                - next[l.b_filter_id[b_table_ind]]
-                                    * next[l.occurrences_id[b_table_ind]]
-                                    * next[l.b_inverses_id[b_table_ind]],
-                        );
-
-                        // Check total sum is zero
-                        builder
-                            .when_last_row()
-                            .assert_eq(local[l.check_id[b_table_ind]], AB::F::ZERO);
+                        next_check -= next[l.b_filter_id[b_table_ind]]
+                            * next[l.occurrences_id[b_table_ind]]
+                            * next[l.b_inverses_id[b_table_ind]]
                     }
+
+                    // Check first row calculated correctly
+                    builder
+                        .when_first_row()
+                        .assert_eq(local[l.check_id], local_check);
+
+                    // Check each row transition
+                    builder
+                        .when_transition()
+                        .assert_eq(next[l.check_id] - local[l.check_id], next_check);
+
+                    // Check total sum is zero
+                    builder
+                        .when_last_row()
+                        .assert_eq(local[l.check_id], AB::F::ZERO);
                 }
 
                 AirConfig::Permutation(p) => {
