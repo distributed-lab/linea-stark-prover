@@ -13,6 +13,8 @@ use p3_field::{Field, FieldAlgebra};
 use p3_matrix::dense::RowMajorMatrix;
 use serde::{Deserialize, Serialize};
 use std::cmp::max;
+use std::sync::{Arc, Mutex};
+use std::thread;
 
 pub struct RawTrace {
     pub columns: Vec<Vec<Bls12_377Fr>>,
@@ -63,6 +65,7 @@ impl RawTrace {
         &mut self,
         permutation_traces: Vec<RawPermutationTrace>,
         lookup_traces: Vec<RawLookupTrace>,
+        thread_count: usize
     ) -> Vec<AirConfig> {
         // Get max height of all lookup traces.
         let mut lookup_max_height = 0;
@@ -80,8 +83,50 @@ impl RawTrace {
         self.height = max(permutation_max_height, lookup_max_height);
 
         let mut cfgs = Vec::new();
-        lookup_traces.iter().for_each(|lt| {
-            cfgs.push(self.push_lookup(lt.clone()));
+
+        let processed: Arc<Mutex<Vec<(AirLookupConfig, Vec<Vec<Bls12_377Fr>>)>>> = Arc::new(Mutex::new(Vec::new()));
+
+        let thread_count = lookup_traces.len().min(thread_count);
+        let chunk_size = (lookup_traces.len() + thread_count - 1) / thread_count;
+        let data = Arc::new(lookup_traces);
+
+        let mut handles = Vec::new();
+        for i in 0..thread_count {
+            let data_clone = Arc::clone(&data);
+
+            // Define the range of data to process in this thread
+            let start = i * chunk_size;
+            let end = ((i + 1) * chunk_size).min(data.len());
+
+            let height = self.height.clone();
+            let challenges = self.challenges.clone();
+            let processed_clone = Arc::clone(&processed);
+
+            let handle = thread::spawn(move || {
+                for lt in &data_clone[start..end] {
+                    let mut lookup = lt.clone();
+                    lookup.resize(height);
+
+                    let (mut cfg, mut lookup_columns) = lookup.get_trace(challenges.clone());
+
+                    let mut processed = processed_clone.lock().unwrap();
+                    processed.push((cfg, lookup_columns));
+                }
+            });
+            handles.push(handle);
+        }
+
+        // Wait for all threads to finish
+        for handle in handles {
+            handle.join().expect("Thread panicked");
+        }
+
+        processed.lock().unwrap().iter().for_each(|(lc, lookup_columns)| {
+            let mut cfg = lc.clone();
+            cfg.shift(self.columns.len());
+
+            self.columns.append(&mut lookup_columns.clone());
+            cfgs.push(AirConfig::Lookup(cfg))
         });
 
         permutation_traces.iter().for_each(|pt| {
