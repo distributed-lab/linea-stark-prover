@@ -87,11 +87,9 @@ impl RawTrace {
         let processed: Arc<Mutex<Vec<(AirLookupConfig, Vec<Vec<Bls12_377Fr>>)>>> = Arc::new(Mutex::new(Vec::new()));
 
         let thread_count = lookup_traces.len().min(thread_count);
-        let chunk_size = (lookup_traces.len() + thread_count - 1) / thread_count;
-        let data = Arc::new(lookup_traces);
+        let data = Arc::new(lookup_traces.clone());
 
         let chunk_size = lookup_traces.len() / thread_count;
-        let remainder = lookup_traces.len() % 3;
 
         let mut handles = Vec::new();
         for i in 0..thread_count {
