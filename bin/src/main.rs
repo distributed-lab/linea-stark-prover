@@ -36,9 +36,19 @@ fn main() -> Result<(), impl Debug> {
 
     let lookup_traces = vec![
         RawLookupTrace::read_file("../lookup_0.bin"),
+        RawLookupTrace::read_file("../lookup_0.bin"),
+        RawLookupTrace::read_file("../lookup_0.bin"),
+        RawLookupTrace::read_file("../lookup_0.bin"),
+        RawLookupTrace::read_file("../lookup_0.bin"),
     ];
 
-    let permutation_traces = vec![];
+    let permutation_traces = vec![
+        RawPermutationTrace::read_file("../permutation_0.bin"),
+        RawPermutationTrace::read_file("../permutation_0.bin"),
+        RawPermutationTrace::read_file("../permutation_0.bin"),
+        RawPermutationTrace::read_file("../permutation_0.bin"),
+        RawPermutationTrace::read_file("../permutation_0.bin"),
+    ];
 
     let cfgs = raw_trace.push_traces(permutation_traces, lookup_traces);
 
