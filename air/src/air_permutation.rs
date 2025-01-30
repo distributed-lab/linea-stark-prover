@@ -1,7 +1,3 @@
-use p3_air::{Air, AirBuilder, AirBuilderWithPublicValues, BaseAir};
-use p3_field::{Field, FieldAlgebra};
-use p3_matrix::Matrix;
-
 #[derive(Clone, Debug)]
 pub struct AirPermutationConfig {
     pub a_columns_ids: Vec<usize>,
@@ -12,8 +8,12 @@ pub struct AirPermutationConfig {
 
 impl AirPermutationConfig {
     pub fn shift(&mut self, shift: usize) {
-        self.a_columns_ids.iter_mut().for_each(|i| *i = *i + shift);
-        self.b_columns_ids.iter_mut().for_each(|i| *i = *i + shift);
+        self.a_columns_ids
+            .iter_mut()
+            .for_each(|i_column| *i_column = *i_column + shift);
+        self.b_columns_ids
+            .iter_mut()
+            .for_each(|i_column| *i_column = *i_column + shift);
         self.b_inverse_id += shift;
         self.check_id += shift;
     }

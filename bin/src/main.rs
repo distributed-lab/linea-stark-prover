@@ -1,6 +1,5 @@
 mod config;
 
-use std::cmp::max;
 use crate::config::*;
 use air::LineaAIR;
 use p3_field::Field;
@@ -16,45 +15,6 @@ use tracing_forest::ForestLayer;
 use tracing_subscriber::layer::SubscriberExt;
 use tracing_subscriber::util::SubscriberInitExt;
 use tracing_subscriber::{EnvFilter, Registry};
-
-fn dummy_permutation_check<F: Field + Ord>(mut a: Vec<Vec<F>>, mut b: Vec<Vec<F>>) {
-    let mut a_all: Vec<F> = Vec::new();
-    let mut b_all: Vec<F> = Vec::new();
-
-    for i in 0..a.len() {
-        a_all.append(&mut a[i]);
-        b_all.append(&mut b[i]);
-    }
-
-    a_all.sort();
-    b_all.sort();
-
-    assert_eq!(a_all.len(), b_all.len());
-    for i in 0..a_all.len() {
-        assert_eq!(a_all[i], b_all[i]);
-    }
-}
-
-/// Returns true if the check is passed. Otherwise, returns true.
-fn dummy_lookup_check<F: Field + Ord>(a: Vec<Vec<F>>, b: Vec<Vec<F>>) -> bool {
-    let mut b_all = HashSet::new();
-
-    for col in b {
-        for element in col {
-            b_all.insert(element);
-        }
-    }
-
-    for col in a {
-        for element in &col {
-            if !b_all.contains(element) {
-                return false;
-            }
-        }
-    }
-
-    true
-}
 
 fn main() -> Result<(), impl Debug> {
     let env_filter = EnvFilter::builder()
@@ -74,36 +34,13 @@ fn main() -> Result<(), impl Debug> {
 
     let mut raw_trace = RawTrace::new(vec![alpha_challenge, delta_challenge]);
 
-    let lookup_trace0 = RawLookupTrace::read_file("../lookup_0.bin");
-    let lookup_trace2 = RawLookupTrace::read_file("../lookup_2.bin");
-    let lookup_traces = vec![lookup_trace0, lookup_trace2];
+    let lookup_traces = vec![
+        RawLookupTrace::read_file("../lookup_0.bin"),
+    ];
 
-    // Get max height of all lookup traces.
-    let mut lookup_max_height = 0;
-    lookup_traces.iter().for_each(|lt| {
-        lookup_max_height = max(lookup_max_height, lt.get_max_height());
-    });
+    let permutation_traces = vec![];
 
-    let permutation_trace = RawPermutationTrace::read_file("../permutation_0.bin");
-    let permutation_traces = vec![permutation_trace];
-
-    // Get max height of all permutation traces.
-    let mut permutation_max_height = 0;
-    permutation_traces.iter().for_each(|pt| {
-        permutation_max_height = max(permutation_max_height, pt.get_max_height());
-    });
-
-    // Get trace max height.
-    raw_trace.height = max(permutation_max_height, lookup_max_height);
-
-    let mut cfgs = Vec::new();
-    lookup_traces.iter().for_each(|lt| {
-        cfgs.push(raw_trace.push_lookup(lt.clone()));
-    });
-
-    permutation_traces.iter().for_each(|pt| {
-        cfgs.push(raw_trace.push_permutation(pt.clone()));
-    });
+    let cfgs = raw_trace.push_traces(permutation_traces, lookup_traces);
 
     // -----------------------------------------------------------
 
