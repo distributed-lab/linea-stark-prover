@@ -90,6 +90,9 @@ impl RawTrace {
         let chunk_size = (lookup_traces.len() + thread_count - 1) / thread_count;
         let data = Arc::new(lookup_traces);
 
+        let chunk_size = lookup_traces.len() / thread_count;
+        let remainder = lookup_traces.len() % 3;
+
         let mut handles = Vec::new();
         for i in 0..thread_count {
             let data_clone = Arc::clone(&data);
@@ -97,6 +100,10 @@ impl RawTrace {
             // Define the range of data to process in this thread
             let start = i * chunk_size;
             let end = ((i + 1) * chunk_size).min(data.len());
+
+            if start > end {
+                break
+            }
 
             let height = self.height.clone();
             let challenges = self.challenges.clone();
