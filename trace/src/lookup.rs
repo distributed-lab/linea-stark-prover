@@ -1,9 +1,9 @@
-use std::cmp::max;
 use air::air_lookup::AirLookupConfig;
 use ark_ff::PrimeField;
 use p3_bls12_377_fr::{Bls12_377Fr, FF_Bls12_377Fr};
 use p3_field::{Field, FieldAlgebra};
 use serde::{Deserialize, Serialize};
+use std::cmp::max;
 use std::collections::HashMap;
 use std::fs;
 
@@ -172,6 +172,14 @@ impl RawLookupTrace {
         res.append(&mut multiplicities_table);
         res.push(prefix_sum_column);
 
+        (self.get_air_lookup_config(a, b), res)
+    }
+
+    fn get_air_lookup_config(
+        &self,
+        a: Vec<Vec<Bls12_377Fr>>,
+        b: Vec<Vec<Vec<Bls12_377Fr>>>,
+    ) -> AirLookupConfig {
         let a_columns_ids = (0..a.len()).collect();
 
         let mut b_columns_ids: Vec<Vec<usize>> = (0..b.len()).map(|_| Vec::new()).collect();
@@ -193,19 +201,16 @@ impl RawLookupTrace {
 
         let check_id = occurrences_id.last().unwrap() + 1;
 
-        (
-            AirLookupConfig {
-                a_columns_ids,
-                b_columns_ids,
-                a_filter_id,
-                b_filter_id,
-                a_inverses_id,
-                b_inverses_id,
-                occurrences_id,
-                check_id,
-            },
-            res,
-        )
+        AirLookupConfig {
+            a_columns_ids,
+            b_columns_ids,
+            a_filter_id,
+            b_filter_id,
+            a_inverses_id,
+            b_inverses_id,
+            occurrences_id,
+            check_id,
+        }
     }
 
     pub fn get_max_height(&self) -> usize {
