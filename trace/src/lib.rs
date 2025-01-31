@@ -95,10 +95,10 @@ impl RawTrace {
         let mut handles = Vec::new();
         let mut start = 0;
         for i in 0..thread_count {
-            let data_clone = Arc::clone(&data);
-
             let extra = if i < remainder { 1 } else { 0 }; // Distribute the remainder
             let end = start + chunk_size + extra;
+
+            let data_clone = Arc::clone(&data);
 
             println!("Launching thread task {} in range {}..{}", i, start, end);
 
@@ -118,8 +118,11 @@ impl RawTrace {
                 }
             });
 
-            start = end;
             handles.push(handle);
+            if end == lookup_traces.len() {
+                break
+            }
+            start = end;
         }
 
         // Wait for all threads to finish
