@@ -12,5 +12,7 @@ p3-bls12-377-fr = { workspace = true }
 ark-ff   = { workspace = true }
 serde    = { workspace = true, features = ["derive"] }
 ciborium = { workspace = true }
+rayon    = { workspace = true }
 
 air = { path = "../air" }
+num_cpus = "1.16.0"
