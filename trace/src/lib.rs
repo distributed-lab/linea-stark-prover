@@ -86,22 +86,21 @@ impl RawTrace {
 
         let processed: Arc<Mutex<Vec<(AirLookupConfig, Vec<Vec<Bls12_377Fr>>)>>> = Arc::new(Mutex::new(Vec::new()));
 
-        let thread_count = lookup_traces.len().min(thread_count);
+        // let thread_count = lookup_traces.len().min(thread_count);
         let data = Arc::new(lookup_traces.clone());
 
         let chunk_size = lookup_traces.len() / thread_count;
+        let remainder = lookup_traces.len() % thread_count;
 
         let mut handles = Vec::new();
+        let mut start = 0;
         for i in 0..thread_count {
             let data_clone = Arc::clone(&data);
 
-            // Define the range of data to process in this thread
-            let start = i * chunk_size;
-            let end = ((i + 1) * chunk_size).min(data.len());
+            let extra = if i < remainder { 1 } else { 0 }; // Distribute the remainder
+            let end = start + chunk_size + extra;
 
-            if start > end {
-                break
-            }
+            println!("Launching thread task {} in range {}..{}", i, start, end);
 
             let height = self.height.clone();
             let challenges = self.challenges.clone();
@@ -118,6 +117,8 @@ impl RawTrace {
                     processed.push((cfg, lookup_columns));
                 }
             });
+
+            start = end;
             handles.push(handle);
         }
 
