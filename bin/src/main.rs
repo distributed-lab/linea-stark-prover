@@ -11,6 +11,7 @@ use rand::distributions::Standard;
 use rand::{thread_rng, Rng};
 use std::collections::{HashMap, HashSet};
 use std::fmt::Debug;
+use std::sync::mpsc::channel;
 use trace::{lookup::RawLookupTrace, permutation::RawPermutationTrace, RawTrace};
 use tracing_forest::util::LevelFilter;
 use tracing_forest::ForestLayer;
@@ -49,19 +50,42 @@ fn main() {
         permutation_traces[trace.get_max_height().ilog2() as usize].push(trace);
     }
 
-    //let cfgs = raw_trace.push_traces(permutation_traces, lookup_traces);
+    // let cfgs = raw_trace.push_traces(permutation_traces, lookup_traces);
 
-    for i in 0..32 {
-        let permutation_trace = permutation_traces.pop().unwrap();
-        let lookup_trace = lookup_traces.pop().unwrap();
+    // for i in 0..32 {
+    //     let permutation_trace = permutation_traces.pop().unwrap();
+    //     let lookup_trace = lookup_traces.pop().unwrap();
+    //
+    //     if !permutation_trace.is_empty() || !lookup_trace.is_empty() {
+    //         println!("Proving for height 2^{}: {}x lookups, {}x perms", 31 - i, lookup_trace.len(), permutation_trace.len());
+    //         prove_linea(
+    //             vec![alpha_challenge, delta_challenge],
+    //             permutation_trace,
+    //             lookup_trace,
+    //         );
+    //     }
+    // }
 
-        if !permutation_trace.is_empty() || !lookup_trace.is_empty() {
-            println!("Proving for height 2^{}: {}x lookups, {}x perms", 31 - i, lookup_trace.len(), permutation_trace.len());
-            prove_linea(
-                vec![alpha_challenge, delta_challenge],
-                permutation_trace,
-                lookup_trace,
-            );
-        }
+    let height_log = 18;
+    let lookup_trace = lookup_traces[height_log].clone();
+    let chunk_num = 3;
+
+    println!("Proving for height 2^{}: {}x lookups, {} chunks", height_log, lookup_trace.len(), chunk_num);
+
+    let mut start = 0;
+    let chunk_size = lookup_trace.len()/chunk_num;
+    let remainder = lookup_trace.len() % chunk_num;
+    for i in 0..chunk_num {
+        let extra = if i < remainder { 1 } else { 0 };
+        let end = start + chunk_size + extra;
+
+        println!("Proving {} elements ({}/{})", end - start, i+1, chunk_num);
+        prove_linea(
+            vec![alpha_challenge, delta_challenge],
+            vec![],
+            lookup_trace[start..end].to_vec(),
+        );
+
+        start = end;
     }
 }
