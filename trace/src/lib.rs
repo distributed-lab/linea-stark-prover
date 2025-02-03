@@ -1,8 +1,10 @@
 pub mod lookup;
 pub mod permutation;
+pub mod range;
 
 use crate::lookup::RawLookupTrace;
 use crate::permutation::RawPermutationTrace;
+use crate::range::RawRangeTrace;
 use air::air_lookup::AirLookupConfig;
 use air::air_permutation::AirPermutationConfig;
 use air::AirConfig;
@@ -28,10 +30,18 @@ impl RawTrace {
             challenges,
         }
     }
-    pub fn resize(&mut self, new_size: usize) {
-        for e in &mut self.columns {
-            e.resize(new_size, Bls12_377Fr::ZERO);
-        }
+
+    pub fn push_range(&mut self, range: RawRangeTrace) -> AirConfig {
+        let mut r = range.clone();
+
+        // Resize trace according to the max height
+        r.resize(self.height);
+
+        let (mut cfg, mut lookup_columns) = r.get_trace(self.challenges.clone());
+        cfg.shift(self.columns.len());
+        self.columns.append(&mut lookup_columns);
+
+        AirConfig::Lookup(cfg)
     }
 
     pub fn push_lookup(&mut self, lookup: RawLookupTrace) -> AirConfig {
@@ -63,7 +73,14 @@ impl RawTrace {
         &mut self,
         permutation_traces: Vec<RawPermutationTrace>,
         lookup_traces: Vec<RawLookupTrace>,
+        range_traces: Vec<RawRangeTrace>,
     ) -> Vec<AirConfig> {
+        // Get max height of all range traces.
+        let mut range_max_height = 0;
+        range_traces.iter().for_each(|rt| {
+            range_max_height = max(range_max_height, rt.get_max_height());
+        });
+
         // Get max height of all lookup traces.
         let mut lookup_max_height = 0;
         lookup_traces.iter().for_each(|lt| {
@@ -77,9 +94,13 @@ impl RawTrace {
         });
 
         // Get trace max height.
-        self.height = max(permutation_max_height, lookup_max_height);
+        self.height = max(max(permutation_max_height, lookup_max_height), range_max_height);
 
         let mut cfgs = Vec::new();
+        range_traces.iter().for_each(|rt| {
+            cfgs.push(self.push_range(rt.clone()));
+        });
+
         lookup_traces.iter().for_each(|lt| {
             cfgs.push(self.push_lookup(lt.clone()));
         });

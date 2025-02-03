@@ -43,9 +43,12 @@ impl RawLookupTrace {
         raw_trace
     }
 
-    pub(crate) fn get_trace(
-        &mut self,
+    pub(crate) fn get_trace_from_columns(
         challenges: Vec<Bls12_377Fr>,
+        a: Vec<Vec<Bls12_377Fr>>,
+        b: Vec<Vec<Vec<Bls12_377Fr>>>,
+        a_filter: Vec<Bls12_377Fr>,
+        b_filter: Vec<Vec<Bls12_377Fr>>,
     ) -> (AirLookupConfig, Vec<Vec<Bls12_377Fr>>) {
         assert_eq!(
             challenges.len(),
@@ -55,9 +58,6 @@ impl RawLookupTrace {
 
         // Unpack challenges
         let (alpha, delta) = (challenges[0], challenges[1]);
-
-        // a columns, b columns, and corresponding filters
-        let (a, mut b, a_filter, b_filter) = self.get_columns();
 
         // Resulting trace in one-dimensional array
         let mut res: Vec<Vec<Bls12_377Fr>> = Vec::new();
@@ -172,11 +172,20 @@ impl RawLookupTrace {
         res.append(&mut multiplicities_table);
         res.push(prefix_sum_column);
 
-        (self.get_air_lookup_config(a, b), res)
+        (Self::get_air_lookup_config(a, b), res)
+    }
+
+    pub(crate) fn get_trace(
+        &mut self,
+        challenges: Vec<Bls12_377Fr>,
+    ) -> (AirLookupConfig, Vec<Vec<Bls12_377Fr>>) {
+        // a columns, b columns, and corresponding filters
+        let (a, b, a_filter, b_filter) = self.get_columns();
+
+        Self::get_trace_from_columns(challenges, a, b, a_filter, b_filter)
     }
 
     fn get_air_lookup_config(
-        &self,
         a: Vec<Vec<Bls12_377Fr>>,
         b: Vec<Vec<Vec<Bls12_377Fr>>>,
     ) -> AirLookupConfig {
@@ -228,7 +237,7 @@ impl RawLookupTrace {
         max_height
     }
 
-    pub fn resize(&mut self, size: usize) {
+    pub(crate) fn resize(&mut self, size: usize) {
         for e in &mut self.a {
             e.resize(size, [0u8; 32]);
         }
@@ -246,7 +255,7 @@ impl RawLookupTrace {
         }
     }
 
-    pub fn get_columns(
+    fn get_columns(
         &mut self,
     ) -> (
         Vec<Vec<Bls12_377Fr>>,

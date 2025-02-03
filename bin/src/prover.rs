@@ -6,16 +6,18 @@ use p3_uni_stark::verify;
 use rand::thread_rng;
 use trace::lookup::RawLookupTrace;
 use trace::permutation::RawPermutationTrace;
+use trace::range::RawRangeTrace;
 use trace::RawTrace;
 
 pub fn prove_linea(
     challenges: Vec<Bls12_377Fr>,
     permutation_traces: Vec<RawPermutationTrace>,
     lookup_traces: Vec<RawLookupTrace>,
+    range_traces: Vec<RawRangeTrace>,
 ) {
     let mut raw_trace = RawTrace::new(challenges.clone());
 
-    let cfgs = raw_trace.push_traces(permutation_traces, lookup_traces);
+    let cfgs = raw_trace.push_traces(permutation_traces, lookup_traces, range_traces);
 
     // TODO: should not be just random
     let mut rng = thread_rng();

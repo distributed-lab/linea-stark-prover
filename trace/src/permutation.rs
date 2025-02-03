@@ -21,7 +21,7 @@ impl RawPermutationTrace {
         raw_trace
     }
 
-    pub fn get_trace(
+    pub(crate) fn get_trace(
         &self,
         challenges: Vec<Bls12_377Fr>,
     ) -> (AirPermutationConfig, Vec<Vec<Bls12_377Fr>>) {
@@ -92,7 +92,7 @@ impl RawPermutationTrace {
         )
     }
 
-    pub fn get_columns(&self) -> (Vec<Vec<Bls12_377Fr>>, Vec<Vec<Bls12_377Fr>>) {
+    fn get_columns(&self) -> (Vec<Vec<Bls12_377Fr>>, Vec<Vec<Bls12_377Fr>>) {
         let mut a: Vec<Vec<Bls12_377Fr>> = Vec::new();
         let mut b: Vec<Vec<Bls12_377Fr>> = Vec::new();
 
@@ -131,7 +131,7 @@ impl RawPermutationTrace {
         max_height
     }
 
-    pub fn resize(&mut self, size: usize) {
+    pub(crate) fn resize(&mut self, size: usize) {
         for e in &mut self.a {
             e.resize(size, [0u8; 32]);
         }
