@@ -8,6 +8,7 @@ use p3_uni_stark::{prove, verify};
 use rand::distributions::Standard;
 use rand::{thread_rng, Rng};
 use std::collections::HashSet;
+use std::env;
 use std::fmt::Debug;
 use trace::{lookup::RawLookupTrace, permutation::RawPermutationTrace, RawTrace};
 use tracing_forest::util::LevelFilter;
@@ -15,6 +16,8 @@ use tracing_forest::ForestLayer;
 use tracing_subscriber::layer::SubscriberExt;
 use tracing_subscriber::util::SubscriberInitExt;
 use tracing_subscriber::{EnvFilter, Registry};
+
+const THREADS_NUM_ENV: &str = "THREADS_NUM";
 
 fn main() -> Result<(), impl Debug> {
     let env_filter = EnvFilter::builder()
@@ -26,6 +29,8 @@ fn main() -> Result<(), impl Debug> {
         .with(ForestLayer::default())
         .init();
 
+    let threads_num = env::var(THREADS_NUM_ENV).map_or_else(|_| 1_u32, |t| u32::from_str_radix(&t, 10).unwrap());
+
     let mut rng = thread_rng();
     let alpha_challenge = rng.sample(Standard {});
     let delta_challenge = rng.sample(Standard {});
@@ -34,13 +39,24 @@ fn main() -> Result<(), impl Debug> {
 
     let mut raw_trace = RawTrace::new(vec![alpha_challenge, delta_challenge]);
 
-    let lookup_traces = vec![
-        RawLookupTrace::read_file("../lookup_0.bin"),
+    let mut lookup_traces = vec![];
+    let lookup_traces_num = 5;
+
+    for i in 0..lookup_traces_num {
+        let name = format!("../traces/lookup_{}.bin", i);
+        println!("Reading {}", name);
+        lookup_traces.push(RawLookupTrace::read_file(&name));
+    }
+
+    println!("Reading permutation file");
+
+    let permutation_traces = vec![
+        RawPermutationTrace::read_file("../traces/permutation_0.bin")
     ];
 
-    let permutation_traces = vec![];
+    println!("Done reading files");
 
-    let cfgs = raw_trace.push_traces(permutation_traces, lookup_traces);
+    let cfgs = raw_trace.push_traces(permutation_traces, lookup_traces, threads_num as usize);
 
     // -----------------------------------------------------------
 
