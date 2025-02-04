@@ -7,9 +7,9 @@ edition = "2021"
 p3-air          = { workspace = true }
 p3-field        = { workspace = true }
 p3-matrix       = { workspace = true }
-p3-bls12-377-fr = { workspace = true }
+p3-bls12-377-fr = { workspace = true,features = ["asm"] }
 
-ark-ff   = { workspace = true }
+ark-ff   = { workspace = true, features = ["asm"] }
 serde    = { workspace = true, features = ["derive"] }
 ciborium = { workspace = true }
 

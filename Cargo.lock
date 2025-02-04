@@ -50,8 +50,7 @@ dependencies = [
 [[package]]
 name = "ark-bls12-377"
 version = "0.5.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "bfedac3173d12820a5e0d6cd4de31b49719a74f4a41dc09b6652d0276a3b2cd4"
+source = "git+https://github.com/distributed-lab/algebra.git?branch=master#e714cbe7d9048045757f61aa6d150f7232120079"
 dependencies = [
  "ark-ec",
  "ark-ff",
@@ -61,8 +60,7 @@ dependencies = [
 [[package]]
 name = "ark-ec"
 version = "0.5.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "43d68f2d516162846c1238e755a7c4d131b892b70cc70c471a8e3ca3ed818fce"
+source = "git+https://github.com/distributed-lab/algebra.git?branch=master#e714cbe7d9048045757f61aa6d150f7232120079"
 dependencies = [
  "ahash",
  "ark-ff",
@@ -82,8 +80,7 @@ dependencies = [
 [[package]]
 name = "ark-ff"
 version = "0.5.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a177aba0ed1e0fbb62aa9f6d0502e9b46dad8c2eab04c14258a1212d2557ea70"
+source = "git+https://github.com/distributed-lab/algebra.git?branch=master#e714cbe7d9048045757f61aa6d150f7232120079"
 dependencies = [
  "ark-ff-asm",
  "ark-ff-macros",
@@ -102,8 +99,7 @@ dependencies = [
 [[package]]
 name = "ark-ff-asm"
 version = "0.5.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "62945a2f7e6de02a31fe400aa489f0e0f5b2502e69f95f853adb82a96c7a6b60"
+source = "git+https://github.com/distributed-lab/algebra.git?branch=master#e714cbe7d9048045757f61aa6d150f7232120079"
 dependencies = [
  "quote",
  "syn",
@@ -112,8 +108,7 @@ dependencies = [
 [[package]]
 name = "ark-ff-macros"
 version = "0.5.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "09be120733ee33f7693ceaa202ca41accd5653b779563608f1234f78ae07c4b3"
+source = "git+https://github.com/distributed-lab/algebra.git?branch=master#e714cbe7d9048045757f61aa6d150f7232120079"
 dependencies = [
  "num-bigint",
  "num-traits",
@@ -125,8 +120,7 @@ dependencies = [
 [[package]]
 name = "ark-poly"
 version = "0.5.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "579305839da207f02b89cd1679e50e67b4331e2f9294a57693e5051b7703fe27"
+source = "git+https://github.com/distributed-lab/algebra.git?branch=master#e714cbe7d9048045757f61aa6d150f7232120079"
 dependencies = [
  "ahash",
  "ark-ff",
@@ -140,8 +134,7 @@ dependencies = [
 [[package]]
 name = "ark-serialize"
 version = "0.5.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "3f4d068aaf107ebcd7dfb52bc748f8030e0fc930ac8e360146ca54c1203088f7"
+source = "git+https://github.com/distributed-lab/algebra.git?branch=master#e714cbe7d9048045757f61aa6d150f7232120079"
 dependencies = [
  "ark-serialize-derive",
  "ark-std",
@@ -153,8 +146,7 @@ dependencies = [
 [[package]]
 name = "ark-serialize-derive"
 version = "0.5.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "213888f660fddcca0d257e88e54ac05bca01885f258ccdf695bafd77031bb69d"
+source = "git+https://github.com/distributed-lab/algebra.git?branch=master#e714cbe7d9048045757f61aa6d150f7232120079"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -188,23 +180,16 @@ name = "bin"
 version = "0.1.0"
 dependencies = [
  "air",
- "ark-ff",
- "ciborium",
- "num-bigint",
- "p3-air",
  "p3-bls12-377-fr",
  "p3-challenger",
- "p3-commit",
  "p3-dft",
  "p3-field",
  "p3-fri",
- "p3-matrix",
  "p3-maybe-rayon",
  "p3-merkle-tree",
  "p3-symmetric",
  "p3-uni-stark",
  "rand",
- "serde",
  "trace",
  "tracing-forest",
  "tracing-subscriber",
@@ -454,7 +439,6 @@ dependencies = [
  "num-integer",
  "num-traits",
  "rand",
- "serde",
 ]
 
 [[package]]
@@ -502,7 +486,7 @@ checksum = "b15813163c1d831bf4a13c3610c05c0d03b39feb07f7e09fa234dac9b15aaf39"
 [[package]]
 name = "p3-air"
 version = "0.1.0"
-source = "git+https://github.com/distributed-lab/Plonky3/?branch=main#f888f9014203e321371b7088cac0569769b2fb77"
+source = "git+https://github.com/distributed-lab/Plonky3/?branch=main#463faba1abe1494be705296d74859d18a58cd866"
 dependencies = [
  "p3-field",
  "p3-matrix",
@@ -511,7 +495,7 @@ dependencies = [
 [[package]]
 name = "p3-bls12-377-fr"
 version = "0.1.0"
-source = "git+https://github.com/distributed-lab/Plonky3/?branch=main#f888f9014203e321371b7088cac0569769b2fb77"
+source = "git+https://github.com/distributed-lab/Plonky3/?branch=main#463faba1abe1494be705296d74859d18a58cd866"
 dependencies = [
  "ark-bls12-377",
  "ark-ff",
@@ -528,7 +512,7 @@ dependencies = [
 [[package]]
 name = "p3-challenger"
 version = "0.1.0"
-source = "git+https://github.com/distributed-lab/Plonky3/?branch=main#f888f9014203e321371b7088cac0569769b2fb77"
+source = "git+https://github.com/distributed-lab/Plonky3/?branch=main#463faba1abe1494be705296d74859d18a58cd866"
 dependencies = [
  "p3-field",
  "p3-maybe-rayon",
@@ -540,7 +524,7 @@ dependencies = [
 [[package]]
 name = "p3-commit"
 version = "0.1.0"
-source = "git+https://github.com/distributed-lab/Plonky3/?branch=main#f888f9014203e321371b7088cac0569769b2fb77"
+source = "git+https://github.com/distributed-lab/Plonky3/?branch=main#463faba1abe1494be705296d74859d18a58cd866"
 dependencies = [
  "itertools",
  "p3-challenger",
@@ -554,7 +538,7 @@ dependencies = [
 [[package]]
 name = "p3-dft"
 version = "0.1.0"
-source = "git+https://github.com/distributed-lab/Plonky3/?branch=main#f888f9014203e321371b7088cac0569769b2fb77"
+source = "git+https://github.com/distributed-lab/Plonky3/?branch=main#463faba1abe1494be705296d74859d18a58cd866"
 dependencies = [
  "itertools",
  "p3-field",
@@ -567,7 +551,7 @@ dependencies = [
 [[package]]
 name = "p3-field"
 version = "0.1.0"
-source = "git+https://github.com/distributed-lab/Plonky3/?branch=main#f888f9014203e321371b7088cac0569769b2fb77"
+source = "git+https://github.com/distributed-lab/Plonky3/?branch=main#463faba1abe1494be705296d74859d18a58cd866"
 dependencies = [
  "itertools",
  "num-bigint",
@@ -584,7 +568,7 @@ dependencies = [
 [[package]]
 name = "p3-fri"
 version = "0.1.0"
-source = "git+https://github.com/distributed-lab/Plonky3/?branch=main#f888f9014203e321371b7088cac0569769b2fb77"
+source = "git+https://github.com/distributed-lab/Plonky3/?branch=main#463faba1abe1494be705296d74859d18a58cd866"
 dependencies = [
  "itertools",
  "p3-challenger",
@@ -603,7 +587,7 @@ dependencies = [
 [[package]]
 name = "p3-interpolation"
 version = "0.1.0"
-source = "git+https://github.com/distributed-lab/Plonky3/?branch=main#f888f9014203e321371b7088cac0569769b2fb77"
+source = "git+https://github.com/distributed-lab/Plonky3/?branch=main#463faba1abe1494be705296d74859d18a58cd866"
 dependencies = [
  "p3-field",
  "p3-matrix",
@@ -614,7 +598,7 @@ dependencies = [
 [[package]]
 name = "p3-matrix"
 version = "0.1.0"
-source = "git+https://github.com/distributed-lab/Plonky3/?branch=main#f888f9014203e321371b7088cac0569769b2fb77"
+source = "git+https://github.com/distributed-lab/Plonky3/?branch=main#463faba1abe1494be705296d74859d18a58cd866"
 dependencies = [
  "itertools",
  "p3-field",
@@ -629,7 +613,7 @@ dependencies = [
 [[package]]
 name = "p3-maybe-rayon"
 version = "0.1.0"
-source = "git+https://github.com/distributed-lab/Plonky3/?branch=main#f888f9014203e321371b7088cac0569769b2fb77"
+source = "git+https://github.com/distributed-lab/Plonky3/?branch=main#463faba1abe1494be705296d74859d18a58cd866"
 dependencies = [
  "rayon",
 ]
@@ -637,7 +621,7 @@ dependencies = [
 [[package]]
 name = "p3-mds"
 version = "0.1.0"
-source = "git+https://github.com/distributed-lab/Plonky3/?branch=main#f888f9014203e321371b7088cac0569769b2fb77"
+source = "git+https://github.com/distributed-lab/Plonky3/?branch=main#463faba1abe1494be705296d74859d18a58cd866"
 dependencies = [
  "itertools",
  "p3-dft",
@@ -651,7 +635,7 @@ dependencies = [
 [[package]]
 name = "p3-merkle-tree"
 version = "0.1.0"
-source = "git+https://github.com/distributed-lab/Plonky3/?branch=main#f888f9014203e321371b7088cac0569769b2fb77"
+source = "git+https://github.com/distributed-lab/Plonky3/?branch=main#463faba1abe1494be705296d74859d18a58cd866"
 dependencies = [
  "itertools",
  "p3-commit",
@@ -668,7 +652,7 @@ dependencies = [
 [[package]]
 name = "p3-poseidon2"
 version = "0.1.0"
-source = "git+https://github.com/distributed-lab/Plonky3/?branch=main#f888f9014203e321371b7088cac0569769b2fb77"
+source = "git+https://github.com/distributed-lab/Plonky3/?branch=main#463faba1abe1494be705296d74859d18a58cd866"
 dependencies = [
  "gcd",
  "p3-field",
@@ -680,7 +664,7 @@ dependencies = [
 [[package]]
 name = "p3-symmetric"
 version = "0.1.0"
-source = "git+https://github.com/distributed-lab/Plonky3/?branch=main#f888f9014203e321371b7088cac0569769b2fb77"
+source = "git+https://github.com/distributed-lab/Plonky3/?branch=main#463faba1abe1494be705296d74859d18a58cd866"
 dependencies = [
  "itertools",
  "p3-field",
@@ -690,7 +674,7 @@ dependencies = [
 [[package]]
 name = "p3-uni-stark"
 version = "0.1.0"
-source = "git+https://github.com/distributed-lab/Plonky3/?branch=main#f888f9014203e321371b7088cac0569769b2fb77"
+source = "git+https://github.com/distributed-lab/Plonky3/?branch=main#463faba1abe1494be705296d74859d18a58cd866"
 dependencies = [
  "itertools",
  "p3-air",
@@ -708,7 +692,7 @@ dependencies = [
 [[package]]
 name = "p3-util"
 version = "0.1.0"
-source = "git+https://github.com/distributed-lab/Plonky3/?branch=main#f888f9014203e321371b7088cac0569769b2fb77"
+source = "git+https://github.com/distributed-lab/Plonky3/?branch=main#463faba1abe1494be705296d74859d18a58cd866"
 dependencies = [
  "serde",
 ]
@@ -889,9 +873,9 @@ checksum = "fe895eb47f22e2ddd4dabc02bce419d2e643c8e3b585c78158b349195bc24d82"
 
 [[package]]
 name = "syn"
-version = "2.0.96"
+version = "2.0.98"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d5d0adab1ae378d7f53bdebc67a39f1f151407ef230f0ce2883572f5d8985c80"
+checksum = "36147f1a48ae0ec2b5b3bc5b537d267457555a10dc06f3dbc8cb11ba3006d3b1"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -1034,9 +1018,9 @@ checksum = "42ff0bf0c66b8238c6f3b578df37d0b7848e55df8577b3f74f92a69acceeb825"
 
 [[package]]
 name = "unicode-ident"
-version = "1.0.15"
+version = "1.0.16"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "11cd88e12b17c6494200a9c1b683a04fcac9573ed74cd1b62aeb2727c5592243"
+checksum = "a210d160f08b701c8721ba1c726c11662f877ea6b7094007e1ca9a1041945034"
 
 [[package]]
 name = "valuable"
