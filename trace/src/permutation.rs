@@ -1,6 +1,6 @@
+use crate::util::decode_be32;
 use air::air_permutation::AirPermutationConfig;
-use ark_ff::PrimeField;
-use p3_bls12_377_fr::{Bls12_377Fr, FF_Bls12_377Fr};
+use p3_bls12_377_fr::{Bls12_377Fr, Scalar};
 use p3_field::{Field, FieldAlgebra};
 use serde::{Deserialize, Serialize};
 use std::cmp::max;
@@ -99,18 +99,14 @@ impl RawPermutationTrace {
         for i in 0..self.a.len() {
             a.push(Vec::new());
             for j in 0..self.a[i].len() {
-                a[i].push(Bls12_377Fr::new(FF_Bls12_377Fr::from_be_bytes_mod_order(
-                    self.a[i][j].as_slice(),
-                )));
+                a[i].push(Bls12_377Fr::new(decode_be32(self.a[i][j])));
             }
         }
 
         for i in 0..self.b.len() {
             b.push(Vec::new());
             for j in 0..self.b[i].len() {
-                b[i].push(Bls12_377Fr::new(FF_Bls12_377Fr::from_be_bytes_mod_order(
-                    self.b[i][j].as_slice(),
-                )));
+                b[i].push(Bls12_377Fr::new(decode_be32(self.b[i][j])));
             }
         }
 

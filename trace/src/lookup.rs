@@ -1,6 +1,6 @@
+use crate::util::decode_be32;
 use air::air_lookup::AirLookupConfig;
-use ark_ff::PrimeField;
-use p3_bls12_377_fr::{Bls12_377Fr, FF_Bls12_377Fr};
+use p3_bls12_377_fr::{Bls12_377Fr, Scalar};
 use p3_field::{Field, FieldAlgebra};
 use serde::{Deserialize, Serialize};
 use std::cmp::max;
@@ -263,16 +263,12 @@ impl RawLookupTrace {
         for i in 0..self.a.len() {
             a.push(Vec::new());
             for j in 0..self.a[i].len() {
-                a[i].push(Bls12_377Fr::new(FF_Bls12_377Fr::from_be_bytes_mod_order(
-                    self.a[i][j].as_slice(),
-                )));
+                a[i].push(Bls12_377Fr::new(decode_be32(self.a[i][j])));
             }
         }
 
         for i in 0..self.a[0].len() {
-            a_filter.push(Bls12_377Fr::new(FF_Bls12_377Fr::from_be_bytes_mod_order(
-                self.a_filter[i].as_slice(),
-            )));
+            a_filter.push(Bls12_377Fr::new(decode_be32(self.a_filter[i])));
         }
 
         for i in 0..self.b.len() {
@@ -282,18 +278,14 @@ impl RawLookupTrace {
             for j in 0..self.b[i].len() {
                 b[i].push(Vec::new());
                 for k in 0..self.b[i][j].len() {
-                    b[i][j].push(Bls12_377Fr::new(FF_Bls12_377Fr::from_be_bytes_mod_order(
-                        self.b[i][j][k].as_slice(),
-                    )));
+                    b[i][j].push(Bls12_377Fr::new(decode_be32(self.b[i][j][k])));
                 }
             }
         }
 
         for i in 0..self.b.len() {
             for j in 0..self.b[i][0].len() {
-                b_filter[i].push(Bls12_377Fr::new(FF_Bls12_377Fr::from_be_bytes_mod_order(
-                    self.b_filter[i][j].as_slice(),
-                )));
+                b_filter[i].push(Bls12_377Fr::new(decode_be32(self.b_filter[i][j])));
             }
         }
 

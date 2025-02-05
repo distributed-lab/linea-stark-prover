@@ -1,12 +1,10 @@
 pub mod lookup;
 pub mod permutation;
+mod util;
 
 use crate::lookup::RawLookupTrace;
 use crate::permutation::RawPermutationTrace;
-use air::air_lookup::AirLookupConfig;
-use air::air_permutation::AirPermutationConfig;
 use air::AirConfig;
-use ark_ff::PrimeField;
 use p3_air::Air;
 use p3_bls12_377_fr::Bls12_377Fr;
 use p3_field::{Field, FieldAlgebra};
