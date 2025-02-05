@@ -23,7 +23,9 @@ use tracing_subscriber::{EnvFilter, Registry};
 const TRACE_GEN_THREADS_NUM: &str = "TRACE_GEN_THREADS_NUM";
 
 fn main() {
-    let threads_num = env::var(TRACE_GEN_THREADS_NUM).map(|thr_string| thr_string.parse::<usize>().unwrap()).unwrap_or_else(|_| 1);
+    let threads_num = env::var(TRACE_GEN_THREADS_NUM)
+        .map(|thr_string| thr_string.parse::<usize>().unwrap())
+        .unwrap_or_else(|_| 1);
 
     let env_filter = EnvFilter::builder()
         .with_default_directive(LevelFilter::INFO.into())
@@ -61,12 +63,17 @@ fn main() {
         // let lookup_trace = lookup_traces.pop().unwrap();
 
         if !permutation_trace.is_empty() || !lookup_trace.is_empty() {
-            println!("Proving for height 2^{}: {}x lookups, {}x perms", i, lookup_trace.len(), permutation_trace.len());
+            println!(
+                "Proving for height 2^{}: {}x lookups, {}x perms",
+                i,
+                lookup_trace.len(),
+                permutation_trace.len()
+            );
             prove_linea(
                 vec![alpha_challenge, delta_challenge],
                 permutation_trace,
                 lookup_trace,
-                threads_num
+                threads_num,
             );
         }
     }

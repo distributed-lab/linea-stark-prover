@@ -4,6 +4,7 @@ mod util;
 
 use crate::lookup::RawLookupTrace;
 use crate::permutation::RawPermutationTrace;
+use air::air_lookup::AirLookupConfig;
 use air::AirConfig;
 use p3_air::Air;
 use p3_bls12_377_fr::Bls12_377Fr;
@@ -13,7 +14,6 @@ use serde::{Deserialize, Serialize};
 use std::cmp::max;
 use std::sync::{Arc, Mutex};
 use std::thread;
-use air::air_lookup::AirLookupConfig;
 
 pub struct RawTrace {
     pub columns: Vec<Vec<Bls12_377Fr>>,
@@ -64,7 +64,7 @@ impl RawTrace {
         &mut self,
         permutation_traces: Vec<RawPermutationTrace>,
         lookup_traces: Vec<RawLookupTrace>,
-        thread_count: usize
+        thread_count: usize,
     ) -> Vec<AirConfig> {
         // Get max height of all lookup traces.
         let mut lookup_max_height = 0;
@@ -83,7 +83,48 @@ impl RawTrace {
 
         let mut cfgs = Vec::new();
 
-        let processed: Arc<Mutex<Vec<(AirLookupConfig, Vec<Vec<Bls12_377Fr>>)>>> = Arc::new(Mutex::new(Vec::new()));
+        let processed = self.gen_lookup_trace_parallel(lookup_traces, thread_count);
+
+        processed
+            .lock()
+            .unwrap()
+            .iter()
+            .for_each(|(lc, lookup_columns)| {
+                let mut cfg = lc.clone();
+                cfg.shift(self.columns.len());
+
+                self.columns.append(&mut lookup_columns.clone());
+                cfgs.push(AirConfig::Lookup(cfg))
+            });
+
+        permutation_traces.iter().for_each(|pt| {
+            cfgs.push(self.push_permutation(pt.clone()));
+        });
+
+        cfgs
+    }
+
+    pub fn get_trace(&self) -> RowMajorMatrix<Bls12_377Fr> {
+        let width = self.columns.len();
+        // The final trace
+        let mut values = vec![];
+
+        for row in 0..self.height {
+            for col in 0..width {
+                values.push(self.columns[col][row]);
+            }
+        }
+
+        RowMajorMatrix::new(values, width)
+    }
+
+    pub fn gen_lookup_trace_parallel(
+        &self,
+        lookup_traces: Vec<RawLookupTrace>,
+        thread_count: usize,
+    ) -> Arc<Mutex<Vec<(AirLookupConfig, Vec<Vec<Bls12_377Fr>>)>>> {
+        let processed: Arc<Mutex<Vec<(AirLookupConfig, Vec<Vec<Bls12_377Fr>>)>>> =
+            Arc::new(Mutex::new(Vec::new()));
 
         // let thread_count = lookup_traces.len().min(thread_count);
         let data = Arc::new(lookup_traces.clone());
@@ -119,7 +160,7 @@ impl RawTrace {
 
             handles.push(handle);
             if end == lookup_traces.len() {
-                break
+                break;
             }
             start = end;
         }
@@ -129,32 +170,6 @@ impl RawTrace {
             handle.join().expect("Thread panicked");
         }
 
-        processed.lock().unwrap().iter().for_each(|(lc, lookup_columns)| {
-            let mut cfg = lc.clone();
-            cfg.shift(self.columns.len());
-
-            self.columns.append(&mut lookup_columns.clone());
-            cfgs.push(AirConfig::Lookup(cfg))
-        });
-
-        permutation_traces.iter().for_each(|pt| {
-            cfgs.push(self.push_permutation(pt.clone()));
-        });
-
-        cfgs
-    }
-
-    pub fn get_trace(&self) -> RowMajorMatrix<Bls12_377Fr> {
-        let width = self.columns.len();
-        // The final trace
-        let mut values = vec![];
-
-        for row in 0..self.height {
-            for col in 0..width {
-                values.push(self.columns[col][row]);
-            }
-        }
-
-        RowMajorMatrix::new(values, width)
+        processed
     }
 }
