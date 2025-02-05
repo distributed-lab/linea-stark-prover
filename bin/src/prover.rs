@@ -12,10 +12,11 @@ pub fn prove_linea(
     challenges: Vec<Bls12_377Fr>,
     permutation_traces: Vec<RawPermutationTrace>,
     lookup_traces: Vec<RawLookupTrace>,
+    threads_count: usize,
 ) {
     let mut raw_trace = RawTrace::new(challenges.clone());
 
-    let cfgs = raw_trace.push_traces(permutation_traces, lookup_traces);
+    let cfgs = raw_trace.push_traces(permutation_traces, lookup_traces, threads_count);
 
     // TODO: should not be just random
     let mut rng = thread_rng();

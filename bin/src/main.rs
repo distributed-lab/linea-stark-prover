@@ -10,6 +10,7 @@ use p3_uni_stark::{prove, verify};
 use rand::distributions::Standard;
 use rand::{thread_rng, Rng};
 use std::collections::{HashMap, HashSet};
+use std::env;
 use std::fmt::Debug;
 use std::sync::mpsc::channel;
 use trace::{lookup::RawLookupTrace, permutation::RawPermutationTrace, RawTrace};
@@ -19,7 +20,11 @@ use tracing_subscriber::layer::SubscriberExt;
 use tracing_subscriber::util::SubscriberInitExt;
 use tracing_subscriber::{EnvFilter, Registry};
 
+const TRACE_GEN_THREADS_NUM: &str = "TRACE_GEN_THREADS_NUM";
+
 fn main() {
+    let threads_num = env::var(TRACE_GEN_THREADS_NUM).map(|thr_string| thr_string.parse::<usize>().unwrap()).unwrap_or_else(|_| 1);
+
     let env_filter = EnvFilter::builder()
         .with_default_directive(LevelFilter::INFO.into())
         .from_env_lossy();
@@ -40,28 +45,28 @@ fn main() {
     let mut lookup_traces: Vec<Vec<RawLookupTrace>> = vec![vec![]; 32];
     let mut permutation_traces: Vec<Vec<RawPermutationTrace>> = vec![vec![]; 32];
 
-    for i in 0..1 {
-        let trace = RawLookupTrace::read_file(&format!("../lookup_{}.bin", i));
+    for i in 0..20 {
+        let trace = RawLookupTrace::read_file(&format!("../traces/lookup_{}.bin", i));
         lookup_traces[trace.get_max_height().ilog2() as usize].push(trace);
     }
 
     for i in 0..1 {
-        let trace = RawPermutationTrace::read_file(&format!("../permutation_{}.bin", i));
+        let trace = RawPermutationTrace::read_file(&format!("../traces/permutation_{}.bin", i));
         permutation_traces[trace.get_max_height().ilog2() as usize].push(trace);
     }
 
-    // let cfgs = raw_trace.push_traces(permutation_traces, lookup_traces);
-
     for i in 0..32 {
         let permutation_trace = permutation_traces.pop().unwrap();
-        let lookup_trace = lookup_traces.pop().unwrap();
+        let lookup_trace = lookup_traces[i].clone();
+        // let lookup_trace = lookup_traces.pop().unwrap();
 
         if !permutation_trace.is_empty() || !lookup_trace.is_empty() {
-            println!("Proving for height 2^{}: {}x lookups, {}x perms", 31 - i, lookup_trace.len(), permutation_trace.len());
+            println!("Proving for height 2^{}: {}x lookups, {}x perms", i, lookup_trace.len(), permutation_trace.len());
             prove_linea(
                 vec![alpha_challenge, delta_challenge],
                 permutation_trace,
                 lookup_trace,
+                threads_num
             );
         }
     }
