@@ -45,16 +45,18 @@ fn main() {
             "/Users/nazarevsky/Documents/linea/new-lookup-trace/traces/lookup_no_filter_{}.bin",
             i
         )) {
-            lookup_no_filter_traces[trace.get_max_height().ilog2() as usize].push(trace);   
+            println!("Reading lookup_no_filter_{}.bin -> {}", i, trace.get_max_height().ilog2() as usize);
+            lookup_no_filter_traces[trace.get_max_height().ilog2() as usize].push(trace.clone());
         }
     }
-
+    
     for i in 0..973 {
         if let Ok(trace) = RawLookupTrace::read_file(&format!(
             "../traces/lookup_{}.bin",
             i
         )) {
-            lookup_traces[trace.get_max_height().ilog2() as usize].push(trace);
+            println!("Reading lookup_{}.bin -> {}", i, trace.get_max_height().ilog2() as usize);
+            lookup_traces[trace.get_max_height().ilog2() as usize].push(trace.clone());
         }
     }
     
@@ -63,15 +65,17 @@ fn main() {
             "../traces/permutation_{}.bin",
             i
         )) {
-            permutation_traces[trace.get_height().ilog2() as usize].push(trace);
+            println!("Reading permutation_{}.bin -> {}", i, trace.get_max_height().ilog2() as usize);
+            permutation_traces[trace.get_max_height().ilog2() as usize].push(trace);
         }
     }
+    
 
-    for i in (0..31).rev() {
-        let permutation_trace = permutation_traces.pop().unwrap();
-        let lookup_trace = lookup_traces.pop().unwrap();
-        let lookup_no_filter_trace = lookup_no_filter_traces.pop().unwrap();
-
+    for i in 0..31 {
+        let permutation_trace = permutation_traces[i].clone();
+        let lookup_trace = lookup_traces[i].clone();
+        let lookup_no_filter_trace = lookup_no_filter_traces[i].clone();
+        
         if !permutation_trace.is_empty()
             || !lookup_trace.is_empty()
             || !lookup_no_filter_trace.is_empty()

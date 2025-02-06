@@ -168,17 +168,18 @@ impl RawPermutationTrace {
         }
     }
 
-    pub fn get_height(&self) -> usize {
-        let height = self.a[0].len();
-
+    pub fn get_max_height(&self) -> usize {
+        let mut max_height = 0_usize;
         self.a.iter().for_each(|ai| {
-            assert_eq!(ai.len(), height);
+            max_height = max(max_height, ai.len());
         });
 
-        self.a.iter().for_each(|bi| {
-            assert_eq!(bi.len(), height);
+        self.b.iter().for_each(|bi| {
+            bi.iter().for_each(|bij| {
+                max_height = max(max_height, bij.len());
+            })
         });
 
-        height
+        max_height
     }
 }
