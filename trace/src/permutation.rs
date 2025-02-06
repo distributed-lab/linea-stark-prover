@@ -122,13 +122,13 @@ impl RawPermutationTrace {
     ) -> AirPermutationConfig {
         let mut a_columns_ids = Vec::new();
 
-        let next_id = || -> usize {
+        let mut next_id = || -> usize {
             columns.push(Vec::new());
             columns.len() - 1
         };
 
-        for name in self.a_ids {
-            if let Some(id) = columns_registry.get(&name) {
+        for name in &self.a_ids {
+            if let Some(id) = columns_registry.get(name) {
                 a_columns_ids.push(*id);
             } else {
                 let id = next_id();
@@ -139,8 +139,8 @@ impl RawPermutationTrace {
 
         let mut b_columns_ids = Vec::new();
 
-        for name in self.b_ids {
-            if let Some(id) = columns_registry.get(&name) {
+        for name in &self.b_ids {
+            if let Some(id) = columns_registry.get(name) {
                 b_columns_ids.push(*id);
             } else {
                 let id = next_id();
