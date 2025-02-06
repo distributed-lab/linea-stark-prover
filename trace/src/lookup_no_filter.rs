@@ -18,12 +18,12 @@ pub struct RawLookupNoFilterTrace {
 }
 
 impl RawLookupNoFilterTrace {
-    pub fn read_file(path: &str) -> Self {
-        let file_content = fs::read(path).unwrap();
-        let mut raw_trace: RawLookupNoFilterTrace =
+    pub fn read_file(path: &str) -> Result<RawLookupNoFilterTrace, std::io::Error> {
+        let file_content = fs::read(path)?;
+        let raw_trace: RawLookupNoFilterTrace =
             ciborium::from_reader(std::io::Cursor::new(file_content)).unwrap();
 
-        raw_trace
+        Ok(raw_trace)
     }
 
     pub(crate) fn set_trace(

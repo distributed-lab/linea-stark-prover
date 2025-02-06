@@ -20,12 +20,12 @@ pub struct RawLookupTrace {
 }
 
 impl RawLookupTrace {
-    pub fn read_file(path: &str) -> Self {
+    pub fn read_file(path: &str) -> Result<RawLookupTrace, String> {
         let file_content = fs::read(path).unwrap();
         let mut raw_trace: RawLookupTrace =
             ciborium::from_reader(std::io::Cursor::new(file_content)).unwrap();
 
-        raw_trace
+        Ok(raw_trace)
     }
 
     pub(crate) fn set_trace(

@@ -19,11 +19,11 @@ pub struct RawPermutationTrace {
 }
 
 impl RawPermutationTrace {
-    pub fn read_file(path: &str) -> Self {
-        let file_content = fs::read(path).unwrap();
+    pub fn read_file(path: &str) -> Result<Self, std::io::Error> {
+        let file_content = fs::read(path)?;
         let raw_trace: RawPermutationTrace =
             ciborium::from_reader(std::io::Cursor::new(file_content)).unwrap();
-        raw_trace
+        Ok(raw_trace)
     }
 
     pub fn set_trace(
