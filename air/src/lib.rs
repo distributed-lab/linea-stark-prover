@@ -1,14 +1,10 @@
-pub mod air_lookup;
-pub mod air_permutation;
-pub mod air_lookup_no_filter;
+pub mod configs;
 
-use crate::air_permutation::AirPermutationConfig;
-use air_lookup::AirLookupConfig;
 use p3_air::{Air, AirBuilder, AirBuilderWithPublicValues, BaseAir};
 use p3_field::{Field, FieldAlgebra};
 use p3_matrix::Matrix;
 use std::ops::{Add, Mul, Sub};
-use crate::air_lookup_no_filter::AirLookupNoFiltersConfig;
+use crate::configs::{AirLookupConfig, AirLookupNoFiltersConfig, AirPermutationConfig};
 
 #[derive(Clone, Debug)]
 pub enum AirConfig {
@@ -21,16 +17,6 @@ pub enum AirConfig {
     Permutation(AirPermutationConfig),
 }
 
-impl AirConfig {
-    pub fn width(&self) -> usize {
-        match self {
-            AirConfig::Lookup(l) => l.width(),
-            AirConfig::LookupNoFilters(l) => l.width(),
-            AirConfig::Permutation(p) => p.width(),
-        }
-    }
-}
-
 #[derive(Clone)]
 pub struct LineaAIR {
     configs: Vec<AirConfig>,
@@ -38,10 +24,10 @@ pub struct LineaAIR {
 }
 
 impl LineaAIR {
-    pub fn new(configs: Vec<AirConfig>) -> Self {
+    pub fn new(configs: Vec<AirConfig>, width: usize) -> Self {
         Self {
-            width: configs.iter().map(|c| c.width()).sum(),
             configs,
+            width,
         }
     }
 }
@@ -141,7 +127,7 @@ impl LineaAIR {
         // Check inverse calculated correctly
         builder.assert_eq(a_local_challenge * local[l.a_inverses_id], AB::F::ONE);
 
-        let mut local_check = local[l.a_inverses_id].into();
+        let mut local_check =  local[l.a_inverses_id].into();
         let mut next_check =  next[l.a_inverses_id].into();
 
         for (b_table_ind, b_columns_ids) in l.b_columns_ids.iter().enumerate() {

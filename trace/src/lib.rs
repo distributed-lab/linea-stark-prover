@@ -5,8 +5,6 @@ pub mod permutation;
 use crate::lookup::RawLookupTrace;
 use crate::lookup_no_filter::RawLookupNoFilterTrace;
 use crate::permutation::RawPermutationTrace;
-use air::air_lookup::AirLookupConfig;
-use air::air_permutation::AirPermutationConfig;
 use air::AirConfig;
 use ark_ff::PrimeField;
 use p3_air::Air;

@@ -1,4 +1,3 @@
-use air::air_lookup::AirLookupConfig;
 use ark_ff::PrimeField;
 use p3_bls12_377_fr::{Bls12_377Fr, FF_Bls12_377Fr};
 use p3_field::{Field, FieldAlgebra};
@@ -7,6 +6,7 @@ use std::cmp::max;
 use std::collections::HashMap;
 use std::fs;
 use std::process::id;
+use air::configs::AirLookupConfig;
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct RawLookupTrace {
@@ -20,8 +20,8 @@ pub struct RawLookupTrace {
 }
 
 impl RawLookupTrace {
-    pub fn read_file(path: &str) -> Result<RawLookupTrace, String> {
-        let file_content = fs::read(path).unwrap();
+    pub fn read_file(path: &str) -> Result<RawLookupTrace, std::io::Error> {
+        let file_content = fs::read(path)?;
         let mut raw_trace: RawLookupTrace =
             ciborium::from_reader(std::io::Cursor::new(file_content)).unwrap();
 
@@ -192,26 +192,21 @@ impl RawLookupTrace {
         columns[cfg.check_id] = prefix_sum_column.clone();
     }
 
-    pub fn get_height(&self) -> usize {
-        let height = self.a[0].len();
+    pub fn get_max_height(&self) -> usize {
+        let mut max_height = 0_usize;
         self.a.iter().for_each(|ai| {
-            assert_eq!(ai.len(), height);
+            max_height = max(max_height, ai.len());
         });
 
         self.b.iter().for_each(|bi| {
             bi.iter().for_each(|bij| {
-                assert_eq!(bij.len(), height);
+                max_height = max(max_height, bij.len());
             })
         });
 
-        assert_eq!(self.a_filter.len(), height);
-
-        self.b_filter.iter().for_each(|bi| {
-            assert_eq!(bi.len(), height);
-        });
-
-        height
+        max_height
     }
+    
     pub fn get_columns(&mut self) -> (Vec<Vec<Bls12_377Fr>>, Vec<Vec<Vec<Bls12_377Fr>>>) {
         let mut a: Vec<Vec<Bls12_377Fr>> = Vec::new();
         let mut b: Vec<Vec<Vec<Bls12_377Fr>>> = Vec::new();

@@ -40,7 +40,7 @@ fn main() {
     let mut lookup_traces: Vec<Vec<RawLookupTrace>> = vec![vec![]; 32];
     let mut permutation_traces: Vec<Vec<RawPermutationTrace>> = vec![vec![]; 32];
 
-    for i in 2..3 {
+    for i in 0..973 {
         if let Ok(trace) = RawLookupNoFilterTrace::read_file(&format!(
             "/Users/nazarevsky/Documents/linea/new-lookup-trace/traces/lookup_no_filter_{}.bin",
             i
@@ -49,23 +49,23 @@ fn main() {
         }
     }
 
-    // for i in 0..973 {
-    //     if let Ok(trace) = RawLookupTrace::read_file(&format!(
-    //         "../traces/lookup_{}.bin",
-    //         i
-    //     )) {
-    //         lookup_traces[trace.get_height().ilog2() as usize].push(trace);
-    //     }
-    // }
-    // 
-    // for i in 0..1 {
-    //     if let Ok(trace) = RawPermutationTrace::read_file(&format!(
-    //         "../traces/permutation_{}.bin",
-    //         i
-    //     )) {
-    //         permutation_traces[trace.get_height().ilog2() as usize].push(trace);
-    //     }
-    // }
+    for i in 0..973 {
+        if let Ok(trace) = RawLookupTrace::read_file(&format!(
+            "../traces/lookup_{}.bin",
+            i
+        )) {
+            lookup_traces[trace.get_max_height().ilog2() as usize].push(trace);
+        }
+    }
+    
+    for i in 0..1 {
+        if let Ok(trace) = RawPermutationTrace::read_file(&format!(
+            "../traces/permutation_{}.bin",
+            i
+        )) {
+            permutation_traces[trace.get_height().ilog2() as usize].push(trace);
+        }
+    }
 
     for i in (0..31).rev() {
         let permutation_trace = permutation_traces.pop().unwrap();

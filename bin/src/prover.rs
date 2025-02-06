@@ -49,7 +49,7 @@ pub fn prove_linea(
 
     println!("Creating LineaAir...");
 
-    let air = LineaAIR::new(cfgs);
+    let air = LineaAIR::new(cfgs, t.width);
 
     let mut challenger = Challenger::new(vec![], hash.clone());
     println!("Proving...");
@@ -57,8 +57,10 @@ pub fn prove_linea(
 
     let mut challenger = Challenger::new(vec![], hash.clone());
     println!("Verification...");
+    
+    let ver_result = verify(&config, &air, &mut challenger, &proof, &challenges.clone()).map_err(|e| println!("{:?}", e));
     assert!(
-        verify(&config, &air, &mut challenger, &proof, &challenges.clone()).is_ok(),
+        ver_result.is_ok(),
         "Verification failed"
     );
 }
