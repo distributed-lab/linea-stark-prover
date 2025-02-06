@@ -41,21 +41,37 @@ fn main() {
     let mut permutation_traces: Vec<Vec<RawPermutationTrace>> = vec![vec![]; 32];
 
     for i in 0..1 {
-        let trace = RawLookupNoFilterTrace::read_file(&format!("../lookup_no_filter_{}.bin", i));
+        let trace = RawLookupNoFilterTrace::read_file(&format!(
+            "/Users/nazarevsky/Documents/linea/new-lookup-trace/lookup_no_filter_{}.bin",
+            i
+        ));
+        println!(
+            "{}",
+            format!(
+                "/Users/nazarevsky/Documents/linea/new-lookup-trace/lookup_no_filter_{}.bin",
+                i
+            )
+        );
         lookup_no_filter_traces[trace.get_height().ilog2() as usize].push(trace);
     }
 
-    for i in 0..1 {
-        let trace = RawLookupTrace::read_file(&format!("../lookup_{}.bin", i));
+    for i in 56..57 {
+        let trace = RawLookupTrace::read_file(&format!(
+            "/Users/nazarevsky/Documents/linea/new-lookup-trace/lookup_{}.bin",
+            i
+        ));
         lookup_traces[trace.get_height().ilog2() as usize].push(trace);
     }
 
     for i in 0..1 {
-        let trace = RawPermutationTrace::read_file(&format!("../permutation_{}.bin", i));
+        let trace = RawPermutationTrace::read_file(&format!(
+            "/Users/nazarevsky/Documents/linea/new-lookup-trace/permutation_{}.bin",
+            i
+        ));
         permutation_traces[trace.get_height().ilog2() as usize].push(trace);
     }
 
-    for i in 31..0 {
+    for i in (0..31).rev() {
         let permutation_trace = permutation_traces.pop().unwrap();
         let lookup_trace = lookup_traces.pop().unwrap();
         let lookup_no_filter_trace = lookup_no_filter_traces.pop().unwrap();
@@ -65,9 +81,10 @@ fn main() {
             || !lookup_no_filter_trace.is_empty()
         {
             println!(
-                "Proving for height 2^{}: {}x lookups, {}x perms",
+                "Proving for height 2^{}: {}x lookups, {}x lookups with no filters, {}x perms",
                 i,
                 lookup_trace.len(),
+                lookup_no_filter_trace.len(),
                 permutation_trace.len()
             );
             prove_linea(
@@ -75,7 +92,7 @@ fn main() {
                 permutation_trace,
                 lookup_trace,
                 lookup_no_filter_trace,
-                1 << i,
+                1 << (i + 1),
             );
         }
     }
