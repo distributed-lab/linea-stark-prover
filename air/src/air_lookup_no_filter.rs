@@ -1,17 +1,15 @@
 #[derive(Clone, Debug)]
-pub struct AirLookupConfig {
+pub struct AirLookupNoFiltersConfig {
     pub a_columns_ids: Vec<usize>,
     pub b_columns_ids: Vec<Vec<usize>>,
-    pub a_filter_id: usize,
-    pub b_filter_id: Vec<usize>,
     pub a_inverses_id: usize,
     pub b_inverses_id: Vec<usize>,
     pub occurrences_id: Vec<usize>,
     pub check_id: usize,
 }
 
-impl AirLookupConfig {
+impl AirLookupNoFiltersConfig {
     pub fn width(&self) -> usize {
-        self.a_columns_ids.len() + self.b_columns_ids.len() * (self.b_columns_ids[0].len() + 3) + 3
+        self.a_columns_ids.len() + self.b_columns_ids.len() * (self.b_columns_ids[0].len() + 2) + 2
     }
 }

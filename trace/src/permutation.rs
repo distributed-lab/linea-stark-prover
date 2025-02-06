@@ -1,15 +1,20 @@
+use air::air_lookup::AirLookupConfig;
+use air::air_lookup_no_filter::AirLookupNoFiltersConfig;
 use air::air_permutation::AirPermutationConfig;
 use ark_ff::PrimeField;
 use p3_bls12_377_fr::{Bls12_377Fr, FF_Bls12_377Fr};
 use p3_field::{Field, FieldAlgebra};
 use serde::{Deserialize, Serialize};
 use std::cmp::max;
+use std::collections::HashMap;
 use std::fs;
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct RawPermutationTrace {
     pub a: Vec<Vec<[u8; 32]>>,
+    pub a_ids: Vec<String>,
     pub b: Vec<Vec<[u8; 32]>>,
+    pub b_ids: Vec<String>,
     pub name: String,
 }
 
@@ -21,10 +26,12 @@ impl RawPermutationTrace {
         raw_trace
     }
 
-    pub fn get_trace(
+    pub fn set_trace(
         &self,
         challenges: Vec<Bls12_377Fr>,
-    ) -> (AirPermutationConfig, Vec<Vec<Bls12_377Fr>>) {
+        columns: &mut Vec<Vec<Bls12_377Fr>>,
+        cfg: &AirPermutationConfig,
+    ) {
         assert_eq!(
             challenges.len(),
             2,
@@ -37,20 +44,21 @@ impl RawPermutationTrace {
         // a columns, b columns
         let (mut a, mut b) = self.get_columns();
 
-        let sz = a[0].len();
+        for (i, id) in cfg.a_columns_ids.iter().enumerate() {
+            columns[*id] = a[i].clone();
+        }
 
-        let width = a.len();
-
-        let mut res: Vec<Vec<Bls12_377Fr>> = Vec::new();
-
-        res.append(&mut a.clone());
-        res.append(&mut b.clone());
+        for (i, id) in cfg.b_columns_ids.iter().enumerate() {
+            columns[*id] = b[i].clone();
+        }
 
         // Prefix multiplication of the permutation terms
         let mut prev_check = Bls12_377Fr::ONE;
 
         let mut b_inverse_column = Vec::new();
         let mut perm_check_column = Vec::new();
+
+        let sz = a[0].len();
 
         for i in 0..sz {
             let mut a_row_comb = Bls12_377Fr::ZERO;
@@ -78,18 +86,8 @@ impl RawPermutationTrace {
             "failed to check constrain: check column should be 1 on the last row"
         );
 
-        res.push(b_inverse_column);
-        res.push(perm_check_column);
-
-        (
-            AirPermutationConfig {
-                a_columns_ids: (0..width).collect(),
-                b_columns_ids: (width..2 * width).collect(),
-                b_inverse_id: 2 * width,
-                check_id: 2 * width + 1,
-            },
-            res,
-        )
+        columns[cfg.b_inverse_id] = b_inverse_column;
+        columns[cfg.check_id] = perm_check_column;
     }
 
     pub fn get_columns(&self) -> (Vec<Vec<Bls12_377Fr>>, Vec<Vec<Bls12_377Fr>>) {
@@ -117,27 +115,62 @@ impl RawPermutationTrace {
         (a, b)
     }
 
-    pub fn get_max_height(&self) -> usize {
-        let mut max_height = 0_usize;
+    pub fn update_registry(
+        &self,
+        columns_registry: &mut HashMap<String, usize>,
+        columns: &mut Vec<Vec<Bls12_377Fr>>,
+    ) -> AirPermutationConfig {
+        let mut a_columns_ids = Vec::new();
 
-        self.a.iter().for_each(|ai| {
-            max_height = max(max_height, ai.len());
-        });
+        let next_id = || -> usize {
+            columns.push(Vec::new());
+            columns.len() - 1
+        };
 
-        self.b.iter().for_each(|bi| {
-            max_height = max(max_height, bi.len());
-        });
+        for name in self.a_ids {
+            if let Some(id) = columns_registry.get(&name) {
+                a_columns_ids.push(*id);
+            } else {
+                let id = next_id();
+                columns_registry.insert(name.clone(), id);
+                a_columns_ids.push(id);
+            }
+        }
 
-        max_height
+        let mut b_columns_ids = Vec::new();
+
+        for name in self.b_ids {
+            if let Some(id) = columns_registry.get(&name) {
+                b_columns_ids.push(*id);
+            } else {
+                let id = next_id();
+                columns_registry.insert(name.clone(), id);
+                b_columns_ids.push(id);
+            }
+        }
+
+        let b_inverse_id = next_id();
+        let check_id = next_id();
+
+        AirPermutationConfig {
+            a_columns_ids,
+            b_columns_ids,
+            b_inverse_id,
+            check_id,
+        }
     }
 
-    pub fn resize(&mut self, size: usize) {
-        for e in &mut self.a {
-            e.resize(size, [0u8; 32]);
-        }
+    pub fn get_height(&self) -> usize {
+        let height = self.a[0].len();
 
-        for e in &mut self.b {
-            e.resize(size, [0u8; 32]);
-        }
+        self.a.iter().for_each(|ai| {
+            assert_eq!(ai.len(), height);
+        });
+
+        self.a.iter().for_each(|bi| {
+            assert_eq!(bi.len(), height);
+        });
+
+        height
     }
 }

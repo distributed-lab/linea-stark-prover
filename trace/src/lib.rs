@@ -1,7 +1,9 @@
 pub mod lookup;
+pub mod lookup_no_filter;
 pub mod permutation;
 
 use crate::lookup::RawLookupTrace;
+use crate::lookup_no_filter::RawLookupNoFilterTrace;
 use crate::permutation::RawPermutationTrace;
 use air::air_lookup::AirLookupConfig;
 use air::air_permutation::AirPermutationConfig;
@@ -13,49 +15,42 @@ use p3_field::{Field, FieldAlgebra};
 use p3_matrix::dense::RowMajorMatrix;
 use serde::{Deserialize, Serialize};
 use std::cmp::max;
+use std::collections::HashMap;
 
 pub struct RawTrace {
     pub columns: Vec<Vec<Bls12_377Fr>>,
     pub height: usize,
     pub challenges: Vec<Bls12_377Fr>,
+    pub column_registry: HashMap<String, usize>,
 }
 
 impl RawTrace {
-    pub fn new(challenges: Vec<Bls12_377Fr>) -> Self {
+    pub fn new(challenges: Vec<Bls12_377Fr>, height: usize) -> Self {
         RawTrace {
             columns: vec![],
-            height: 0,
+            height,
             challenges,
+            column_registry: HashMap::new(),
         }
     }
-    pub fn resize(&mut self, new_size: usize) {
-        for e in &mut self.columns {
-            e.resize(new_size, Bls12_377Fr::ZERO);
-        }
-    }
-
     pub fn push_lookup(&mut self, lookup: RawLookupTrace) -> AirConfig {
         let mut l = lookup.clone();
-
-        // Resize trace according to the max height
-        l.resize(self.height);
-
-        let (mut cfg, mut lookup_columns) = l.get_trace(self.challenges.clone());
-        cfg.shift(self.columns.len());
-        self.columns.append(&mut lookup_columns);
-
+        let cfg = l.update_registry(&mut self.column_registry, &mut self.columns);
+        l.set_trace(self.challenges.clone(), &mut self.columns, &cfg);
         AirConfig::Lookup(cfg)
+    }
+
+    pub fn push_lookup_no_filter(&mut self, lookup: RawLookupNoFilterTrace) -> AirConfig {
+        let mut l = lookup.clone();
+        let cfg = l.update_registry(&mut self.column_registry, &mut self.columns);
+        l.set_trace(self.challenges.clone(), &mut self.columns, &cfg);
+        AirConfig::LookupNoFilters(cfg)
     }
 
     pub fn push_permutation(&mut self, permutation: RawPermutationTrace) -> AirConfig {
         let mut p = permutation.clone();
-        // Resize trace according to the max height
-        p.resize(self.height);
-
-        let (mut cfg, mut permutation_columns) = p.get_trace(self.challenges.clone());
-        cfg.shift(self.columns.len());
-        self.columns.append(&mut permutation_columns);
-
+        let cfg = p.update_registry(&mut self.column_registry, &mut self.columns);
+        p.set_trace(self.challenges.clone(), &mut self.columns, &cfg);
         AirConfig::Permutation(cfg)
     }
 
@@ -63,29 +58,20 @@ impl RawTrace {
         &mut self,
         permutation_traces: Vec<RawPermutationTrace>,
         lookup_traces: Vec<RawLookupTrace>,
+        lookup_no_filter_traces: Vec<RawLookupNoFilterTrace>,
     ) -> Vec<AirConfig> {
-        // Get max height of all lookup traces.
-        let mut lookup_max_height = 0;
-        lookup_traces.iter().for_each(|lt| {
-            lookup_max_height = max(lookup_max_height, lt.get_max_height());
-        });
-
-        // Get max height of all permutation traces.
-        let mut permutation_max_height = 0;
-        permutation_traces.iter().for_each(|pt| {
-            permutation_max_height = max(permutation_max_height, pt.get_max_height());
-        });
-
-        // Get trace max height.
-        self.height = max(permutation_max_height, lookup_max_height);
-
         let mut cfgs = Vec::new();
+
         lookup_traces.iter().for_each(|lt| {
             cfgs.push(self.push_lookup(lt.clone()));
         });
 
         permutation_traces.iter().for_each(|pt| {
             cfgs.push(self.push_permutation(pt.clone()));
+        });
+
+        lookup_no_filter_traces.iter().for_each(|lt| {
+            cfgs.push(self.push_lookup_no_filter(lt.clone()));
         });
 
         cfgs

@@ -1,4 +1,4 @@
-use air::air_lookup::AirLookupConfig;
+use air::air_lookup_no_filter::AirLookupNoFiltersConfig;
 use ark_ff::PrimeField;
 use p3_bls12_377_fr::{Bls12_377Fr, FF_Bls12_377Fr};
 use p3_field::{Field, FieldAlgebra};
@@ -9,20 +9,18 @@ use std::fs;
 use std::process::id;
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
-pub struct RawLookupTrace {
+pub struct RawLookupNoFilterTrace {
     pub a: Vec<Vec<[u8; 32]>>,
     pub a_ids: Vec<String>,
     pub b: Vec<Vec<Vec<[u8; 32]>>>,
     pub b_ids: Vec<Vec<String>>,
     pub name: String,
-    pub a_filter: Vec<[u8; 32]>,
-    pub b_filter: Vec<Vec<[u8; 32]>>,
 }
 
-impl RawLookupTrace {
+impl RawLookupNoFilterTrace {
     pub fn read_file(path: &str) -> Self {
         let file_content = fs::read(path).unwrap();
-        let mut raw_trace: RawLookupTrace =
+        let mut raw_trace: RawLookupNoFilterTrace =
             ciborium::from_reader(std::io::Cursor::new(file_content)).unwrap();
 
         raw_trace
@@ -32,7 +30,7 @@ impl RawLookupTrace {
         &mut self,
         challenges: Vec<Bls12_377Fr>,
         columns: &mut Vec<Vec<Bls12_377Fr>>,
-        cfg: &AirLookupConfig,
+        cfg: &AirLookupNoFiltersConfig,
     ) {
         assert_eq!(
             challenges.len(),
@@ -56,15 +54,6 @@ impl RawLookupTrace {
             }
         }
 
-        // Get a, b filter columns
-        let (a_filter, b_filter) = self.get_filters();
-
-        columns[cfg.a_filter_id] = a_filter.clone();
-
-        for (i, id) in cfg.b_filter_id.iter().enumerate() {
-            columns[*id] = b_filter[i].clone();
-        }
-
         // Trace height
         // !IMPORTANT: should be equal per all columns.
         let sz = a[0].len();
@@ -75,11 +64,6 @@ impl RawLookupTrace {
         // Build occurrence mapping (should be done before trace generation)
         // TODO: this is a partially repeated piece of code. Think how write it better.
         for i in 0..sz {
-            // Skip is disabled by filter
-            if a_filter[i] == Bls12_377Fr::ZERO {
-                continue;
-            }
-
             let mut a_row_comb = Bls12_377Fr::ZERO;
             for a_column in &a {
                 // Collect linear combination of the row
@@ -120,12 +104,8 @@ impl RawLookupTrace {
             let a_row_comb_inverse = (a_row_comb + delta).inverse();
             a_inverses_column.push(a_row_comb_inverse);
 
-            // If the current A row is not disabled by filter
-            // (otherwise it is assumed to be multiplied on zero filter value)
-            if a_filter[i] != Bls12_377Fr::ZERO {
-                // Add A row log-derivative term
-                log_derivative_sum += a_row_comb_inverse
-            }
+            // Add A row log-derivative term
+            log_derivative_sum += a_row_comb_inverse;
 
             for (b_table_ind, b_table) in b.iter().enumerate() {
                 let mut b_row_comb = Bls12_377Fr::ZERO;
@@ -140,14 +120,12 @@ impl RawLookupTrace {
 
                 let mut occurrence = Bls12_377Fr::ZERO;
                 if let Some(cnt) = occurrences.get(&b_row_comb) {
-                    if b_filter[b_table_ind][i] != Bls12_377Fr::ZERO {
-                        // If multiplicity is non-zero and B row is not disabled by filter, then:
-                        // - subtract from sum the corresponding log-derivative term
-                        // - remove multiplicity from occurrences
-                        occurrence = Bls12_377Fr::from_canonical_usize(*cnt);
-                        log_derivative_sum -= b_row_comb_inverse * occurrence;
-                        occurrences.remove(&b_row_comb);
-                    }
+                    // If multiplicity is non-zero, then:
+                    // - subtract from sum the corresponding log-derivative term
+                    // - remove multiplicity from occurrences
+                    occurrence = Bls12_377Fr::from_canonical_usize(*cnt);
+                    log_derivative_sum -= b_row_comb_inverse * occurrence;
+                    occurrences.remove(&b_row_comb);
                 }
 
                 multiplicities_table[b_table_ind].push(occurrence);
@@ -186,12 +164,6 @@ impl RawLookupTrace {
             })
         });
 
-        assert_eq!(self.a_filter.len(), height);
-
-        self.b_filter.iter().for_each(|bi| {
-            assert_eq!(bi.len(), height);
-        });
-
         height
     }
     pub fn get_columns(&mut self) -> (Vec<Vec<Bls12_377Fr>>, Vec<Vec<Vec<Bls12_377Fr>>>) {
@@ -223,34 +195,11 @@ impl RawLookupTrace {
         (a, b)
     }
 
-    pub fn get_filters(&mut self) -> (Vec<Bls12_377Fr>, Vec<Vec<Bls12_377Fr>>) {
-        let mut a_filter: Vec<Bls12_377Fr> = Vec::new();
-        let mut b_filter: Vec<Vec<Bls12_377Fr>> = Vec::new();
-
-        for i in 0..self.a[0].len() {
-            a_filter.push(Bls12_377Fr::new(FF_Bls12_377Fr::from_be_bytes_mod_order(
-                self.a_filter[i].as_slice(),
-            )));
-        }
-
-        for i in 0..self.b.len() {
-            b_filter.push(Vec::new());
-
-            for j in 0..self.b[i][0].len() {
-                b_filter[i].push(Bls12_377Fr::new(FF_Bls12_377Fr::from_be_bytes_mod_order(
-                    self.b_filter[i][j].as_slice(),
-                )));
-            }
-        }
-
-        (a_filter, b_filter)
-    }
-
     pub fn update_registry(
         &self,
         columns_registry: &mut HashMap<String, usize>,
         columns: &mut Vec<Vec<Bls12_377Fr>>,
-    ) -> AirLookupConfig {
+    ) -> AirLookupNoFiltersConfig {
         let mut a_columns_ids = Vec::new();
 
         let next_id = || -> usize {
@@ -282,19 +231,14 @@ impl RawLookupTrace {
             }
         }
 
-        let a_filter_id = next_id();
-        let b_filter_id = (0..self.b.len()).map(|_| next_id()).collect();
-
         let a_inverses_id = next_id();
         let b_inverses_id: Vec<usize> = (0..self.b.len()).map(|_| next_id()).collect();
         let occurrences_id: Vec<usize> = (0..self.b.len()).map(|i| next_id()).collect();
         let check_id = next_id();
 
-        AirLookupConfig {
+        AirLookupNoFiltersConfig {
             a_columns_ids,
             b_columns_ids,
-            a_filter_id,
-            b_filter_id,
             a_inverses_id,
             b_inverses_id,
             occurrences_id,

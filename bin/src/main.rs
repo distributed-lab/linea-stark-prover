@@ -9,8 +9,8 @@ use p3_fri::{FriConfig, TwoAdicFriPcs};
 use p3_uni_stark::{prove, verify};
 use rand::distributions::Standard;
 use rand::{thread_rng, Rng};
-use std::collections::{HashMap, HashSet};
 use std::fmt::Debug;
+use trace::lookup_no_filter::RawLookupNoFilterTrace;
 use trace::{lookup::RawLookupTrace, permutation::RawPermutationTrace, RawTrace};
 use tracing_forest::util::LevelFilter;
 use tracing_forest::ForestLayer;
@@ -36,31 +36,46 @@ fn main() {
 
     // read all traces
 
+    let mut lookup_no_filter_traces: Vec<Vec<RawLookupNoFilterTrace>> = vec![vec![]; 32];
     let mut lookup_traces: Vec<Vec<RawLookupTrace>> = vec![vec![]; 32];
     let mut permutation_traces: Vec<Vec<RawPermutationTrace>> = vec![vec![]; 32];
 
     for i in 0..1 {
+        let trace = RawLookupNoFilterTrace::read_file(&format!("../lookup_no_filter_{}.bin", i));
+        lookup_no_filter_traces[trace.get_height().ilog2() as usize].push(trace);
+    }
+
+    for i in 0..1 {
         let trace = RawLookupTrace::read_file(&format!("../lookup_{}.bin", i));
-        lookup_traces[trace.get_max_height().ilog2() as usize].push(trace);
+        lookup_traces[trace.get_height().ilog2() as usize].push(trace);
     }
 
     for i in 0..1 {
         let trace = RawPermutationTrace::read_file(&format!("../permutation_{}.bin", i));
-        permutation_traces[trace.get_max_height().ilog2() as usize].push(trace);
+        permutation_traces[trace.get_height().ilog2() as usize].push(trace);
     }
 
-    //let cfgs = raw_trace.push_traces(permutation_traces, lookup_traces);
-
-    for i in 0..32 {
+    for i in 31..0 {
         let permutation_trace = permutation_traces.pop().unwrap();
         let lookup_trace = lookup_traces.pop().unwrap();
+        let lookup_no_filter_trace = lookup_no_filter_traces.pop().unwrap();
 
-        if !permutation_trace.is_empty() || !lookup_trace.is_empty() {
-            println!("Proving for height 2^{}: {}x lookups, {}x perms", 31 - i, lookup_trace.len(), permutation_trace.len());
+        if !permutation_trace.is_empty()
+            || !lookup_trace.is_empty()
+            || !lookup_no_filter_trace.is_empty()
+        {
+            println!(
+                "Proving for height 2^{}: {}x lookups, {}x perms",
+                i,
+                lookup_trace.len(),
+                permutation_trace.len()
+            );
             prove_linea(
                 vec![alpha_challenge, delta_challenge],
                 permutation_trace,
                 lookup_trace,
+                lookup_no_filter_trace,
+                1 << i,
             );
         }
     }
