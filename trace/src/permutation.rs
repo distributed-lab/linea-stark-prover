@@ -26,6 +26,16 @@ impl RawPermutationTrace {
         Ok(raw_trace)
     }
 
+    pub fn resize(&mut self, size: usize) {
+        for e in &mut self.a {
+            e.resize(size, [0u8; 32]);
+        }
+
+        for e in &mut self.b {
+            e.resize(size, [0u8; 32]);
+        }
+    }
+
     pub fn set_trace(
         &self,
         challenges: Vec<Bls12_377Fr>,

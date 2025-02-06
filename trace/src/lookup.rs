@@ -28,6 +28,24 @@ impl RawLookupTrace {
         Ok(raw_trace)
     }
 
+    pub fn resize(&mut self, size: usize) {
+        for e in &mut self.a {
+            e.resize(size, [0u8; 32]);
+        }
+
+        self.a_filter.resize(size, [0u8; 32]);
+
+        for b_element in &mut self.b {
+            for e in b_element {
+                e.resize(size, [0u8; 32]);
+            }
+        }
+
+        for b_filter in &mut self.b_filter {
+            b_filter.resize(size, [0u8; 32]);
+        }
+    }
+
     pub(crate) fn set_trace(
         &mut self,
         challenges: Vec<Bls12_377Fr>,

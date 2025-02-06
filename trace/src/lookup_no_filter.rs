@@ -26,6 +26,18 @@ impl RawLookupNoFilterTrace {
         Ok(raw_trace)
     }
 
+    pub fn resize(&mut self, size: usize) {
+        for e in &mut self.a {
+            e.resize(size, [0u8; 32]);
+        }
+        
+        for b_element in &mut self.b {
+            for e in b_element {
+                e.resize(size, [0u8; 32]);
+            }
+        }
+    }
+
     pub(crate) fn set_trace(
         &mut self,
         challenges: Vec<Bls12_377Fr>,
@@ -152,20 +164,21 @@ impl RawLookupNoFilterTrace {
         columns[cfg.check_id] = prefix_sum_column.clone();
     }
 
-    pub fn get_height(&self) -> usize {
-        let height = self.a[0].len();
+    pub fn get_max_height(&self) -> usize {
+        let mut max_height = 0_usize;
         self.a.iter().for_each(|ai| {
-            assert_eq!(ai.len(), height);
+            max_height = max(max_height, ai.len());
         });
 
         self.b.iter().for_each(|bi| {
             bi.iter().for_each(|bij| {
-                assert_eq!(bij.len(), height);
+                max_height = max(max_height, bij.len());
             })
         });
 
-        height
+        max_height
     }
+    
     pub fn get_columns(&mut self) -> (Vec<Vec<Bls12_377Fr>>, Vec<Vec<Vec<Bls12_377Fr>>>) {
         let mut a: Vec<Vec<Bls12_377Fr>> = Vec::new();
         let mut b: Vec<Vec<Vec<Bls12_377Fr>>> = Vec::new();

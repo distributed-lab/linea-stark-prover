@@ -33,8 +33,17 @@ impl RawTrace {
             column_registry: HashMap::new(),
         }
     }
+
+    pub fn resize(&mut self, new_size: usize) {
+        for e in &mut self.columns {
+            e.resize(new_size, Bls12_377Fr::ZERO);
+        }
+    }
+    
     pub fn push_lookup(&mut self, lookup: RawLookupTrace) -> AirConfig {
         let mut l = lookup.clone();
+        l.resize(self.height);
+        
         let cfg = l.update_registry(&mut self.column_registry, &mut self.columns);
         l.set_trace(self.challenges.clone(), &mut self.columns, &cfg);
         AirConfig::Lookup(cfg)
@@ -42,6 +51,8 @@ impl RawTrace {
 
     pub fn push_lookup_no_filter(&mut self, lookup: RawLookupNoFilterTrace) -> AirConfig {
         let mut l = lookup.clone();
+        l.resize(self.height);
+        
         let cfg = l.update_registry(&mut self.column_registry, &mut self.columns);
         l.set_trace(self.challenges.clone(), &mut self.columns, &cfg);
         AirConfig::LookupNoFilters(cfg)
@@ -49,6 +60,8 @@ impl RawTrace {
 
     pub fn push_permutation(&mut self, permutation: RawPermutationTrace) -> AirConfig {
         let mut p = permutation.clone();
+        p.resize(self.height);
+        
         let cfg = p.update_registry(&mut self.column_registry, &mut self.columns);
         p.set_trace(self.challenges.clone(), &mut self.columns, &cfg);
         AirConfig::Permutation(cfg)
