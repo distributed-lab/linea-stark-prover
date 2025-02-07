@@ -42,7 +42,7 @@ fn main() {
 
     for i in 0..973 {
         if let Ok(trace) =
-            RawLookupNoFilterTrace::read_file(&format!("../lookup_no_filter_{}.bin", i))
+            RawLookupNoFilterTrace::read_file(&format!("../traces/trace/lookup_no_filter_{}.bin", i))
         {
             println!(
                 "Reading lookup_no_filter_{}.bin -> {}",
