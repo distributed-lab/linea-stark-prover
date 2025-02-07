@@ -1,10 +1,10 @@
 pub mod configs;
 
+use crate::configs::{AirLookupConfig, AirLookupNoFiltersConfig, AirPermutationConfig};
 use p3_air::{Air, AirBuilder, AirBuilderWithPublicValues, BaseAir};
 use p3_field::{Field, FieldAlgebra};
 use p3_matrix::Matrix;
 use std::ops::{Add, Mul, Sub};
-use crate::configs::{AirLookupConfig, AirLookupNoFiltersConfig, AirPermutationConfig};
 
 #[derive(Clone, Debug)]
 pub enum AirConfig {
@@ -17,28 +17,36 @@ pub enum AirConfig {
     Permutation(AirPermutationConfig),
 }
 
-#[derive(Clone)]
-pub struct LineaAIR {
-    configs: Vec<AirConfig>,
-    width: usize,
+pub trait LineaConfigAIR<AB: AirBuilder> {
+    fn eval_lookup(&self, builder: &mut AB, l: &AirLookupConfig);
+    fn eval_lookup_no_filters(&self, builder: &mut AB, l: &AirLookupNoFiltersConfig);
+    fn eval_permutation(&self, builder: &mut AB, p: &AirPermutationConfig);
 }
 
-impl LineaAIR {
-    pub fn new(configs: Vec<AirConfig>, width: usize) -> Self {
+#[derive(Clone)]
+pub struct LineaAIR<F> {
+    configs: Vec<AirConfig>,
+    width: usize,
+    challenges: Vec<F>,
+}
+
+impl<F: Field> LineaAIR<F> {
+    pub fn new(configs: Vec<AirConfig>, width: usize, challenges: Vec<F>) -> Self {
         Self {
             configs,
             width,
+            challenges,
         }
     }
 }
 
-impl<F: Field> BaseAir<F> for LineaAIR {
+impl<F: Field> BaseAir<F> for LineaAIR<F> {
     fn width(&self) -> usize {
         self.width
     }
 }
 
-impl<AB: AirBuilderWithPublicValues> Air<AB> for LineaAIR {
+impl<AB: AirBuilder> Air<AB> for LineaAIR<AB::F> {
     fn eval(&self, builder: &mut AB) {
         self.configs.iter().for_each(|c| match c {
             AirConfig::Lookup(l) => self.eval_lookup(builder, l),
@@ -48,15 +56,14 @@ impl<AB: AirBuilderWithPublicValues> Air<AB> for LineaAIR {
     }
 }
 
-impl LineaAIR {
-    fn eval_lookup<AB: AirBuilderWithPublicValues>(&self, builder: &mut AB, l: &AirLookupConfig) {
+impl<AB: AirBuilder> LineaConfigAIR<AB> for LineaAIR<AB::F>  {
+    fn eval_lookup(&self, builder: &mut AB, l: &AirLookupConfig) {
         let main = builder.main();
 
         let local = main.row_slice(0);
         let next = main.row_slice(1);
 
-        let alpha = builder.public_values()[0].into();
-        let delta = builder.public_values()[1].into();
+        let (alpha,delta) = (self.challenges[0], self.challenges[1]);
 
         let mut a_local_comb = AB::Expr::from(AB::F::ZERO);
         for i in &l.a_columns_ids {
@@ -108,14 +115,13 @@ impl LineaAIR {
             .assert_eq(local[l.check_id], AB::F::ZERO);
     }
 
-    fn eval_lookup_no_filters<AB: AirBuilderWithPublicValues>(&self, builder: &mut AB, l: &AirLookupNoFiltersConfig) {
+    fn eval_lookup_no_filters(&self, builder: &mut AB, l: &AirLookupNoFiltersConfig) {
         let main = builder.main();
 
         let local = main.row_slice(0);
         let next = main.row_slice(1);
 
-        let alpha = builder.public_values()[0].into();
-        let delta = builder.public_values()[1].into();
+        let (alpha,delta) = (self.challenges[0], self.challenges[1]);
 
         let mut a_local_comb = AB::Expr::from(AB::F::ZERO);
         for i in &l.a_columns_ids {
@@ -127,8 +133,8 @@ impl LineaAIR {
         // Check inverse calculated correctly
         builder.assert_eq(a_local_challenge * local[l.a_inverses_id], AB::F::ONE);
 
-        let mut local_check =  local[l.a_inverses_id].into();
-        let mut next_check =  next[l.a_inverses_id].into();
+        let mut local_check = local[l.a_inverses_id].into();
+        let mut next_check = next[l.a_inverses_id].into();
 
         for (b_table_ind, b_columns_ids) in l.b_columns_ids.iter().enumerate() {
             let mut b_local_comb = AB::Expr::from(AB::F::ZERO);
@@ -145,8 +151,7 @@ impl LineaAIR {
             local_check -= local[l.occurrences_id[b_table_ind]].into()
                 * local[l.b_inverses_id[b_table_ind]].into();
 
-            next_check -= next[l.occurrences_id[b_table_ind]]
-                * next[l.b_inverses_id[b_table_ind]]
+            next_check -= next[l.occurrences_id[b_table_ind]] * next[l.b_inverses_id[b_table_ind]]
         }
 
         // Check first row calculated correctly
@@ -165,19 +170,13 @@ impl LineaAIR {
             .assert_eq(local[l.check_id], AB::F::ZERO);
     }
 
-
-    fn eval_permutation<AB: AirBuilderWithPublicValues>(
-        &self,
-        builder: &mut AB,
-        p: &AirPermutationConfig,
-    ) {
+    fn eval_permutation(&self, builder: &mut AB, p: &AirPermutationConfig) {
         let main = builder.main();
 
         let local = main.row_slice(0);
         let next = main.row_slice(1);
 
-        let alpha = builder.public_values()[0].into();
-        let delta = builder.public_values()[1].into();
+        let (alpha,delta) = (self.challenges[0], self.challenges[1]);
 
         let mut a_local_comb = AB::Expr::from(AB::F::ZERO);
         for i in &p.a_columns_ids {

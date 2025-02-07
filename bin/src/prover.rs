@@ -49,16 +49,16 @@ pub fn prove_linea(
 
     println!("Creating LineaAir...");
 
-    let air = LineaAIR::new(cfgs, t.width);
+    let air = LineaAIR::new(cfgs, t.width, challenges);
 
     let mut challenger = Challenger::new(vec![], hash.clone());
     println!("Proving...");
-    let proof = p3_uni_stark::prove(&config, &air, &mut challenger, t, &challenges.clone());
+    let proof = p3_uni_stark::prove(&config, &air, &mut challenger, t, &vec![]);
 
     let mut challenger = Challenger::new(vec![], hash.clone());
     println!("Verification...");
     
-    let ver_result = verify(&config, &air, &mut challenger, &proof, &challenges.clone()).map_err(|e| println!("{:?}", e));
+    let ver_result = verify(&config, &air, &mut challenger, &proof, &vec![]).map_err(|e| println!("{:?}", e));
     assert!(
         ver_result.is_ok(),
         "Verification failed"
