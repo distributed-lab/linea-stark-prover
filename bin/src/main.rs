@@ -42,7 +42,7 @@ fn main() {
 
     for i in 0..973 {
         if let Ok(trace) = RawLookupNoFilterTrace::read_file(&format!(
-            "/Users/nazarevsky/Documents/linea/new-lookup-trace/traces/lookup_no_filter_{}.bin",
+            "../traces/trace/lookup_no_filter_{}.bin",
             i
         )) {
             println!("Reading lookup_no_filter_{}.bin -> {}", i, trace.get_max_height().ilog2() as usize);
@@ -52,7 +52,7 @@ fn main() {
     
     for i in 0..973 {
         if let Ok(trace) = RawLookupTrace::read_file(&format!(
-            "../traces/lookup_{}.bin",
+            "../traces/trace/lookup_{}.bin",
             i
         )) {
             println!("Reading lookup_{}.bin -> {}", i, trace.get_max_height().ilog2() as usize);
@@ -62,7 +62,7 @@ fn main() {
     
     for i in 0..1 {
         if let Ok(trace) = RawPermutationTrace::read_file(&format!(
-            "../traces/permutation_{}.bin",
+            "../traces/trace/permutation_{}.bin",
             i
         )) {
             println!("Reading permutation_{}.bin -> {}", i, trace.get_max_height().ilog2() as usize);

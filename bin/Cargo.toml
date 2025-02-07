@@ -31,3 +31,4 @@ air   = { path = "../air" }
 
 [features]
 parallel = ["p3-maybe-rayon/parallel"]
+asm = ["p3-bls12-377-fr/asm"]
