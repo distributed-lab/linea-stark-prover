@@ -40,9 +40,9 @@ fn main() {
     let mut lookup_traces: Vec<Vec<RawLookupTrace>> = vec![vec![]; 32];
     let mut permutation_traces: Vec<Vec<RawPermutationTrace>> = vec![vec![]; 32];
 
-    for i in 0..973 {
+    for i in 0..1 {
         if let Ok(trace) =
-            RawLookupNoFilterTrace::read_file(&format!("../traces/trace/lookup_no_filter_{}.bin", i))
+            RawLookupNoFilterTrace::read_file(&format!("../trace/lookup_no_filter_{}.bin", i))
         {
             println!(
                 "Reading lookup_no_filter_{}.bin -> {}",
@@ -53,8 +53,10 @@ fn main() {
         }
     }
 
-    for i in 0..973 {
-        if let Ok(trace) = RawLookupTrace::read_file(&format!("../traces/trace/lookup_{}.bin", i)) {
+    for i in 56..57 {
+        if let Ok(trace) =
+            RawLookupTrace::read_file(&format!("../trace/lookup_{}.bin", i))
+        {
             println!(
                 "Reading lookup_{}.bin -> {}",
                 i,
@@ -64,9 +66,10 @@ fn main() {
         }
     }
 
+
     for i in 0..1 {
         if let Ok(trace) =
-            RawPermutationTrace::read_file(&format!("../traces/trace/permutation_{}.bin", i))
+            RawPermutationTrace::read_file(&format!("../trace/permutation_{}.bin", i))
         {
             println!(
                 "Reading permutation_{}.bin -> {}",
@@ -82,24 +85,23 @@ fn main() {
     for i in 0..31 {
         let permutation_trace = permutation_traces.pop().unwrap();
         let lookup_trace = lookup_traces.pop().unwrap();
-        let lookup_no_filter_trace = lookup_no_filter_traces.pop().unwrap();
+        let lookup_trace_no_filter = lookup_no_filter_traces.pop().unwrap();
 
         if !permutation_trace.is_empty()
             || !lookup_trace.is_empty()
-            || !lookup_no_filter_trace.is_empty()
+            || !lookup_trace_no_filter.is_empty()
         {
             println!(
-                "Proving for height 2^{}: {}x lookups, {}x lookups with no filters, {}x perms",
+                "Proving for height 2^{}: {}x lookups, {}x perms",
                 31 - i,
                 lookup_trace.len(),
-                lookup_no_filter_trace.len(),
                 permutation_trace.len()
             );
             prove_linea(
                 vec![alpha_challenge, delta_challenge],
                 permutation_trace,
                 lookup_trace,
-                lookup_no_filter_trace,
+                lookup_trace_no_filter,
                 height,
             );
         }

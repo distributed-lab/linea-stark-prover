@@ -7,6 +7,7 @@ use std::collections::HashMap;
 use std::fs;
 use std::process::id;
 use air::configs::AirLookupConfig;
+use crate::lookup_no_filter::RawLookupNoFilterTrace;
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct RawLookupTrace {
@@ -74,13 +75,16 @@ impl RawLookupTrace {
             }
         }
 
-        // Get a, b filter columns
-        let (a_filter, b_filter) = self.get_filters();
+        let a_filter = self.get_a_filters();
+        if let Some(a_filter_id) = cfg.a_filter_id {
+            columns[a_filter_id] = a_filter.clone();
+        }
 
-        columns[cfg.a_filter_id] = a_filter.clone();
-
-        for (i, id) in cfg.b_filter_id.iter().enumerate() {
-            columns[*id] = b_filter[i].clone();
+        let b_filter = self.get_b_filters();
+        if let Some(b_filter_id) = cfg.b_filter_id.clone() {
+            for (i, id) in b_filter_id.iter().enumerate() {
+                columns[*id] = b_filter[i].clone();
+            }
         }
 
         // Trace height
@@ -94,7 +98,7 @@ impl RawLookupTrace {
         // TODO: this is a partially repeated piece of code. Think how write it better.
         for i in 0..sz {
             // Skip is disabled by filter
-            if a_filter[i] == Bls12_377Fr::ZERO {
+            if cfg.a_filter_id.is_some() && a_filter[i] == Bls12_377Fr::ZERO {
                 continue;
             }
 
@@ -140,7 +144,12 @@ impl RawLookupTrace {
 
             // If the current A row is not disabled by filter
             // (otherwise it is assumed to be multiplied on zero filter value)
-            if a_filter[i] != Bls12_377Fr::ZERO {
+            if cfg.a_filter_id.is_some() {
+                if a_filter[i] != Bls12_377Fr::ZERO {
+                    // Add A row log-derivative term
+                    log_derivative_sum += a_row_comb_inverse
+                }
+            } else {
                 // Add A row log-derivative term
                 log_derivative_sum += a_row_comb_inverse
             }
@@ -158,7 +167,16 @@ impl RawLookupTrace {
 
                 let mut occurrence = Bls12_377Fr::ZERO;
                 if let Some(cnt) = occurrences.get(&b_row_comb) {
-                    if b_filter[b_table_ind][i] != Bls12_377Fr::ZERO {
+                    if cfg.b_filter_id.is_some() {
+                        if b_filter[b_table_ind][i] != Bls12_377Fr::ZERO {
+                            // If multiplicity is non-zero and B row is not disabled by filter, then:
+                            // - subtract from sum the corresponding log-derivative term
+                            // - remove multiplicity from occurrences
+                            occurrence = Bls12_377Fr::from_canonical_usize(*cnt);
+                            log_derivative_sum -= b_row_comb_inverse * occurrence;
+                            occurrences.remove(&b_row_comb);
+                        }
+                    } else {
                         // If multiplicity is non-zero and B row is not disabled by filter, then:
                         // - subtract from sum the corresponding log-derivative term
                         // - remove multiplicity from occurrences
@@ -236,15 +254,28 @@ impl RawLookupTrace {
         (a, b)
     }
 
-    pub fn get_filters(&mut self) -> (Vec<Bls12_377Fr>, Vec<Vec<Bls12_377Fr>>) {
+    pub fn get_a_filters(&mut self) -> Vec<Bls12_377Fr> {
+        if self.a_filter.len() == 0 {
+            return vec![]
+        }
+
         let mut a_filter: Vec<Bls12_377Fr> = Vec::new();
-        let mut b_filter: Vec<Vec<Bls12_377Fr>> = Vec::new();
 
         for i in 0..self.a[0].len() {
             a_filter.push(Bls12_377Fr::new(FF_Bls12_377Fr::from_be_bytes_mod_order(
                 self.a_filter[i].as_slice(),
             )));
         }
+
+        a_filter
+    }
+
+    pub fn get_b_filters(&mut self) -> Vec<Vec<Bls12_377Fr>> {
+        if self.b_filter.len() == 0 {
+            return vec![]
+        }
+
+        let mut b_filter: Vec<Vec<Bls12_377Fr>> = Vec::new();
 
         for i in 0..self.b.len() {
             b_filter.push(Vec::new());
@@ -256,7 +287,7 @@ impl RawLookupTrace {
             }
         }
 
-        (a_filter, b_filter)
+        b_filter
     }
 
     pub fn update_registry(
@@ -295,8 +326,16 @@ impl RawLookupTrace {
             }
         }
 
-        let a_filter_id = next_id();
-        let b_filter_id = (0..self.b.len()).map(|_| next_id()).collect();
+        let mut a_filter_id = None;
+        if self.a_filter.len() != 0 {
+            a_filter_id = Some(next_id())
+        }
+
+        let mut b_filter_id = None;
+        if self.b_filter.len() != 0 {
+            b_filter_id = Some((0..self.b.len()).map(|_| next_id()).collect());
+        }
+
 
         let a_inverses_id = next_id();
         let b_inverses_id: Vec<usize> = (0..self.b.len()).map(|_| next_id()).collect();
@@ -312,6 +351,20 @@ impl RawLookupTrace {
             b_inverses_id,
             occurrences_id,
             check_id,
+        }
+    }
+}
+
+impl From<RawLookupNoFilterTrace> for RawLookupTrace {
+    fn from(value: RawLookupNoFilterTrace) -> Self {
+        Self {
+            a: value.a,
+            a_ids: value.a_ids,
+            b: value.b,
+            b_ids: value.b_ids,
+            name: value.name,
+            a_filter: vec![],
+            b_filter: vec![],
         }
     }
 }
