@@ -1,10 +1,9 @@
 pub mod configs;
 
 use crate::configs::{AirLookupConfig, AirPermutationConfig};
-use p3_air::{Air, AirBuilder, AirBuilderWithPublicValues, BaseAir};
+use p3_air::{Air, AirBuilder, BaseAir};
 use p3_field::{Field, FieldAlgebra};
 use p3_matrix::Matrix;
-use std::ops::{Add, Mul, Sub};
 
 #[derive(Clone, Debug)]
 pub enum AirConfig {
@@ -61,10 +60,10 @@ impl<AB: AirBuilder> LineaConfigAIR<AB> for LineaAIR<AB::F>  {
 
         let mut a_local_comb = AB::Expr::from(AB::F::ZERO);
         for i in &l.a_columns_ids {
-            a_local_comb = a_local_comb * alpha.clone() + local[*i]
+            a_local_comb = a_local_comb * alpha + local[*i]
         }
 
-        let a_local_challenge = a_local_comb + delta.clone();
+        let a_local_challenge = a_local_comb + delta;
 
         // Check inverse calculated correctly
         builder.assert_eq(a_local_challenge * local[l.a_inverses_id], AB::F::ONE);
@@ -81,10 +80,10 @@ impl<AB: AirBuilder> LineaConfigAIR<AB> for LineaAIR<AB::F>  {
         for (b_table_ind, b_columns_ids) in l.b_columns_ids.iter().enumerate() {
             let mut b_local_comb = AB::Expr::from(AB::F::ZERO);
             for i in b_columns_ids {
-                b_local_comb = b_local_comb * alpha.clone() + local[*i]
+                b_local_comb = b_local_comb * alpha + local[*i]
             }
 
-            let b_local_challenge = b_local_comb + delta.clone();
+            let b_local_challenge = b_local_comb + delta;
             builder.assert_eq(
                 b_local_challenge * local[l.b_inverses_id[b_table_ind]],
                 AB::F::ONE,
@@ -133,16 +132,16 @@ impl<AB: AirBuilder> LineaConfigAIR<AB> for LineaAIR<AB::F>  {
 
         let mut a_local_comb = AB::Expr::from(AB::F::ZERO);
         for i in &p.a_columns_ids {
-            a_local_comb = a_local_comb * alpha.clone() + local[*i]
+            a_local_comb = a_local_comb * alpha + local[*i]
         }
 
         let mut b_local_comb = AB::Expr::from(AB::F::ZERO);
         for i in &p.b_columns_ids {
-            b_local_comb = b_local_comb * alpha.clone() + local[*i]
+            b_local_comb = b_local_comb * alpha + local[*i]
         }
 
-        let a_local_challenge = a_local_comb + delta.clone();
-        let b_local_challenge = b_local_comb + delta.clone();
+        let a_local_challenge = a_local_comb + delta;
+        let b_local_challenge = b_local_comb + delta;
 
         // Check inverse calculated correctly
         builder.assert_eq(b_local_challenge * local[p.b_inverse_id], AB::F::ONE);
@@ -154,10 +153,10 @@ impl<AB: AirBuilder> LineaConfigAIR<AB> for LineaAIR<AB::F>  {
 
         let mut a_next_comb = AB::Expr::from(AB::F::ZERO);
         for i in &p.a_columns_ids {
-            a_next_comb = a_next_comb * alpha.clone() + next[*i]
+            a_next_comb = a_next_comb * alpha + next[*i]
         }
 
-        let a_next_challenge = a_next_comb + delta.clone();
+        let a_next_challenge = a_next_comb + delta;
 
         // Check each row transition
         builder.when_transition().assert_eq(

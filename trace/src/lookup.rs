@@ -5,7 +5,6 @@ use serde::{Deserialize, Serialize};
 use std::cmp::max;
 use std::collections::HashMap;
 use std::fs;
-use std::process::id;
 use air::configs::AirLookupConfig;
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -22,7 +21,7 @@ pub struct RawLookupTrace {
 impl RawLookupTrace {
     pub fn read_file(path: &str) -> Result<RawLookupTrace, std::io::Error> {
         let file_content = fs::read(path)?;
-        let mut raw_trace: RawLookupTrace =
+        let raw_trace: RawLookupTrace =
             ciborium::from_reader(std::io::Cursor::new(file_content)).unwrap();
 
         Ok(raw_trace)
@@ -53,7 +52,7 @@ impl RawLookupTrace {
     pub(crate) fn set_trace(
         &mut self,
         challenges: Vec<Bls12_377Fr>,
-        columns: &mut Vec<Vec<Bls12_377Fr>>,
+        columns: &mut [Vec<Bls12_377Fr>],
         cfg: &AirLookupConfig,
     ) {
         assert_eq!(
@@ -72,9 +71,9 @@ impl RawLookupTrace {
             columns[*id] = a[i].clone();
         }
 
-        for i in 0..cfg.b_columns_ids.len() {
+        for (i, b_ids) in b.iter().enumerate().take(cfg.b_columns_ids.len()) {
             for (j, id) in cfg.b_columns_ids[i].iter().enumerate() {
-                columns[*id] = b[i][j].clone();
+                columns[*id] = b_ids[j].clone();
             }
         }
 
@@ -261,9 +260,9 @@ impl RawLookupTrace {
         let mut a_filter_field: Vec<Bls12_377Fr> = Vec::new();
 
         if let Some(a_filter) = &self.a_filter {
-            for i in 0..self.a[0].len() {
+            for a_filter_ids in a_filter.iter().take(self.a[0].len()) {
                 a_filter_field.push(Bls12_377Fr::new(FF_Bls12_377Fr::from_be_bytes_mod_order(
-                    a_filter[i].as_slice(),
+                    a_filter_ids.as_slice(),
                 )));
             }
         }
@@ -312,31 +311,31 @@ impl RawLookupTrace {
 
         let mut b_columns_ids = vec![Vec::<usize>::new(); self.b.len()];
 
-        for i in 0..self.b.len() {
+        for (i, ids) in b_columns_ids.iter_mut().enumerate().take(self.b.len()) {
             for name in &self.b_ids[i] {
                 if let Some(id) = columns_registry.get(name) {
-                    b_columns_ids[i].push(*id);
+                    ids.push(*id);
                 } else {
                     let id = next_id();
                     columns_registry.insert(name.clone(), id);
-                    b_columns_ids[i].push(id);
+                    ids.push(id);
                 }
             }
         }
 
         let mut a_filter_id = None;
-        if self.a_filter.is_none() || self.a_filter.clone().unwrap().len() == 0 {
+        if self.a_filter.is_none() || self.a_filter.clone().unwrap().is_empty() {
             a_filter_id = Some(next_id())
         }
 
         let mut b_filter_id = None;
-        if self.b_filter.is_none() || self.b_filter.clone().unwrap().len() == 0 {
+        if self.b_filter.is_none() || self.b_filter.clone().unwrap().is_empty() {
             b_filter_id = Some((0..self.b.len()).map(|_| next_id()).collect());
         }
 
         let a_inverses_id = next_id();
         let b_inverses_id: Vec<usize> = (0..self.b.len()).map(|_| next_id()).collect();
-        let occurrences_id: Vec<usize> = (0..self.b.len()).map(|i| next_id()).collect();
+        let occurrences_id: Vec<usize> = (0..self.b.len()).map(|_| next_id()).collect();
         let check_id = next_id();
 
         AirLookupConfig {

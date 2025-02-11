@@ -54,10 +54,8 @@ pub fn prove_linea(
 
     let mut challenger = Challenger::new(vec![], hash.clone());
     println!("Verification...");
-    
-    let ver_result = verify(&config, &air, &mut challenger, &proof, &vec![]).map_err(|e| println!("{:?}", e));
-    assert!(
-        ver_result.is_ok(),
-        "Verification failed"
-    );
+
+    let ver_result =
+        verify(&config, &air, &mut challenger, &proof, &vec![]).map_err(|e| println!("{:?}", e));
+    assert!(ver_result.is_ok(), "Verification failed");
 }

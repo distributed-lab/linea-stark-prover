@@ -1,17 +1,12 @@
 pub mod lookup;
-pub mod lookup_no_filter;
 pub mod permutation;
 
 use crate::lookup::RawLookupTrace;
 use crate::permutation::RawPermutationTrace;
 use air::AirConfig;
-use ark_ff::PrimeField;
-use p3_air::Air;
 use p3_bls12_377_fr::Bls12_377Fr;
-use p3_field::{Field, FieldAlgebra};
+use p3_field::FieldAlgebra;
 use p3_matrix::dense::RowMajorMatrix;
-use serde::{Deserialize, Serialize};
-use std::cmp::max;
 use std::collections::HashMap;
 
 pub struct RawTrace {
