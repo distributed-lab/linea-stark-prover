@@ -324,12 +324,12 @@ impl RawLookupTrace {
         }
 
         let mut a_filter_id = None;
-        if self.a_filter.is_none() || self.a_filter.clone().unwrap().is_empty() {
+        if self.a_filter.is_some() && !self.a_filter.clone().unwrap().is_empty() {
             a_filter_id = Some(next_id())
         }
 
         let mut b_filter_id = None;
-        if self.b_filter.is_none() || self.b_filter.clone().unwrap().is_empty() {
+        if self.b_filter.is_some() && !self.b_filter.clone().unwrap().is_empty() {
             b_filter_id = Some((0..self.b.len()).map(|_| next_id()).collect());
         }
 

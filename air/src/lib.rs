@@ -68,8 +68,9 @@ impl<AB: AirBuilder> LineaConfigAIR<AB> for LineaAIR<AB::F>  {
         // Check inverse calculated correctly
         builder.assert_eq(a_local_challenge * local[l.a_inverses_id], AB::F::ONE);
 
-        let mut local_check = local[l.a_inverses_id] + AB::F::ZERO;
-        let mut next_check = next[l.a_inverses_id] + AB::F::ZERO;
+        let mut local_check = local[l.a_inverses_id].into();
+        let mut next_check = next[l.a_inverses_id].into();
+
         if let Some(a_filter_id) = l.a_filter_id {
             local_check *= local[a_filter_id].into();
             next_check *= next[a_filter_id].into();
