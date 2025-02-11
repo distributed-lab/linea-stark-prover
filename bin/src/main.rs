@@ -10,7 +10,6 @@ use p3_uni_stark::{prove, verify};
 use rand::distributions::Standard;
 use rand::{thread_rng, Rng};
 use std::fmt::Debug;
-use trace::lookup_no_filter::RawLookupNoFilterTrace;
 use trace::{lookup::RawLookupTrace, permutation::RawPermutationTrace, RawTrace};
 use tracing_forest::util::LevelFilter;
 use tracing_forest::ForestLayer;
@@ -36,26 +35,12 @@ fn main() {
 
     // read all traces
 
-    let mut lookup_no_filter_traces: Vec<Vec<RawLookupNoFilterTrace>> = vec![vec![]; 32];
     let mut lookup_traces: Vec<Vec<RawLookupTrace>> = vec![vec![]; 32];
     let mut permutation_traces: Vec<Vec<RawPermutationTrace>> = vec![vec![]; 32];
 
     for i in 0..1 {
         if let Ok(trace) =
-            RawLookupNoFilterTrace::read_file(&format!("../trace/lookup_no_filter_{}.bin", i))
-        {
-            println!(
-                "Reading lookup_no_filter_{}.bin -> {}",
-                i,
-                trace.get_max_height().ilog2() as usize
-            );
-            lookup_no_filter_traces[trace.get_max_height().ilog2() as usize].push(trace.clone());
-        }
-    }
-
-    for i in 56..57 {
-        if let Ok(trace) =
-            RawLookupTrace::read_file(&format!("../trace/lookup_{}.bin", i))
+            RawLookupTrace::read_file(&format!("../traces/lookup_{}.bin", i))
         {
             println!(
                 "Reading lookup_{}.bin -> {}",
@@ -67,29 +52,27 @@ fn main() {
     }
 
 
-    for i in 0..1 {
-        if let Ok(trace) =
-            RawPermutationTrace::read_file(&format!("../trace/permutation_{}.bin", i))
-        {
-            println!(
-                "Reading permutation_{}.bin -> {}",
-                i,
-                trace.get_max_height().ilog2() as usize
-            );
-            permutation_traces[trace.get_max_height().ilog2() as usize].push(trace);
-        }
-    }
+    // for i in 0..1 {
+    //     if let Ok(trace) =
+    //         RawPermutationTrace::read_file(&format!("../trace/permutation_{}.bin", i))
+    //     {
+    //         println!(
+    //             "Reading permutation_{}.bin -> {}",
+    //             i,
+    //             trace.get_max_height().ilog2() as usize
+    //         );
+    //         permutation_traces[trace.get_max_height().ilog2() as usize].push(trace);
+    //     }
+    // }
 
     let mut height = 1 << (permutation_traces.len() - 1);
 
     for i in 0..31 {
         let permutation_trace = permutation_traces.pop().unwrap();
         let lookup_trace = lookup_traces.pop().unwrap();
-        let lookup_trace_no_filter = lookup_no_filter_traces.pop().unwrap();
 
         if !permutation_trace.is_empty()
             || !lookup_trace.is_empty()
-            || !lookup_trace_no_filter.is_empty()
         {
             println!(
                 "Proving for height 2^{}: {}x lookups, {}x perms",
@@ -101,7 +84,6 @@ fn main() {
                 vec![alpha_challenge, delta_challenge],
                 permutation_trace,
                 lookup_trace,
-                lookup_trace_no_filter,
                 height,
             );
         }

@@ -7,7 +7,6 @@ use std::collections::HashMap;
 use std::fs;
 use std::process::id;
 use air::configs::AirLookupConfig;
-use crate::lookup_no_filter::RawLookupNoFilterTrace;
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct RawLookupTrace {
@@ -16,8 +15,8 @@ pub struct RawLookupTrace {
     pub b: Vec<Vec<Vec<[u8; 32]>>>,
     pub b_ids: Vec<Vec<String>>,
     pub name: String,
-    pub a_filter: Vec<[u8; 32]>,
-    pub b_filter: Vec<Vec<[u8; 32]>>,
+    pub a_filter: Option<Vec<[u8; 32]>>,
+    pub b_filter: Option<Vec<Vec<[u8; 32]>>>,
 }
 
 impl RawLookupTrace {
@@ -34,7 +33,9 @@ impl RawLookupTrace {
             e.resize(size, [0u8; 32]);
         }
 
-        self.a_filter.resize(size, [0u8; 32]);
+        if let Some(a_filter) = &mut self.a_filter {
+            a_filter.resize(size, [0u8; 32]);
+        }
 
         for b_element in &mut self.b {
             for e in b_element {
@@ -42,8 +43,10 @@ impl RawLookupTrace {
             }
         }
 
-        for b_filter in &mut self.b_filter {
-            b_filter.resize(size, [0u8; 32]);
+        if let Some(b_filter) = &mut self.b_filter {
+            for b_filter_row in b_filter {
+                b_filter_row.resize(size, [0u8; 32]);
+            }
         }
     }
 
@@ -255,39 +258,34 @@ impl RawLookupTrace {
     }
 
     pub fn get_a_filters(&mut self) -> Vec<Bls12_377Fr> {
-        if self.a_filter.len() == 0 {
-            return vec![]
-        }
+        let mut a_filter_field: Vec<Bls12_377Fr> = Vec::new();
 
-        let mut a_filter: Vec<Bls12_377Fr> = Vec::new();
-
-        for i in 0..self.a[0].len() {
-            a_filter.push(Bls12_377Fr::new(FF_Bls12_377Fr::from_be_bytes_mod_order(
-                self.a_filter[i].as_slice(),
-            )));
-        }
-
-        a_filter
-    }
-
-    pub fn get_b_filters(&mut self) -> Vec<Vec<Bls12_377Fr>> {
-        if self.b_filter.len() == 0 {
-            return vec![]
-        }
-
-        let mut b_filter: Vec<Vec<Bls12_377Fr>> = Vec::new();
-
-        for i in 0..self.b.len() {
-            b_filter.push(Vec::new());
-
-            for j in 0..self.b[i][0].len() {
-                b_filter[i].push(Bls12_377Fr::new(FF_Bls12_377Fr::from_be_bytes_mod_order(
-                    self.b_filter[i][j].as_slice(),
+        if let Some(a_filter) = &self.a_filter {
+            for i in 0..self.a[0].len() {
+                a_filter_field.push(Bls12_377Fr::new(FF_Bls12_377Fr::from_be_bytes_mod_order(
+                    a_filter[i].as_slice(),
                 )));
             }
         }
 
-        b_filter
+        a_filter_field
+    }
+
+    pub fn get_b_filters(&mut self) -> Vec<Vec<Bls12_377Fr>> {
+        let mut b_filter_field: Vec<Vec<Bls12_377Fr>> = Vec::new();
+        if let Some(b_filter) = &self.b_filter {
+            for i in 0..self.b.len() {
+                b_filter_field.push(Vec::new());
+
+                for j in 0..self.b[i][0].len() {
+                    b_filter_field[i].push(Bls12_377Fr::new(FF_Bls12_377Fr::from_be_bytes_mod_order(
+                        b_filter[i][j].as_slice(),
+                    )));
+                }
+            }
+        }
+
+        b_filter_field
     }
 
     pub fn update_registry(
@@ -327,15 +325,14 @@ impl RawLookupTrace {
         }
 
         let mut a_filter_id = None;
-        if self.a_filter.len() != 0 {
+        if self.a_filter.is_none() || self.a_filter.clone().unwrap().len() == 0 {
             a_filter_id = Some(next_id())
         }
 
         let mut b_filter_id = None;
-        if self.b_filter.len() != 0 {
+        if self.b_filter.is_none() || self.b_filter.clone().unwrap().len() == 0 {
             b_filter_id = Some((0..self.b.len()).map(|_| next_id()).collect());
         }
-
 
         let a_inverses_id = next_id();
         let b_inverses_id: Vec<usize> = (0..self.b.len()).map(|_| next_id()).collect();
@@ -351,20 +348,6 @@ impl RawLookupTrace {
             b_inverses_id,
             occurrences_id,
             check_id,
-        }
-    }
-}
-
-impl From<RawLookupNoFilterTrace> for RawLookupTrace {
-    fn from(value: RawLookupNoFilterTrace) -> Self {
-        Self {
-            a: value.a,
-            a_ids: value.a_ids,
-            b: value.b,
-            b_ids: value.b_ids,
-            name: value.name,
-            a_filter: vec![],
-            b_filter: vec![],
         }
     }
 }

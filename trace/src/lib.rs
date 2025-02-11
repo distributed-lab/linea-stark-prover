@@ -3,7 +3,6 @@ pub mod lookup_no_filter;
 pub mod permutation;
 
 use crate::lookup::RawLookupTrace;
-use crate::lookup_no_filter::RawLookupNoFilterTrace;
 use crate::permutation::RawPermutationTrace;
 use air::AirConfig;
 use ark_ff::PrimeField;
@@ -47,17 +46,6 @@ impl RawTrace {
         AirConfig::Lookup(cfg)
     }
 
-    pub fn push_lookup_no_filter(&mut self, lookup: RawLookupNoFilterTrace) -> AirConfig {
-        let mut l = lookup.clone();
-        l.resize(self.height);
-
-        let mut lookup = RawLookupTrace::from(l);
-
-        let cfg = lookup.update_registry(&mut self.column_registry, &mut self.columns);
-        lookup.set_trace(self.challenges.clone(), &mut self.columns, &cfg);
-        AirConfig::Lookup(cfg)
-    }
-
     pub fn push_permutation(&mut self, permutation: RawPermutationTrace) -> AirConfig {
         let mut p = permutation.clone();
         p.resize(self.height);
@@ -71,16 +59,11 @@ impl RawTrace {
         &mut self,
         permutation_traces: Vec<RawPermutationTrace>,
         lookup_traces: Vec<RawLookupTrace>,
-        lookup_trace_no_filter: Vec<RawLookupNoFilterTrace>
     ) -> Vec<AirConfig> {
         let mut cfgs = Vec::new();
 
         lookup_traces.iter().for_each(|lt| {
             cfgs.push(self.push_lookup(lt.clone()));
-        });
-
-        lookup_trace_no_filter.iter().for_each(|lt| {
-            cfgs.push(self.push_lookup_no_filter(lt.clone()));
         });
 
         permutation_traces.iter().for_each(|pt| {
