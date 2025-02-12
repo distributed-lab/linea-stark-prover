@@ -1,11 +1,11 @@
 use crate::lookup::{LookupColumns, RawLookupTrace};
+use air::configs::AirLookupConfig;
 use ark_ff::PrimeField;
 use p3_bls12_377_fr::{Bls12_377Fr, FF_Bls12_377Fr};
+use p3_field::FieldAlgebra;
 use serde::{Deserialize, Serialize};
 use std::cmp::max;
 use std::fs;
-use p3_field::FieldAlgebra;
-use air::configs::AirLookupConfig;
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct RawRangeTrace {
@@ -26,9 +26,5 @@ impl RawRangeTrace {
 
     pub fn get_max_height(&self) -> usize {
         max(self.a.len(), self.b as usize)
-    }
-
-    pub(crate) fn resize(&mut self, size: usize) {
-        self.a.resize(size, [0u8; 32]);
     }
 }

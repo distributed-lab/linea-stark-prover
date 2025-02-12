@@ -1,3 +1,5 @@
+use crate::range::RawRangeTrace;
+use air::configs::AirLookupConfig;
 use ark_ff::{BigInteger, PrimeField};
 use p3_bls12_377_fr::{Bls12_377Fr, FF_Bls12_377Fr};
 use p3_field::{Field, FieldAlgebra};
@@ -5,15 +7,12 @@ use serde::{Deserialize, Serialize};
 use std::cmp::max;
 use std::collections::HashMap;
 use std::fs;
-use rand::Rng;
-use air::configs::AirLookupConfig;
-use crate::range::RawRangeTrace;
 
 pub struct LookupColumns {
     pub a: Vec<Vec<Bls12_377Fr>>,
     pub b: Vec<Vec<Vec<Bls12_377Fr>>>,
     pub a_filter: Vec<Bls12_377Fr>,
-    pub b_filter: Vec<Vec<Bls12_377Fr>>
+    pub b_filter: Vec<Vec<Bls12_377Fr>>,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -23,8 +22,8 @@ pub struct RawLookupTrace {
     pub b: Vec<Vec<Vec<[u8; 32]>>>,
     pub b_ids: Vec<Vec<String>>,
     pub name: String,
-    pub a_filter: Option<Vec<[u8; 32]>>,
-    pub b_filter: Option<Vec<Vec<[u8; 32]>>>,
+    pub a_filter: Vec<[u8; 32]>,
+    pub b_filter: Vec<Vec<[u8; 32]>>,
 }
 
 impl RawLookupTrace {
@@ -36,13 +35,23 @@ impl RawLookupTrace {
         Ok(raw_trace)
     }
 
-    pub fn resize(&mut self, size: usize) {
+    pub fn is_a_filtered(&self) -> bool {
+        !self.a_filter.is_empty()
+    }
+
+    pub fn is_b_filtered(&self) -> bool {
+        // We have only two cases - all filters for B is included or no filters for B at all
+        !self.b_filter.is_empty() && !self.b_filter[0].is_empty()
+    }
+
+    pub(crate) fn resize(&mut self, size: usize) {
         for e in &mut self.a {
             e.resize(size, [0u8; 32]);
         }
 
-        if let Some(a_filter) = &mut self.a_filter {
-            a_filter.resize(size, [0u8; 32]);
+        if self.is_a_filtered() {
+            // Resize only if A filters enabled
+            self.a_filter.resize(size, [0u8; 32]);
         }
 
         for b_element in &mut self.b {
@@ -51,14 +60,19 @@ impl RawLookupTrace {
             }
         }
 
-        if let Some(b_filter) = &mut self.b_filter {
-            for b_filter_row in b_filter {
+        if self.is_b_filtered() {
+            // Resize only if B filters enabled
+            for b_filter_row in &mut self.b_filter {
                 b_filter_row.resize(size, [0u8; 32]);
             }
         }
     }
 
-    pub(crate) fn set_columns(&mut self, columns: &mut [Vec<Bls12_377Fr>], cfg: &AirLookupConfig) -> LookupColumns {
+    pub(crate) fn set_columns(
+        &mut self,
+        columns: &mut [Vec<Bls12_377Fr>],
+        cfg: &AirLookupConfig,
+    ) -> LookupColumns {
         // Get a, b columns
         let (a, b) = self.get_columns();
 
@@ -66,9 +80,9 @@ impl RawLookupTrace {
             columns[*id] = a[i].clone();
         }
 
-        for (i, b_ids) in b.iter().enumerate().take(cfg.b_columns_ids.len()) {
-            for (j, id) in cfg.b_columns_ids[i].iter().enumerate() {
-                columns[*id] = b_ids[j].clone();
+        for (i, b_ids) in cfg.b_columns_ids.iter().enumerate() {
+            for (j, id) in b_ids.iter().enumerate() {
+                columns[*id] = b[i][j].clone();
             }
         }
 
@@ -120,7 +134,7 @@ impl RawLookupTrace {
         // TODO: this is a partially repeated piece of code. Think how write it better.
         for i in 0..sz {
             // Skip is disabled by filter
-            if cfg.a_filter_id.is_some() && lc.a_filter[i] == Bls12_377Fr::ZERO {
+            if cfg.a_filter_id.is_some() && lc.a_filter[i].is_zero() {
                 continue;
             }
 
@@ -166,12 +180,7 @@ impl RawLookupTrace {
 
             // If the current A row is not disabled by filter
             // (otherwise it is assumed to be multiplied on zero filter value)
-            if cfg.a_filter_id.is_some() {
-                if lc.a_filter[i] != Bls12_377Fr::ZERO {
-                    // Add A row log-derivative term
-                    log_derivative_sum += a_row_comb_inverse
-                }
-            } else {
+            if cfg.a_filter_id.is_none() || lc.a_filter[i].is_one() {
                 // Add A row log-derivative term
                 log_derivative_sum += a_row_comb_inverse
             }
@@ -189,16 +198,7 @@ impl RawLookupTrace {
 
                 let mut occurrence = Bls12_377Fr::ZERO;
                 if let Some(cnt) = occurrences.get(&b_row_comb) {
-                    if cfg.b_filter_id.is_some() {
-                        if lc.b_filter[b_table_ind][i] != Bls12_377Fr::ZERO {
-                            // If multiplicity is non-zero and B row is not disabled by filter, then:
-                            // - subtract from sum the corresponding log-derivative term
-                            // - remove multiplicity from occurrences
-                            occurrence = Bls12_377Fr::from_canonical_usize(*cnt);
-                            log_derivative_sum -= b_row_comb_inverse * occurrence;
-                            occurrences.remove(&b_row_comb);
-                        }
-                    } else {
+                    if cfg.b_filter_id.is_none() || lc.b_filter[b_table_ind][i].is_one() {
                         // If multiplicity is non-zero and B row is not disabled by filter, then:
                         // - subtract from sum the corresponding log-derivative term
                         // - remove multiplicity from occurrences
@@ -246,7 +246,7 @@ impl RawLookupTrace {
 
         max_height
     }
-    
+
     pub fn get_columns(&mut self) -> (Vec<Vec<Bls12_377Fr>>, Vec<Vec<Vec<Bls12_377Fr>>>) {
         let mut a: Vec<Vec<Bls12_377Fr>> = Vec::new();
         let mut b: Vec<Vec<Vec<Bls12_377Fr>>> = Vec::new();
@@ -279,28 +279,31 @@ impl RawLookupTrace {
     pub fn get_a_filters(&mut self) -> Vec<Bls12_377Fr> {
         let mut a_filter_field: Vec<Bls12_377Fr> = Vec::new();
 
-        if let Some(a_filter) = &self.a_filter {
-            for a_filter_ids in a_filter.iter().take(self.a[0].len()) {
-                a_filter_field.push(Bls12_377Fr::new(FF_Bls12_377Fr::from_be_bytes_mod_order(
-                    a_filter_ids.as_slice(),
-                )));
-            }
+        if !self.is_a_filtered() {
+            return a_filter_field;
+        }
+
+        for i in 0..self.a_filter.len() {
+            a_filter_field.push(Bls12_377Fr::new(FF_Bls12_377Fr::from_be_bytes_mod_order(
+                self.a_filter[i].as_slice(),
+            )));
         }
 
         a_filter_field
     }
 
     pub fn get_b_filters(&mut self) -> Vec<Vec<Bls12_377Fr>> {
-        let mut b_filter_field: Vec<Vec<Bls12_377Fr>> = Vec::new();
-        if let Some(b_filter) = &self.b_filter {
-            for i in 0..self.b.len() {
-                b_filter_field.push(Vec::new());
+        let mut b_filter_field: Vec<Vec<Bls12_377Fr>> = vec![Vec::new(); self.b.len()];
 
-                for j in 0..self.b[i][0].len() {
-                    b_filter_field[i].push(Bls12_377Fr::new(FF_Bls12_377Fr::from_be_bytes_mod_order(
-                        b_filter[i][j].as_slice(),
-                    )));
-                }
+        if !self.is_b_filtered() {
+            return b_filter_field;
+        }
+
+        for i in 0..self.b.len() {
+            for j in 0..self.b_filter[i].len() {
+                b_filter_field[i].push(Bls12_377Fr::new(FF_Bls12_377Fr::from_be_bytes_mod_order(
+                    self.b_filter[i][j].as_slice(),
+                )));
             }
         }
 
@@ -344,12 +347,12 @@ impl RawLookupTrace {
         }
 
         let mut a_filter_id = None;
-        if self.a_filter.is_some() && !self.a_filter.clone().unwrap().is_empty() {
+        if self.is_a_filtered() {
             a_filter_id = Some(next_id())
         }
 
         let mut b_filter_id = None;
-        if self.b_filter.is_some() && !self.b_filter.clone().unwrap().is_empty() {
+        if self.is_b_filtered() {
             b_filter_id = Some((0..self.b.len()).map(|_| next_id()).collect());
         }
 
@@ -384,17 +387,20 @@ impl From<RawRangeTrace> for RawLookupTrace {
 
         for _ in 0..value.a.len() {
             if counter < value.b {
-                b[0][0].push(Bls12_377Fr::from_canonical_u64(counter).value.into_bigint().to_bytes_be().as_slice().try_into().unwrap());
+                b[0][0].push(
+                    Bls12_377Fr::from_canonical_u64(counter)
+                        .value
+                        .into_bigint()
+                        .to_bytes_be()
+                        .as_slice()
+                        .try_into()
+                        .unwrap(),
+                );
                 counter += 1;
             } else {
-                b[0][0].push([0u8;32]);
+                b[0][0].push([0u8; 32]);
             }
         }
-
-        let mut rng = rand::thread_rng(); // Thread-local random number generator
-
-        // Generate a random number between 1 and 100 (inclusive)
-        // let random_number = rng.gen_range(1..=100000);
 
         Self {
             a,
@@ -402,8 +408,8 @@ impl From<RawRangeTrace> for RawLookupTrace {
             b,
             b_ids: vec![vec![format!("{}", value.b)]],
             name: value.name,
-            a_filter: None,
-            b_filter: None,
+            a_filter: vec![],
+            b_filter: vec![],
         }
     }
 }

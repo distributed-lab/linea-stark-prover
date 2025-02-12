@@ -24,7 +24,7 @@ impl RawPermutationTrace {
         Ok(raw_trace)
     }
 
-    pub fn resize(&mut self, size: usize) {
+    pub(crate) fn resize(&mut self, size: usize) {
         for e in &mut self.a {
             e.resize(size, [0u8; 32]);
         }
