@@ -1,4 +1,4 @@
-use ark_ff::PrimeField;
+use ark_ff::{BigInteger, PrimeField};
 use p3_bls12_377_fr::{Bls12_377Fr, FF_Bls12_377Fr};
 use p3_field::{Field, FieldAlgebra};
 use serde::{Deserialize, Serialize};
@@ -6,6 +6,14 @@ use std::cmp::max;
 use std::collections::HashMap;
 use std::fs;
 use air::configs::AirLookupConfig;
+use crate::range::RawRangeTrace;
+
+pub struct LookupColumns {
+    pub a: Vec<Vec<Bls12_377Fr>>,
+    pub b: Vec<Vec<Vec<Bls12_377Fr>>>,
+    pub a_filter: Vec<Bls12_377Fr>,
+    pub b_filter: Vec<Vec<Bls12_377Fr>>
+}
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct RawLookupTrace {
@@ -49,21 +57,7 @@ impl RawLookupTrace {
         }
     }
 
-    pub(crate) fn set_trace(
-        &mut self,
-        challenges: Vec<Bls12_377Fr>,
-        columns: &mut [Vec<Bls12_377Fr>],
-        cfg: &AirLookupConfig,
-    ) {
-        assert_eq!(
-            challenges.len(),
-            2,
-            "Two challenges should be provided for the lookup trace"
-        );
-
-        // Unpack challenges
-        let (alpha, delta) = (challenges[0], challenges[1]);
-
+    pub(crate) fn set_columns(&mut self, columns: &mut [Vec<Bls12_377Fr>], cfg: &AirLookupConfig) -> LookupColumns {
         // Get a, b columns
         let (a, b) = self.get_columns();
 
@@ -89,9 +83,34 @@ impl RawLookupTrace {
             }
         }
 
+        LookupColumns {
+            a,
+            b,
+            a_filter,
+            b_filter,
+        }
+    }
+
+    pub(crate) fn set_trace(
+        &mut self,
+        challenges: Vec<Bls12_377Fr>,
+        columns: &mut [Vec<Bls12_377Fr>],
+        cfg: &AirLookupConfig,
+    ) {
+        assert_eq!(
+            challenges.len(),
+            2,
+            "Two challenges should be provided for the lookup trace"
+        );
+
+        // Unpack challenges
+        let (alpha, delta) = (challenges[0], challenges[1]);
+
+        let lc = self.set_columns(columns, &cfg);
+
         // Trace height
         // !IMPORTANT: should be equal per all columns.
-        let sz = a[0].len();
+        let sz = lc.a[0].len();
 
         // Amount of occurrence pre unique row in A
         let mut occurrences: HashMap<Bls12_377Fr, usize> = HashMap::new();
@@ -100,12 +119,12 @@ impl RawLookupTrace {
         // TODO: this is a partially repeated piece of code. Think how write it better.
         for i in 0..sz {
             // Skip is disabled by filter
-            if cfg.a_filter_id.is_some() && a_filter[i] == Bls12_377Fr::ZERO {
+            if cfg.a_filter_id.is_some() && lc.a_filter[i] == Bls12_377Fr::ZERO {
                 continue;
             }
 
             let mut a_row_comb = Bls12_377Fr::ZERO;
-            for a_column in &a {
+            for a_column in &lc.a {
                 // Collect linear combination of the row
                 // `a_row_comb = a[i][j] * alpha^j` per all `j`
                 a_row_comb = a_row_comb * alpha + a_column[i];
@@ -122,10 +141,10 @@ impl RawLookupTrace {
         let mut a_inverses_column = Vec::new();
 
         let mut b_inverses_table: Vec<Vec<Bls12_377Fr>> =
-            (0..b.len()).map(|_| Vec::new()).collect();
+            (0..lc.b.len()).map(|_| Vec::new()).collect();
 
         let mut multiplicities_table: Vec<Vec<Bls12_377Fr>> =
-            (0..b.len()).map(|_| Vec::new()).collect();
+            (0..lc.b.len()).map(|_| Vec::new()).collect();
 
         let mut prefix_sum_column = Vec::new();
 
@@ -135,7 +154,7 @@ impl RawLookupTrace {
 
         for i in 0..sz {
             let mut a_row_comb = Bls12_377Fr::ZERO;
-            for a_column in &a {
+            for a_column in &lc.a {
                 // Iterate over all A columns and collect linear combination of the row
                 // `a_row_comb = a[i][j] * alpha^j` per all `j`
                 a_row_comb = a_row_comb * alpha + a_column[i];
@@ -147,7 +166,7 @@ impl RawLookupTrace {
             // If the current A row is not disabled by filter
             // (otherwise it is assumed to be multiplied on zero filter value)
             if cfg.a_filter_id.is_some() {
-                if a_filter[i] != Bls12_377Fr::ZERO {
+                if lc.a_filter[i] != Bls12_377Fr::ZERO {
                     // Add A row log-derivative term
                     log_derivative_sum += a_row_comb_inverse
                 }
@@ -156,7 +175,7 @@ impl RawLookupTrace {
                 log_derivative_sum += a_row_comb_inverse
             }
 
-            for (b_table_ind, b_table) in b.iter().enumerate() {
+            for (b_table_ind, b_table) in lc.b.iter().enumerate() {
                 let mut b_row_comb = Bls12_377Fr::ZERO;
                 for b_column in b_table {
                     // Iterate over all B columns and collect linear combination of the row
@@ -170,7 +189,7 @@ impl RawLookupTrace {
                 let mut occurrence = Bls12_377Fr::ZERO;
                 if let Some(cnt) = occurrences.get(&b_row_comb) {
                     if cfg.b_filter_id.is_some() {
-                        if b_filter[b_table_ind][i] != Bls12_377Fr::ZERO {
+                        if lc.b_filter[b_table_ind][i] != Bls12_377Fr::ZERO {
                             // If multiplicity is non-zero and B row is not disabled by filter, then:
                             // - subtract from sum the corresponding log-derivative term
                             // - remove multiplicity from occurrences
@@ -347,6 +366,45 @@ impl RawLookupTrace {
             b_inverses_id,
             occurrences_id,
             check_id,
+        }
+    }
+}
+
+impl From<RawRangeTrace> for RawLookupTrace {
+    fn from(value: RawRangeTrace) -> Self {
+        let mut a: Vec<Vec<[u8; 32]>> = vec![Vec::new()];
+        let mut b: Vec<Vec<Vec<[u8; 32]>>> = vec![vec![Vec::new()]];
+
+        let mut a_filter: Vec<[u8; 32]> = Vec::new();
+        let mut b_filter: Vec<Vec<[u8; 32]>> = vec![Vec::new()];
+
+        for i in 0..value.a.len() {
+            a[0].push(value.a[i].as_slice().try_into().unwrap());
+
+            a_filter.push(Bls12_377Fr::ONE.value.into_bigint().to_bytes_be().as_slice().try_into().unwrap());
+        }
+
+        let mut counter = 0u64;
+
+        for _ in 0..value.a.len() {
+            if counter < value.b {
+                b[0][0].push(Bls12_377Fr::from_canonical_u64(counter).value.into_bigint().to_bytes_be().as_slice().try_into().unwrap());
+                counter += 1;
+            } else {
+                b[0][0].push(Bls12_377Fr::ZERO.value.into_bigint().to_bytes_be().as_slice().try_into().unwrap());
+            }
+
+            b_filter[0].push(Bls12_377Fr::ONE.value.into_bigint().to_bytes_be().as_slice().try_into().unwrap());
+        }
+
+        Self {
+            a,
+            a_ids: vec![value.a_id.clone()],
+            b,
+            b_ids: vec![vec!["".to_string()]],
+            name: value.name,
+            a_filter: Some(a_filter),
+            b_filter: Some(b_filter),
         }
     }
 }

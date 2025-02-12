@@ -1,5 +1,6 @@
 pub mod lookup;
 pub mod permutation;
+pub mod range;
 
 use crate::lookup::RawLookupTrace;
 use crate::permutation::RawPermutationTrace;
@@ -8,6 +9,7 @@ use p3_bls12_377_fr::Bls12_377Fr;
 use p3_field::FieldAlgebra;
 use p3_matrix::dense::RowMajorMatrix;
 use std::collections::HashMap;
+use crate::range::RawRangeTrace;
 
 pub struct RawTrace {
     pub columns: Vec<Vec<Bls12_377Fr>>,
@@ -37,8 +39,17 @@ impl RawTrace {
         l.resize(self.height);
         
         let cfg = l.update_registry(&mut self.column_registry, &mut self.columns);
+
         l.set_trace(self.challenges.clone(), &mut self.columns, &cfg);
         AirConfig::Lookup(cfg)
+    }
+
+    pub fn push_range(&mut self, range: RawRangeTrace) -> AirConfig {
+        let r = range.clone();
+        let mut l = RawLookupTrace::from(r);
+        l.resize(self.height);
+
+        self.push_lookup(l)
     }
 
     pub fn push_permutation(&mut self, permutation: RawPermutationTrace) -> AirConfig {
@@ -54,11 +65,16 @@ impl RawTrace {
         &mut self,
         permutation_traces: Vec<RawPermutationTrace>,
         lookup_traces: Vec<RawLookupTrace>,
+        range_traces: Vec<RawRangeTrace>,
     ) -> Vec<AirConfig> {
         let mut cfgs = Vec::new();
 
         lookup_traces.iter().for_each(|lt| {
             cfgs.push(self.push_lookup(lt.clone()));
+        });
+
+        range_traces.iter().for_each(|rt| {
+            cfgs.push(self.push_range(rt.clone()));
         });
 
         permutation_traces.iter().for_each(|pt| {
