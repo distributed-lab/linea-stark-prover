@@ -14,3 +14,4 @@ serde    = { workspace = true, features = ["derive"] }
 ciborium = { workspace = true }
 
 air = { path = "../air" }
+rand = "0.8.5"

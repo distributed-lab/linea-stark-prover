@@ -31,43 +31,4 @@ impl RawRangeTrace {
     pub(crate) fn resize(&mut self, size: usize) {
         self.a.resize(size, [0u8; 32]);
     }
-
-    fn get_columns(
-        &mut self,
-    ) -> (
-        Vec<Vec<Bls12_377Fr>>,
-        Vec<Vec<Vec<Bls12_377Fr>>>,
-        Vec<Bls12_377Fr>,
-        Vec<Vec<Bls12_377Fr>>,
-    ) {
-        let mut a: Vec<Vec<Bls12_377Fr>> = vec![Vec::new()];
-        let mut b: Vec<Vec<Vec<Bls12_377Fr>>> = vec![vec![Vec::new()]];
-
-        let mut a_filter: Vec<Bls12_377Fr> = Vec::new();
-        let mut b_filter: Vec<Vec<Bls12_377Fr>> = vec![Vec::new()];
-
-        for i in 0..self.a.len() {
-            a[0].push(Bls12_377Fr::new(FF_Bls12_377Fr::from_be_bytes_mod_order(
-                self.a[i].as_slice(),
-            )));
-
-            a_filter.push(Bls12_377Fr::ONE);
-        }
-
-        let mut counter = 0u64;
-
-        for _ in 0..self.a.len() {
-            if counter < self.b {
-                b[0][0].push(Bls12_377Fr::from_canonical_u64(counter));
-                counter += 1;
-            } else {
-                b[0][0].push(Bls12_377Fr::ZERO);
-            }
-
-            b_filter[0].push(Bls12_377Fr::ONE);
-        }
-
-
-        (a, b, a_filter, b_filter)
-    }
 }

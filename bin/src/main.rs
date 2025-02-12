@@ -34,41 +34,50 @@ fn main() {
     let mut permutation_traces: Vec<Vec<RawPermutationTrace>> = vec![vec![]; 32];
     let mut range_traces: Vec<Vec<RawRangeTrace>> = vec![vec![]; 32];
 
-    for i in 0..1 {
+    for i in 0..0 { // 1416
         if let Ok(trace) = RawRangeTrace::read_file(&format!("../ranges/range_{}.bin", i)) {
-            println!(
-                "Reading range_{}.bin -> {}",
-                i,
-                trace.get_max_height().ilog2() as usize
-            );
-            range_traces[trace.get_max_height().ilog2() as usize].push(trace);
+            if trace.get_max_height().ilog2() == 21 {
+                println!("{}", trace.b);
+                println!(
+                    "Reading range_{}.bin -> {}",
+                    i,
+                    trace.get_max_height().ilog2() as usize
+                );
+                range_traces[trace.get_max_height().ilog2() as usize].push(trace);
+            }
         }
 
     }
 
-    // for i in 700..701 {
-    //     if let Ok(trace) = RawLookupTrace::read_file(&format!("../traces/lookup_{}.bin", i)) {
-    //         println!(
-    //             "Reading lookup_{}.bin -> {}",
-    //             i,
-    //             trace.get_max_height().ilog2() as usize
-    //         );
-    //         lookup_traces[trace.get_max_height().ilog2() as usize].push(trace.clone());
-    //     }
-    // }
-    //
-    // for i in 0..1 {
-    //     if let Ok(trace) =
-    //         RawPermutationTrace::read_file(&format!("../traces/permutation_{}.bin", i))
-    //     {
-    //         println!(
-    //             "Reading permutation_{}.bin -> {}",
-    //             i,
-    //             trace.get_max_height().ilog2() as usize
-    //         );
-    //         permutation_traces[trace.get_max_height().ilog2() as usize].push(trace);
-    //     }
-    // }
+    for i in 0..973 {
+        if let Ok(trace) = RawLookupTrace::read_file(&format!("../traces/lookup_{}.bin", i)) {
+            if trace.get_max_height().ilog2() == 21 {
+                println!(
+                    "Reading lookup_{}.bin -> {}",
+                    i,
+                    trace.get_max_height().ilog2() as usize
+                );
+                lookup_traces[trace.get_max_height().ilog2() as usize].push(trace.clone());
+            }
+        }
+
+        if lookup_traces.len() == 12 {
+            break
+        }
+    }
+
+    for i in 0..0 { // 1
+        if let Ok(trace) =
+            RawPermutationTrace::read_file(&format!("../traces/permutation_{}.bin", i))
+        {
+            println!(
+                "Reading permutation_{}.bin -> {}",
+                i,
+                trace.get_max_height().ilog2() as usize
+            );
+            permutation_traces[trace.get_max_height().ilog2() as usize].push(trace);
+        }
+    }
 
     let mut height = 1 << (permutation_traces.len() - 1);
 

@@ -5,6 +5,7 @@ use serde::{Deserialize, Serialize};
 use std::cmp::max;
 use std::collections::HashMap;
 use std::fs;
+use rand::Rng;
 use air::configs::AirLookupConfig;
 use crate::range::RawRangeTrace;
 
@@ -375,13 +376,8 @@ impl From<RawRangeTrace> for RawLookupTrace {
         let mut a: Vec<Vec<[u8; 32]>> = vec![Vec::new()];
         let mut b: Vec<Vec<Vec<[u8; 32]>>> = vec![vec![Vec::new()]];
 
-        let mut a_filter: Vec<[u8; 32]> = Vec::new();
-        let mut b_filter: Vec<Vec<[u8; 32]>> = vec![Vec::new()];
-
         for i in 0..value.a.len() {
             a[0].push(value.a[i].as_slice().try_into().unwrap());
-
-            a_filter.push(Bls12_377Fr::ONE.value.into_bigint().to_bytes_be().as_slice().try_into().unwrap());
         }
 
         let mut counter = 0u64;
@@ -391,20 +387,23 @@ impl From<RawRangeTrace> for RawLookupTrace {
                 b[0][0].push(Bls12_377Fr::from_canonical_u64(counter).value.into_bigint().to_bytes_be().as_slice().try_into().unwrap());
                 counter += 1;
             } else {
-                b[0][0].push(Bls12_377Fr::ZERO.value.into_bigint().to_bytes_be().as_slice().try_into().unwrap());
+                b[0][0].push([0u8;32]);
             }
-
-            b_filter[0].push(Bls12_377Fr::ONE.value.into_bigint().to_bytes_be().as_slice().try_into().unwrap());
         }
+
+        let mut rng = rand::thread_rng(); // Thread-local random number generator
+
+        // Generate a random number between 1 and 100 (inclusive)
+        // let random_number = rng.gen_range(1..=100000);
 
         Self {
             a,
             a_ids: vec![value.a_id.clone()],
             b,
-            b_ids: vec![vec!["".to_string()]],
+            b_ids: vec![vec![format!("{}", value.b)]],
             name: value.name,
-            a_filter: Some(a_filter),
-            b_filter: Some(b_filter),
+            a_filter: None,
+            b_filter: None,
         }
     }
 }
