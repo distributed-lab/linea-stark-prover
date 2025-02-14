@@ -385,26 +385,22 @@ impl From<&mut RawRangeTrace> for RawLookupTrace {
         let mut b: Vec<Vec<Vec<[u8; 32]>>> = vec![vec![Vec::new()]];
 
         for i in 0..value.a.len() {
-            a[0].push(value.a[i].as_slice().try_into().unwrap());
+            a[0].push(value.a[i]);
         }
 
         let mut counter = 0u64;
 
-        for _ in 0..value.a.len() {
-            if counter < value.b {
-                b[0][0].push(
-                    Bls12_377Fr::from_canonical_u64(counter)
-                        .value
-                        .into_bigint()
-                        .to_bytes_be()
-                        .as_slice()
-                        .try_into()
-                        .unwrap(),
-                );
-                counter += 1;
-            } else {
-                b[0][0].push([0u8; 32]);
-            }
+        while counter < value.b {
+            b[0][0].push(
+                Bls12_377Fr::from_canonical_u64(counter)
+                    .value
+                    .into_bigint()
+                    .to_bytes_be()
+                    .as_slice()
+                    .try_into()
+                    .unwrap(),
+            );
+            counter += 1;
         }
 
         Self {

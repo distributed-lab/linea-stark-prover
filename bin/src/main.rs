@@ -34,35 +34,26 @@ fn main() {
     let mut permutation_traces: Vec<Vec<RawPermutationTrace>> = vec![vec![]; 32];
     let mut range_traces: Vec<Vec<RawRangeTrace>> = vec![vec![]; 32];
 
-    for i in 0..0 { // 1416
-        if let Ok(trace) = RawRangeTrace::read_file(&format!("../ranges/range_{}.bin", i)) {
-            if trace.get_max_height().ilog2() == 21 {
-                println!("{}", trace.b);
-                println!(
-                    "Reading range_{}.bin -> {}",
-                    i,
-                    trace.get_max_height().ilog2() as usize
-                );
-                range_traces[trace.get_max_height().ilog2() as usize].push(trace);
-            }
+    for i in 0..1416 {
+        if let Ok(trace) = RawRangeTrace::read_file(&format!("../ranges/trace/range_{}.bin", i)) {
+            println!(
+                "Reading range_{}.bin -> {}",
+                i,
+                trace.get_max_height().ilog2() as usize
+            );
+            range_traces[trace.get_max_height().ilog2() as usize].push(trace);
         }
 
     }
 
-    for i in 0..973 {
-        if let Ok(trace) = RawLookupTrace::read_file(&format!("../traces/lookup_{}.bin", i)) {
-            if trace.get_max_height().ilog2() == 21 {
-                println!(
-                    "Reading lookup_{}.bin -> {}",
-                    i,
-                    trace.get_max_height().ilog2() as usize
-                );
-                lookup_traces[trace.get_max_height().ilog2() as usize].push(trace.clone());
-            }
-        }
-
-        if lookup_traces[21].len() == 12 {
-            break
+    for i in 0..0 {
+        if let Ok(trace) = RawLookupTrace::read_file(&format!("../traces/traces/lookup_{}.bin", i)) {
+            println!(
+                "Reading lookup_{}.bin -> {}",
+                i,
+                trace.get_max_height().ilog2() as usize
+            );
+            lookup_traces[trace.get_max_height().ilog2() as usize].push(trace.clone());
         }
     }
 
@@ -82,11 +73,11 @@ fn main() {
     let mut height = 1 << (permutation_traces.len() - 1);
 
     for i in 0..31 {
-        
+
         let permutation_trace = permutation_traces.pop().unwrap();
         let lookup_trace = lookup_traces.pop().unwrap();
         let range_trace = range_traces.pop().unwrap();
-        
+
         if !permutation_trace.is_empty() || !lookup_trace.is_empty() || !range_trace.is_empty() {
             println!(
                 "Proving for height 2^{}: {}x lookups, {}x perms, {}x ranges.",
