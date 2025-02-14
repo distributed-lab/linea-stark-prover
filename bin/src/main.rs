@@ -34,7 +34,7 @@ fn main() {
     let mut permutation_traces: Vec<Vec<RawPermutationTrace>> = vec![vec![]; 32];
     let mut range_traces: Vec<Vec<RawRangeTrace>> = vec![vec![]; 32];
 
-    for i in 0..0 {
+    for i in 0..2000 {
         if let Ok(trace) = RawRangeTrace::read_file(&format!("../range_{}.bin", i)) {
             println!(
                 "Reading range_{}.bin -> {}",
@@ -46,7 +46,7 @@ fn main() {
 
     }
 
-    for i in 18..19 {
+    for i in 0..2000 {
         if let Ok(trace) = RawLookupTrace::read_file(&format!("../lookup_{}.bin", i)) {
             println!(
                 "Reading lookup_{}.bin -> {}",
