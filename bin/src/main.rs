@@ -61,7 +61,7 @@ fn main() {
             }
         }
 
-        if lookup_traces.len() == 12 {
+        if lookup_traces[21].len() == 12 {
             break
         }
     }
@@ -82,10 +82,11 @@ fn main() {
     let mut height = 1 << (permutation_traces.len() - 1);
 
     for i in 0..31 {
+        
         let permutation_trace = permutation_traces.pop().unwrap();
         let lookup_trace = lookup_traces.pop().unwrap();
         let range_trace = range_traces.pop().unwrap();
-
+        
         if !permutation_trace.is_empty() || !lookup_trace.is_empty() || !range_trace.is_empty() {
             println!(
                 "Proving for height 2^{}: {}x lookups, {}x perms, {}x ranges.",

@@ -34,30 +34,27 @@ impl RawTrace {
         }
     }
 
-    pub fn push_lookup(&mut self, lookup: RawLookupTrace) -> AirConfig {
-        let mut l = lookup.clone();
-        l.resize(self.height);
+    pub fn push_lookup(&mut self, lookup: &mut RawLookupTrace) -> AirConfig {
+        lookup.resize(self.height);
 
-        let cfg = l.update_registry(&mut self.column_registry, &mut self.columns);
+        let cfg = lookup.update_registry(&mut self.column_registry, &mut self.columns);
 
-        l.set_trace(self.challenges.clone(), &mut self.columns, &cfg);
+        lookup.set_trace(self.challenges.clone(), &mut self.columns, &cfg);
         AirConfig::Lookup(cfg)
     }
 
-    pub fn push_range(&mut self, range: RawRangeTrace) -> AirConfig {
-        let r = range.clone();
-        let mut l = RawLookupTrace::from(r);
+    pub fn push_range(&mut self, range: &mut RawRangeTrace) -> AirConfig {
+        let mut l = RawLookupTrace::from(range);
         l.resize(self.height);
 
-        self.push_lookup(l)
+        self.push_lookup(&mut l)
     }
 
-    pub fn push_permutation(&mut self, permutation: RawPermutationTrace) -> AirConfig {
-        let mut p = permutation.clone();
-        p.resize(self.height);
+    pub fn push_permutation(&mut self, permutation: &mut RawPermutationTrace) -> AirConfig {
+        permutation.resize(self.height);
 
-        let cfg = p.update_registry(&mut self.column_registry, &mut self.columns);
-        p.set_trace(self.challenges.clone(), &mut self.columns, &cfg);
+        let cfg = permutation.update_registry(&mut self.column_registry, &mut self.columns);
+        permutation.set_trace(self.challenges.clone(), &mut self.columns, &cfg);
         AirConfig::Permutation(cfg)
     }
 
@@ -69,16 +66,16 @@ impl RawTrace {
     ) -> Vec<AirConfig> {
         let mut cfgs = Vec::new();
 
-        lookup_traces.iter().for_each(|lt| {
-            cfgs.push(self.push_lookup(lt.clone()));
+        lookup_traces.into_iter().for_each(|mut lt| {
+            cfgs.push(self.push_lookup(&mut lt));
         });
 
-        range_traces.iter().for_each(|rt| {
-            cfgs.push(self.push_range(rt.clone()));
+        range_traces.into_iter().for_each(|mut rt| {
+            cfgs.push(self.push_range(&mut rt));
         });
 
-        permutation_traces.iter().for_each(|pt| {
-            cfgs.push(self.push_permutation(pt.clone()));
+        permutation_traces.into_iter().for_each(|mut pt| {
+            cfgs.push(self.push_permutation(&mut pt));
         });
 
         cfgs

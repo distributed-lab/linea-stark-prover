@@ -93,7 +93,7 @@ impl<AB: AirBuilder> LineaConfigAIR<AB> for LineaAIR<AB::F>  {
             let mut b_filter_local = AB::Expr::from(AB::F::ONE);
             let mut b_filter_next = AB::Expr::from(AB::F::ONE);
 
-            if let Some(b_filter_id) = l.b_filter_id.clone() {
+            if let Some(b_filter_id) = &l.b_filter_id {
                 b_filter_local = local[b_filter_id[b_table_ind]].into();
                 b_filter_next = next[b_filter_id[b_table_ind]].into();
             }

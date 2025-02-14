@@ -74,26 +74,30 @@ impl RawLookupTrace {
         cfg: &AirLookupConfig,
     ) -> LookupColumns {
         // Get a, b columns
-        let (a, b) = self.get_columns();
+        let (mut a, mut b) = self.get_columns();
 
         for (i, id) in cfg.a_columns_ids.iter().enumerate() {
+            // Move a[i] to columns[*id] without cloning
             columns[*id] = a[i].clone();
         }
 
         for (i, b_ids) in cfg.b_columns_ids.iter().enumerate() {
             for (j, id) in b_ids.iter().enumerate() {
+                // Move b[i][j] to columns[*id] without cloning
                 columns[*id] = b[i][j].clone();
             }
         }
 
-        let a_filter = self.get_a_filters();
+        let mut a_filter = self.get_a_filters();
         if let Some(a_filter_id) = cfg.a_filter_id {
+            // Move a_filter to columns[a_filter_id] without cloning
             columns[a_filter_id] = a_filter.clone();
         }
 
-        let b_filter = self.get_b_filters();
-        if let Some(b_filter_id) = cfg.b_filter_id.clone() {
+        let mut b_filter = self.get_b_filters();
+        if let Some(b_filter_id) = &cfg.b_filter_id {
             for (i, id) in b_filter_id.iter().enumerate() {
+                // Move b_filter[i] to columns[*id] without cloning
                 columns[*id] = b_filter[i].clone();
             }
         }
@@ -105,6 +109,7 @@ impl RawLookupTrace {
             b_filter,
         }
     }
+
 
     pub(crate) fn set_trace(
         &mut self,
@@ -229,7 +234,7 @@ impl RawLookupTrace {
             columns[*id] = multiplicities_table[i].clone();
         }
 
-        columns[cfg.check_id] = prefix_sum_column.clone();
+        columns[cfg.check_id] = prefix_sum_column;
     }
 
     pub fn get_max_height(&self) -> usize {
@@ -374,8 +379,8 @@ impl RawLookupTrace {
     }
 }
 
-impl From<RawRangeTrace> for RawLookupTrace {
-    fn from(value: RawRangeTrace) -> Self {
+impl From<&mut RawRangeTrace> for RawLookupTrace {
+    fn from(value: &mut RawRangeTrace) -> Self {
         let mut a: Vec<Vec<[u8; 32]>> = vec![Vec::new()];
         let mut b: Vec<Vec<Vec<[u8; 32]>>> = vec![vec![Vec::new()]];
 
@@ -407,7 +412,7 @@ impl From<RawRangeTrace> for RawLookupTrace {
             a_ids: vec![value.a_id.clone()],
             b,
             b_ids: vec![vec![format!("{}", value.b)]],
-            name: value.name,
+            name: value.name.clone(),
             a_filter: vec![],
             b_filter: vec![],
         }
