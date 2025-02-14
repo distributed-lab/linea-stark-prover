@@ -9,20 +9,20 @@ use std::collections::HashMap;
 use std::fs;
 
 pub struct LookupColumns {
-    pub a: Vec<Vec<Bls12_377Fr>>,
+    pub a: Vec<Vec<Vec<Bls12_377Fr>>>,
     pub b: Vec<Vec<Vec<Bls12_377Fr>>>,
-    pub a_filter: Vec<Bls12_377Fr>,
+    pub a_filter: Vec<Vec<Bls12_377Fr>>,
     pub b_filter: Vec<Vec<Bls12_377Fr>>,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct RawLookupTrace {
-    pub a: Vec<Vec<[u8; 32]>>,
-    pub a_ids: Vec<String>,
+    pub a: Vec<Vec<Vec<[u8; 32]>>>,
+    pub a_ids: Vec<Vec<String>>,
     pub b: Vec<Vec<Vec<[u8; 32]>>>,
     pub b_ids: Vec<Vec<String>>,
     pub name: String,
-    pub a_filter: Vec<[u8; 32]>,
+    pub a_filter: Vec<Vec<[u8; 32]>>,
     pub b_filter: Vec<Vec<[u8; 32]>>,
 }
 
@@ -31,12 +31,11 @@ impl RawLookupTrace {
         let file_content = fs::read(path)?;
         let raw_trace: RawLookupTrace =
             ciborium::from_reader(std::io::Cursor::new(file_content)).unwrap();
-
         Ok(raw_trace)
     }
 
     pub fn is_a_filtered(&self) -> bool {
-        !self.a_filter.is_empty()
+        !self.a_filter.is_empty() && !self.a_filter[0].is_empty()
     }
 
     pub fn is_b_filtered(&self) -> bool {
@@ -45,13 +44,17 @@ impl RawLookupTrace {
     }
 
     pub(crate) fn resize(&mut self, size: usize) {
-        for e in &mut self.a {
-            e.resize(size, [0u8; 32]);
+        for a_element in &mut self.a {
+            for e in a_element {
+                e.resize(size, [0u8; 32]);
+            }
         }
 
         if self.is_a_filtered() {
-            // Resize only if A filters enabled
-            self.a_filter.resize(size, [0u8; 32]);
+            // Resize only if B filters enabled
+            for a_filter_row in &mut self.a_filter {
+                a_filter_row.resize(size, [0u8; 32]);
+            }
         }
 
         for b_element in &mut self.b {
@@ -74,30 +77,30 @@ impl RawLookupTrace {
         cfg: &AirLookupConfig,
     ) -> LookupColumns {
         // Get a, b columns
-        let (mut a, mut b) = self.get_columns();
+        let (a, b) = self.get_columns();
 
-        for (i, id) in cfg.a_columns_ids.iter().enumerate() {
-            // Move a[i] to columns[*id] without cloning
-            columns[*id] = a[i].clone();
+        for (i, a_ids) in cfg.a_columns_ids.iter().enumerate() {
+            for (j, id) in a_ids.iter().enumerate() {
+                columns[*id] = a[i][j].clone();
+            }
         }
 
         for (i, b_ids) in cfg.b_columns_ids.iter().enumerate() {
             for (j, id) in b_ids.iter().enumerate() {
-                // Move b[i][j] to columns[*id] without cloning
                 columns[*id] = b[i][j].clone();
             }
         }
 
-        let mut a_filter = self.get_a_filters();
-        if let Some(a_filter_id) = cfg.a_filter_id {
-            // Move a_filter to columns[a_filter_id] without cloning
-            columns[a_filter_id] = a_filter.clone();
+        let a_filter = self.get_a_filters();
+        if let Some(a_filter_id) = cfg.a_filter_id.clone() {
+            for (i, id) in a_filter_id.iter().enumerate() {
+                columns[*id] = a_filter[i].clone();
+            }
         }
 
-        let mut b_filter = self.get_b_filters();
-        if let Some(b_filter_id) = &cfg.b_filter_id {
+        let b_filter = self.get_b_filters();
+        if let Some(b_filter_id) = cfg.b_filter_id.clone() {
             for (i, id) in b_filter_id.iter().enumerate() {
-                // Move b_filter[i] to columns[*id] without cloning
                 columns[*id] = b_filter[i].clone();
             }
         }
@@ -109,7 +112,6 @@ impl RawLookupTrace {
             b_filter,
         }
     }
-
 
     pub(crate) fn set_trace(
         &mut self,
@@ -130,7 +132,7 @@ impl RawLookupTrace {
 
         // Trace height
         // !IMPORTANT: should be equal per all columns.
-        let sz = lc.a[0].len();
+        let sz = lc.a[0][0].len();
 
         // Amount of occurrence pre unique row in A
         let mut occurrences: HashMap<Bls12_377Fr, usize> = HashMap::new();
@@ -138,27 +140,30 @@ impl RawLookupTrace {
         // Build occurrence mapping (should be done before trace generation)
         // TODO: this is a partially repeated piece of code. Think how write it better.
         for i in 0..sz {
-            // Skip is disabled by filter
-            if cfg.a_filter_id.is_some() && lc.a_filter[i].is_zero() {
-                continue;
-            }
+            for (a_table_ind, a_table) in lc.a.iter().enumerate() {
+                // Skip is disabled by filter
+                if self.is_a_filtered() && lc.a_filter[a_table_ind][i].is_zero() {
+                    continue;
+                }
 
-            let mut a_row_comb = Bls12_377Fr::ZERO;
-            for a_column in &lc.a {
-                // Collect linear combination of the row
-                // `a_row_comb = a[i][j] * alpha^j` per all `j`
-                a_row_comb = a_row_comb * alpha + a_column[i];
-            }
+                let mut a_row_comb = Bls12_377Fr::ZERO;
+                for a_column in a_table {
+                    // Collect linear combination of the row
+                    // `a_row_comb = a[i][j] * alpha^j` per all `j`
+                    a_row_comb = a_row_comb * alpha + a_column[i];
+                }
 
-            // Update occurrences of the A row linear combination
-            if let Some(count) = occurrences.get(&a_row_comb) {
-                occurrences.insert(a_row_comb, *count + 1);
-            } else {
-                occurrences.insert(a_row_comb, 1);
+                // Update occurrences of the A row linear combination
+                if let Some(count) = occurrences.get(&a_row_comb) {
+                    occurrences.insert(a_row_comb, *count + 1);
+                } else {
+                    occurrences.insert(a_row_comb, 1);
+                }
             }
         }
 
-        let mut a_inverses_column = Vec::new();
+        let mut a_inverses_table: Vec<Vec<Bls12_377Fr>> =
+            (0..lc.a.len()).map(|_| Vec::new()).collect();
 
         let mut b_inverses_table: Vec<Vec<Bls12_377Fr>> =
             (0..lc.b.len()).map(|_| Vec::new()).collect();
@@ -173,21 +178,23 @@ impl RawLookupTrace {
         let mut log_derivative_sum = Bls12_377Fr::ZERO;
 
         for i in 0..sz {
-            let mut a_row_comb = Bls12_377Fr::ZERO;
-            for a_column in &lc.a {
-                // Iterate over all A columns and collect linear combination of the row
-                // `a_row_comb = a[i][j] * alpha^j` per all `j`
-                a_row_comb = a_row_comb * alpha + a_column[i];
-            }
+            for (a_table_ind, a_table) in lc.a.iter().enumerate() {
+                let mut a_row_comb = Bls12_377Fr::ZERO;
+                for a_column in a_table {
+                    // Iterate over all A columns and collect linear combination of the row
+                    // `a_row_comb = a[i][j] * alpha^j` per all `j`
+                    a_row_comb = a_row_comb * alpha + a_column[i];
+                }
 
-            let a_row_comb_inverse = (a_row_comb + delta).inverse();
-            a_inverses_column.push(a_row_comb_inverse);
+                let a_row_comb_inverse = (a_row_comb + delta).inverse();
+                a_inverses_table[a_table_ind].push(a_row_comb_inverse);
 
-            // If the current A row is not disabled by filter
-            // (otherwise it is assumed to be multiplied on zero filter value)
-            if cfg.a_filter_id.is_none() || lc.a_filter[i].is_one() {
-                // Add A row log-derivative term
-                log_derivative_sum += a_row_comb_inverse
+                // If the current A row is not disabled by filter
+                // (otherwise it is assumed to be multiplied on zero filter value)
+                if !self.is_a_filtered() || lc.a_filter[a_table_ind][i].is_one() {
+                    // Add A row log-derivative term
+                    log_derivative_sum += a_row_comb_inverse
+                }
             }
 
             for (b_table_ind, b_table) in lc.b.iter().enumerate() {
@@ -203,7 +210,7 @@ impl RawLookupTrace {
 
                 let mut occurrence = Bls12_377Fr::ZERO;
                 if let Some(cnt) = occurrences.get(&b_row_comb) {
-                    if cfg.b_filter_id.is_none() || lc.b_filter[b_table_ind][i].is_one() {
+                    if !self.is_b_filtered() || lc.b_filter[b_table_ind][i].is_one() {
                         // If multiplicity is non-zero and B row is not disabled by filter, then:
                         // - subtract from sum the corresponding log-derivative term
                         // - remove multiplicity from occurrences
@@ -224,7 +231,9 @@ impl RawLookupTrace {
             "failed to check constrain: check column should be 0 on the last row"
         );
 
-        columns[cfg.a_inverses_id] = a_inverses_column;
+        for (i, id) in cfg.a_inverses_id.iter().enumerate() {
+            columns[*id] = a_inverses_table[i].clone();
+        }
 
         for (i, id) in cfg.b_inverses_id.iter().enumerate() {
             columns[*id] = b_inverses_table[i].clone();
@@ -234,13 +243,16 @@ impl RawLookupTrace {
             columns[*id] = multiplicities_table[i].clone();
         }
 
-        columns[cfg.check_id] = prefix_sum_column;
+        columns[cfg.check_id] = prefix_sum_column.clone();
     }
 
     pub fn get_max_height(&self) -> usize {
         let mut max_height = 0_usize;
+
         self.a.iter().for_each(|ai| {
-            max_height = max(max_height, ai.len());
+            ai.iter().for_each(|aij| {
+                max_height = max(max_height, aij.len());
+            })
         });
 
         self.b.iter().for_each(|bi| {
@@ -252,16 +264,20 @@ impl RawLookupTrace {
         max_height
     }
 
-    pub fn get_columns(&mut self) -> (Vec<Vec<Bls12_377Fr>>, Vec<Vec<Vec<Bls12_377Fr>>>) {
-        let mut a: Vec<Vec<Bls12_377Fr>> = Vec::new();
+    pub fn get_columns(&mut self) -> (Vec<Vec<Vec<Bls12_377Fr>>>, Vec<Vec<Vec<Bls12_377Fr>>>) {
+        let mut a: Vec<Vec<Vec<Bls12_377Fr>>> = Vec::new();
         let mut b: Vec<Vec<Vec<Bls12_377Fr>>> = Vec::new();
 
         for i in 0..self.a.len() {
             a.push(Vec::new());
+
             for j in 0..self.a[i].len() {
-                a[i].push(Bls12_377Fr::new(FF_Bls12_377Fr::from_be_bytes_mod_order(
-                    self.a[i][j].as_slice(),
-                )));
+                a[i].push(Vec::new());
+                for k in 0..self.a[i][j].len() {
+                    a[i][j].push(Bls12_377Fr::new(FF_Bls12_377Fr::from_be_bytes_mod_order(
+                        self.a[i][j][k].as_slice(),
+                    )));
+                }
             }
         }
 
@@ -281,17 +297,19 @@ impl RawLookupTrace {
         (a, b)
     }
 
-    pub fn get_a_filters(&mut self) -> Vec<Bls12_377Fr> {
-        let mut a_filter_field: Vec<Bls12_377Fr> = Vec::new();
+    pub fn get_a_filters(&mut self) -> Vec<Vec<Bls12_377Fr>> {
+        let mut a_filter_field: Vec<Vec<Bls12_377Fr>> = vec![Vec::new(); self.a.len()];
 
         if !self.is_a_filtered() {
             return a_filter_field;
         }
 
-        for i in 0..self.a_filter.len() {
-            a_filter_field.push(Bls12_377Fr::new(FF_Bls12_377Fr::from_be_bytes_mod_order(
-                self.a_filter[i].as_slice(),
-            )));
+        for i in 0..self.a.len() {
+            for j in 0..self.a_filter[i].len() {
+                a_filter_field[i].push(Bls12_377Fr::new(FF_Bls12_377Fr::from_be_bytes_mod_order(
+                    self.a_filter[i][j].as_slice(),
+                )));
+            }
         }
 
         a_filter_field
@@ -320,20 +338,22 @@ impl RawLookupTrace {
         columns_registry: &mut HashMap<String, usize>,
         columns: &mut Vec<Vec<Bls12_377Fr>>,
     ) -> AirLookupConfig {
-        let mut a_columns_ids = Vec::new();
-
         let mut next_id = || -> usize {
             columns.push(Vec::new());
             columns.len() - 1
         };
 
-        for name in &self.a_ids {
-            if let Some(id) = columns_registry.get(name) {
-                a_columns_ids.push(*id);
-            } else {
-                let id = next_id();
-                columns_registry.insert(name.clone(), id);
-                a_columns_ids.push(id);
+        let mut a_columns_ids = vec![Vec::<usize>::new(); self.a.len()];
+
+        for (i, ids) in a_columns_ids.iter_mut().enumerate().take(self.a.len()) {
+            for name in &self.a_ids[i] {
+                if let Some(id) = columns_registry.get(name) {
+                    ids.push(*id);
+                } else {
+                    let id = next_id();
+                    columns_registry.insert(name.clone(), id);
+                    ids.push(id);
+                }
             }
         }
 
@@ -353,7 +373,7 @@ impl RawLookupTrace {
 
         let mut a_filter_id = None;
         if self.is_a_filtered() {
-            a_filter_id = Some(next_id())
+            a_filter_id = Some((0..self.a.len()).map(|_| next_id()).collect());
         }
 
         let mut b_filter_id = None;
@@ -361,7 +381,7 @@ impl RawLookupTrace {
             b_filter_id = Some((0..self.b.len()).map(|_| next_id()).collect());
         }
 
-        let a_inverses_id = next_id();
+        let a_inverses_id: Vec<usize> = (0..self.a.len()).map(|_| next_id()).collect();
         let b_inverses_id: Vec<usize> = (0..self.b.len()).map(|_| next_id()).collect();
         let occurrences_id: Vec<usize> = (0..self.b.len()).map(|_| next_id()).collect();
         let check_id = next_id();
@@ -379,13 +399,13 @@ impl RawLookupTrace {
     }
 }
 
-impl From<&mut RawRangeTrace> for RawLookupTrace {
-    fn from(value: &mut RawRangeTrace) -> Self {
-        let mut a: Vec<Vec<[u8; 32]>> = vec![Vec::new()];
+impl From<RawRangeTrace> for RawLookupTrace {
+    fn from(value: RawRangeTrace) -> Self {
+        let mut a: Vec<Vec<Vec<[u8; 32]>>> = vec![vec![Vec::new()]];
         let mut b: Vec<Vec<Vec<[u8; 32]>>> = vec![vec![Vec::new()]];
 
         for i in 0..value.a.len() {
-            a[0].push(value.a[i]);
+            a[0][0].push(value.a[i]);
         }
 
         let mut counter = 0u64;
@@ -405,10 +425,10 @@ impl From<&mut RawRangeTrace> for RawLookupTrace {
 
         Self {
             a,
-            a_ids: vec![value.a_id.clone()],
+            a_ids: vec![vec![value.a_id.clone()]],
             b,
             b_ids: vec![vec![format!("{}", value.b)]],
-            name: value.name.clone(),
+            name: value.name,
             a_filter: vec![],
             b_filter: vec![],
         }
