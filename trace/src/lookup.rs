@@ -402,10 +402,15 @@ impl RawLookupTrace {
 impl From<RawRangeTrace> for RawLookupTrace {
     fn from(value: RawRangeTrace) -> Self {
         let mut a: Vec<Vec<Vec<[u8; 32]>>> = vec![];
+        let mut a_ids: Vec<Vec<String>> = vec![];
         let mut b: Vec<Vec<Vec<[u8; 32]>>> = vec![vec![Vec::new()]];
 
         for colA in value.a {
             a.push(vec![colA]);
+        }
+
+        for colA_id in value.a_id {
+            a_ids.push(vec![colA_id]);
         }
 
         let mut counter = 0u64;
@@ -425,7 +430,7 @@ impl From<RawRangeTrace> for RawLookupTrace {
 
         Self {
             a,
-            a_ids: vec![value.a_id],
+            a_ids,
             b,
             b_ids: vec![vec![format!("{}", value.b)]],
             name: value.name,
