@@ -49,31 +49,41 @@ impl<AB: AirBuilder> Air<AB> for LineaAIR<AB::F> {
     }
 }
 
-impl<AB: AirBuilder> LineaConfigAIR<AB> for LineaAIR<AB::F>  {
+impl<AB: AirBuilder> LineaConfigAIR<AB> for LineaAIR<AB::F> {
     fn eval_lookup(&self, builder: &mut AB, l: &AirLookupConfig) {
         let main = builder.main();
 
         let local = main.row_slice(0);
         let next = main.row_slice(1);
 
-        let (alpha,delta) = (self.challenges[0], self.challenges[1]);
+        let (alpha, delta) = (self.challenges[0], self.challenges[1]);
 
-        let mut a_local_comb = AB::Expr::from(AB::F::ZERO);
-        for i in &l.a_columns_ids {
-            a_local_comb = a_local_comb * alpha + local[*i]
-        }
+        let mut local_check = AB::Expr::from(AB::F::ZERO);
+        let mut next_check = AB::Expr::from(AB::F::ZERO);
 
-        let a_local_challenge = a_local_comb + delta;
+        for (a_table_ind, a_columns_ids) in l.a_columns_ids.iter().enumerate() {
+            let mut a_local_comb = AB::Expr::from(AB::F::ZERO);
+            for i in a_columns_ids {
+                a_local_comb = a_local_comb * alpha + local[*i]
+            }
 
-        // Check inverse calculated correctly
-        builder.assert_eq(a_local_challenge * local[l.a_inverses_id], AB::F::ONE);
+            // Check inverse calculated correctly
+            let a_local_challenge = a_local_comb + delta;
+            builder.assert_eq(
+                a_local_challenge * local[l.a_inverses_id[a_table_ind]],
+                AB::F::ONE,
+            );
 
-        let mut local_check = local[l.a_inverses_id].into();
-        let mut next_check = next[l.a_inverses_id].into();
+            let mut local_add = local[l.a_inverses_id[a_table_ind]].into();
+            let mut next_add = next[l.a_inverses_id[a_table_ind]].into();
 
-        if let Some(a_filter_id) = l.a_filter_id {
-            local_check *= local[a_filter_id].into();
-            next_check *= next[a_filter_id].into();
+            if let Some(a_filter_id) = l.a_filter_id.clone() {
+                local_add *= local[a_filter_id[a_table_ind]].into();
+                next_add *= next[a_filter_id[a_table_ind]].into();
+            }
+
+            local_check += local_add;
+            next_check += next_add;
         }
 
         // TODO: we can check then whether it will be faster to put under option the whole for loop.
@@ -129,7 +139,7 @@ impl<AB: AirBuilder> LineaConfigAIR<AB> for LineaAIR<AB::F>  {
         let local = main.row_slice(0);
         let next = main.row_slice(1);
 
-        let (alpha,delta) = (self.challenges[0], self.challenges[1]);
+        let (alpha, delta) = (self.challenges[0], self.challenges[1]);
 
         let mut a_local_comb = AB::Expr::from(AB::F::ZERO);
         for i in &p.a_columns_ids {

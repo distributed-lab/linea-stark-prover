@@ -2,15 +2,17 @@ mod config;
 mod prover;
 
 use crate::prover::prove_linea;
+use p3_bls12_377_fr::Bls12_377Fr;
+use p3_field::FieldAlgebra;
 use rand::distributions::Standard;
 use rand::{thread_rng, Rng};
+use trace::range::RawRangeTrace;
 use trace::{lookup::RawLookupTrace, permutation::RawPermutationTrace};
 use tracing_forest::util::LevelFilter;
 use tracing_forest::ForestLayer;
 use tracing_subscriber::layer::SubscriberExt;
 use tracing_subscriber::util::SubscriberInitExt;
 use tracing_subscriber::{EnvFilter, Registry};
-use trace::range::RawRangeTrace;
 
 fn main() {
     let env_filter = EnvFilter::builder()
@@ -35,7 +37,7 @@ fn main() {
     let mut range_traces: Vec<Vec<RawRangeTrace>> = vec![vec![]; 32];
 
     for i in 0..1416 {
-        if let Ok(trace) = RawRangeTrace::read_file(&format!("../ranges/trace/range_{}.bin", i)) {
+        if let Ok(trace) = RawRangeTrace::read_file(&format!("../range_{}.bin", i)) {
             println!(
                 "Reading range_{}.bin -> {}",
                 i,
@@ -43,11 +45,10 @@ fn main() {
             );
             range_traces[trace.get_max_height().ilog2() as usize].push(trace);
         }
-
     }
 
-    for i in 0..0 {
-        if let Ok(trace) = RawLookupTrace::read_file(&format!("../traces/traces/lookup_{}.bin", i)) {
+    for i in 0..973 {
+        if let Ok(trace) = RawLookupTrace::read_file(&format!("../lookup_{}.bin", i)) {
             println!(
                 "Reading lookup_{}.bin -> {}",
                 i,
@@ -57,10 +58,8 @@ fn main() {
         }
     }
 
-    for i in 0..0 { // 1
-        if let Ok(trace) =
-            RawPermutationTrace::read_file(&format!("../traces/permutation_{}.bin", i))
-        {
+    for i in 0..1 {
+        if let Ok(trace) = RawPermutationTrace::read_file(&format!("../permutation_{}.bin", i)) {
             println!(
                 "Reading permutation_{}.bin -> {}",
                 i,
@@ -73,7 +72,6 @@ fn main() {
     let mut height = 1 << (permutation_traces.len() - 1);
 
     for i in 0..31 {
-
         let permutation_trace = permutation_traces.pop().unwrap();
         let lookup_trace = lookup_traces.pop().unwrap();
         let range_trace = range_traces.pop().unwrap();

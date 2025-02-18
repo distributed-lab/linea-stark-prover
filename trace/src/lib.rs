@@ -43,7 +43,7 @@ impl RawTrace {
         AirConfig::Lookup(cfg)
     }
 
-    pub fn push_range(&mut self, range: &mut RawRangeTrace) -> AirConfig {
+    pub fn push_range(&mut self, range: RawRangeTrace) -> AirConfig {
         let mut l = RawLookupTrace::from(range);
         l.resize(self.height);
 
@@ -70,8 +70,8 @@ impl RawTrace {
             cfgs.push(self.push_lookup(&mut lt));
         });
 
-        range_traces.into_iter().for_each(|mut rt| {
-            cfgs.push(self.push_range(&mut rt));
+        range_traces.into_iter().for_each(|rt| {
+            cfgs.push(self.push_range(rt));
         });
 
         permutation_traces.into_iter().for_each(|mut pt| {

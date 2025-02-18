@@ -1,3 +1,4 @@
+use air::configs::AirPermutationConfig;
 use ark_ff::PrimeField;
 use p3_bls12_377_fr::{Bls12_377Fr, FF_Bls12_377Fr};
 use p3_field::{Field, FieldAlgebra};
@@ -5,7 +6,6 @@ use serde::{Deserialize, Serialize};
 use std::cmp::max;
 use std::collections::HashMap;
 use std::fs;
-use air::configs::AirPermutationConfig;
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct RawPermutationTrace {
@@ -53,11 +53,11 @@ impl RawPermutationTrace {
         let (a, b) = self.get_columns();
 
         for (i, id) in cfg.a_columns_ids.iter().enumerate() {
-            columns[*id] = a[i].clone();
+            columns[*id] = std::mem::take(&mut a[i]);
         }
 
         for (i, id) in cfg.b_columns_ids.iter().enumerate() {
-            columns[*id] = b[i].clone();
+            columns[*id] = std::mem::take(&mut b[i]);
         }
 
         // Prefix multiplication of the permutation terms
