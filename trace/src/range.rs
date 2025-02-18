@@ -1,8 +1,3 @@
-use crate::lookup::{LookupColumns, RawLookupTrace};
-use air::configs::AirLookupConfig;
-use ark_ff::PrimeField;
-use p3_bls12_377_fr::{Bls12_377Fr, FF_Bls12_377Fr};
-use p3_field::FieldAlgebra;
 use serde::{Deserialize, Serialize};
 use std::cmp::max;
 use std::fs;

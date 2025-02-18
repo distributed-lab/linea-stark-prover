@@ -36,8 +36,8 @@ fn main() {
     let mut permutation_traces: Vec<Vec<RawPermutationTrace>> = vec![vec![]; 32];
     let mut range_traces: Vec<Vec<RawRangeTrace>> = vec![vec![]; 32];
 
-    for i in 0..0 {
-        if let Ok(trace) = RawRangeTrace::read_file(&format!("../range_{}.bin", i)) {
+    for i in 0..1416 {
+        if let Ok(trace) = RawRangeTrace::read_file(&format!("/Users/nazarevsky/Documents/linea/new-lookup-trace-mirror/traces/trace/range_{}.bin", i)) {
             println!(
                 "Reading range_{}.bin -> {}",
                 i,
@@ -48,8 +48,8 @@ fn main() {
 
     }
 
-    for i in 50..53 {
-        if let Ok(trace) = RawLookupTrace::read_file(&format!("../lookup_{}.bin", i)) {
+    for i in 0..973 {
+        if let Ok(trace) = RawLookupTrace::read_file(&format!("/Users/nazarevsky/Documents/linea/new-lookup-trace-mirror/traces/trace/lookup_{}.bin", i)) {
             println!(
                 "Reading lookup_{}.bin -> {}",
                 i,
@@ -59,7 +59,7 @@ fn main() {
         }
     }
 
-    for i in 0..0 {
+    for i in 0..1 {
         if let Ok(trace) =
             RawPermutationTrace::read_file(&format!("../permutation_{}.bin", i))
         {
