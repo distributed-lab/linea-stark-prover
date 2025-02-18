@@ -87,13 +87,15 @@ impl RawLookupTrace {
 
         for a_table_id in 0..a.len() {
             for a_col_id in 0..a[a_table_id].len() {
-                columns[cfg.a_columns_ids[a_table_id][a_col_id]] = std::mem::take(&mut a[a_table_id][a_col_id]);
+                columns[cfg.a_columns_ids[a_table_id][a_col_id]] =
+                    std::mem::take(&mut a[a_table_id][a_col_id]);
             }
         }
 
         for b_table_id in 0..b.len() {
             for b_col_id in 0..b[b_table_id].len() {
-                columns[cfg.b_columns_ids[b_table_id][b_col_id]] = std::mem::take(&mut b[b_table_id][b_col_id]);
+                columns[cfg.b_columns_ids[b_table_id][b_col_id]] =
+                    std::mem::take(&mut b[b_table_id][b_col_id]);
             }
         }
 
@@ -153,7 +155,8 @@ impl RawLookupTrace {
         for i in 0..sz {
             for (a_table_index, a_col_indexes) in cfg.a_columns_ids.iter().enumerate() {
                 // Skip is disabled by filter
-                if self.is_a_filtered() && columns[a_filter_id.unwrap()[a_table_index]][i].is_zero() {
+                if self.is_a_filtered() && columns[a_filter_id.unwrap()[a_table_index]][i].is_zero()
+                {
                     continue;
                 }
 
@@ -202,7 +205,8 @@ impl RawLookupTrace {
 
                 // If the current A row is not disabled by filter
                 // (otherwise it is assumed to be multiplied on zero filter value)
-                if !self.is_a_filtered() || columns[a_filter_id.unwrap()[a_table_index]][i].is_one() {
+                if !self.is_a_filtered() || columns[a_filter_id.unwrap()[a_table_index]][i].is_one()
+                {
                     log_derivative_sum += a_row_comb_inverse;
                 }
             }

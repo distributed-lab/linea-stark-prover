@@ -1,3 +1,4 @@
+use air::configs::AirPermutationConfig;
 use ark_ff::PrimeField;
 use p3_bls12_377_fr::{Bls12_377Fr, FF_Bls12_377Fr};
 use p3_field::{Field, FieldAlgebra};
@@ -5,7 +6,6 @@ use serde::{Deserialize, Serialize};
 use std::cmp::max;
 use std::collections::HashMap;
 use std::fs;
-use air::configs::AirPermutationConfig;
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct RawPermutationTrace {
