@@ -50,7 +50,7 @@ impl RawPermutationTrace {
         let (alpha, delta) = (challenges[0], challenges[1]);
 
         // a columns, b columns
-        let (a, b) = self.get_columns();
+        let (mut a, mut b) = self.get_columns();
 
         for (i, id) in cfg.a_columns_ids.iter().enumerate() {
             columns[*id] = std::mem::take(&mut a[i]);
