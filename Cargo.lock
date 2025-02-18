@@ -931,6 +931,7 @@ dependencies = [
  "p3-bls12-377-fr",
  "p3-field",
  "p3-matrix",
+ "rand",
  "serde",
 ]
 

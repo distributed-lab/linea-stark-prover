@@ -73,35 +73,37 @@ impl RawLookupTrace {
 
     pub(crate) fn set_columns(
         &mut self,
+        mut a: Vec<Vec<Vec<Bls12_377Fr>>>,
+        mut b: Vec<Vec<Vec<Bls12_377Fr>>>,
+        mut a_filter: Vec<Vec<Bls12_377Fr>>,
+        mut b_filter: Vec<Vec<Bls12_377Fr>>,
         columns: &mut [Vec<Bls12_377Fr>],
         cfg: &AirLookupConfig,
     ) -> LookupColumns {
         // Get a, b columns
-        let (a, b) = self.get_columns();
+        // let (a, b) = self.get_columns();
 
-        for (i, a_ids) in cfg.a_columns_ids.iter().enumerate() {
-            for (j, id) in a_ids.iter().enumerate() {
-                columns[*id] = a[i][j].clone();
+        for a_table_id in 0..a.len() {
+            for a_col_id in 0..a[a_table_id].len() {
+                columns[cfg.a_columns_ids[a_table_id][a_col_id]] = std::mem::take(&mut a[a_table_id][a_col_id]);
             }
         }
 
-        for (i, b_ids) in cfg.b_columns_ids.iter().enumerate() {
-            for (j, id) in b_ids.iter().enumerate() {
-                columns[*id] = b[i][j].clone();
+        for b_table_id in 0..b.len() {
+            for b_col_id in 0..b[b_table_id].len() {
+                columns[cfg.b_columns_ids[b_table_id][b_col_id]] = std::mem::take(&mut b[b_table_id][b_col_id]);
             }
         }
 
-        let a_filter = self.get_a_filters();
-        if let Some(a_filter_id) = cfg.a_filter_id.clone() {
-            for (i, id) in a_filter_id.iter().enumerate() {
-                columns[*id] = a_filter[i].clone();
+        if let Some(a_filter_ids) = &cfg.a_filter_id {
+            for (i, id) in a_filter_ids.iter().enumerate() {
+                columns[*id] = std::mem::take(&mut a_filter[i]);
             }
         }
 
-        let b_filter = self.get_b_filters();
-        if let Some(b_filter_id) = cfg.b_filter_id.clone() {
-            for (i, id) in b_filter_id.iter().enumerate() {
-                columns[*id] = b_filter[i].clone();
+        if let Some(b_filter_ids) = &cfg.b_filter_id {
+            for (i, id) in b_filter_ids.iter().enumerate() {
+                columns[*id] = std::mem::take(&mut b_filter[i]);
             }
         }
 
@@ -128,11 +130,18 @@ impl RawLookupTrace {
         // Unpack challenges
         let (alpha, delta) = (challenges[0], challenges[1]);
 
-        let lc = self.set_columns(columns, &cfg);
+        let (a, b) = self.get_columns();
+        let a_filter = self.get_a_filters();
+        let b_filter = self.get_b_filters();
+
+        let a_filter_id = cfg.a_filter_id.as_ref();
+        let b_filter_id = cfg.b_filter_id.as_ref();
 
         // Trace height
         // !IMPORTANT: should be equal per all columns.
-        let sz = lc.a[0][0].len();
+        let sz = a[0][0].len();
+
+        self.set_columns(a, b, a_filter, b_filter, columns, cfg);
 
         // Amount of occurrence pre unique row in A
         let mut occurrences: HashMap<Bls12_377Fr, usize> = HashMap::new();
@@ -140,17 +149,17 @@ impl RawLookupTrace {
         // Build occurrence mapping (should be done before trace generation)
         // TODO: this is a partially repeated piece of code. Think how write it better.
         for i in 0..sz {
-            for (a_table_ind, a_table) in lc.a.iter().enumerate() {
+            for (a_table_index, a_col_indexes) in cfg.a_columns_ids.iter().enumerate() {
                 // Skip is disabled by filter
-                if self.is_a_filtered() && lc.a_filter[a_table_ind][i].is_zero() {
+                if self.is_a_filtered() && columns[a_filter_id.unwrap()[a_table_index]][i].is_zero() {
                     continue;
                 }
 
                 let mut a_row_comb = Bls12_377Fr::ZERO;
-                for a_column in a_table {
+                for a_id in a_col_indexes {
                     // Collect linear combination of the row
                     // `a_row_comb = a[i][j] * alpha^j` per all `j`
-                    a_row_comb = a_row_comb * alpha + a_column[i];
+                    a_row_comb = a_row_comb * alpha + columns[*a_id][i];
                 }
 
                 // Update occurrences of the A row linear combination
@@ -163,13 +172,13 @@ impl RawLookupTrace {
         }
 
         let mut a_inverses_table: Vec<Vec<Bls12_377Fr>> =
-            (0..lc.a.len()).map(|_| Vec::new()).collect();
+            (0..cfg.a_inverses_id.len()).map(|_| Vec::new()).collect();
 
         let mut b_inverses_table: Vec<Vec<Bls12_377Fr>> =
-            (0..lc.b.len()).map(|_| Vec::new()).collect();
+            (0..cfg.b_inverses_id.len()).map(|_| Vec::new()).collect();
 
         let mut multiplicities_table: Vec<Vec<Bls12_377Fr>> =
-            (0..lc.b.len()).map(|_| Vec::new()).collect();
+            (0..cfg.b_inverses_id.len()).map(|_| Vec::new()).collect();
 
         let mut prefix_sum_column = Vec::new();
 
@@ -178,49 +187,51 @@ impl RawLookupTrace {
         let mut log_derivative_sum = Bls12_377Fr::ZERO;
 
         for i in 0..sz {
-            for (a_table_ind, a_table) in lc.a.iter().enumerate() {
+            for (a_table_index, a_col_indexes) in cfg.a_columns_ids.iter().enumerate() {
                 let mut a_row_comb = Bls12_377Fr::ZERO;
-                for a_column in a_table {
+                for a_id in a_col_indexes {
                     // Iterate over all A columns and collect linear combination of the row
                     // `a_row_comb = a[i][j] * alpha^j` per all `j`
-                    a_row_comb = a_row_comb * alpha + a_column[i];
+                    a_row_comb = a_row_comb * alpha + columns[*a_id][i];
                 }
 
                 let a_row_comb_inverse = (a_row_comb + delta).inverse();
-                a_inverses_table[a_table_ind].push(a_row_comb_inverse);
+                a_inverses_table[a_table_index].push(a_row_comb_inverse);
 
                 // If the current A row is not disabled by filter
                 // (otherwise it is assumed to be multiplied on zero filter value)
-                if !self.is_a_filtered() || lc.a_filter[a_table_ind][i].is_one() {
-                    // Add A row log-derivative term
-                    log_derivative_sum += a_row_comb_inverse
+                if !self.is_a_filtered() || columns[a_filter_id.unwrap()[a_table_index]][i].is_one() {
+                    log_derivative_sum += a_row_comb_inverse;
                 }
             }
 
-            for (b_table_ind, b_table) in lc.b.iter().enumerate() {
+            for (b_table_index, b_col_indexes) in cfg.b_columns_ids.iter().enumerate() {
                 let mut b_row_comb = Bls12_377Fr::ZERO;
-                for b_column in b_table {
+                for b_ind in b_col_indexes {
                     // Iterate over all B columns and collect linear combination of the row
                     // `b_row_comb = b[i][j] * alpha^j` per all `j`
-                    b_row_comb = b_row_comb * alpha + b_column[i];
+                    b_row_comb = b_row_comb * alpha + columns[*b_ind][i];
                 }
 
                 let b_row_comb_inverse = (b_row_comb + delta).inverse();
-                b_inverses_table[b_table_ind].push(b_row_comb_inverse);
+                b_inverses_table[b_table_index].push(b_row_comb_inverse);
 
                 let mut occurrence = Bls12_377Fr::ZERO;
                 if let Some(cnt) = occurrences.get(&b_row_comb) {
-                    if !self.is_b_filtered() || lc.b_filter[b_table_ind][i].is_one() {
-                        // If multiplicity is non-zero and B row is not disabled by filter, then:
-                        // - subtract from sum the corresponding log-derivative term
-                        // - remove multiplicity from occurrences
+                    let should_remove = if self.is_b_filtered() {
+                        columns[b_filter_id.unwrap()[b_table_index]][i].is_one()
+                    } else {
+                        true
+                    };
+
+                    if should_remove {
                         occurrence = Bls12_377Fr::from_canonical_usize(*cnt);
                         log_derivative_sum -= b_row_comb_inverse * occurrence;
                         occurrences.remove(&b_row_comb);
                     }
                 }
 
-                multiplicities_table[b_table_ind].push(occurrence);
+                multiplicities_table[b_table_index].push(occurrence);
             }
 
             prefix_sum_column.push(log_derivative_sum);
@@ -232,18 +243,18 @@ impl RawLookupTrace {
         );
 
         for (i, id) in cfg.a_inverses_id.iter().enumerate() {
-            columns[*id] = a_inverses_table[i].clone();
+            columns[*id] = std::mem::take(&mut a_inverses_table[i]);
         }
 
         for (i, id) in cfg.b_inverses_id.iter().enumerate() {
-            columns[*id] = b_inverses_table[i].clone();
+            columns[*id] = std::mem::take(&mut b_inverses_table[i].clone());
         }
 
         for (i, id) in cfg.occurrences_id.iter().enumerate() {
-            columns[*id] = multiplicities_table[i].clone();
+            columns[*id] = std::mem::take(&mut multiplicities_table[i].clone());
         }
 
-        columns[cfg.check_id] = prefix_sum_column.clone();
+        columns[cfg.check_id] = std::mem::take(&mut prefix_sum_column);
     }
 
     pub fn get_max_height(&self) -> usize {
