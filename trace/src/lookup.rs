@@ -8,9 +8,11 @@ use std::cmp::max;
 use std::collections::HashMap;
 use std::fs;
 
+type LookupColumn = Vec<Vec<Vec<Bls12_377Fr>>>;
+
 pub struct LookupColumns {
-    pub a: Vec<Vec<Vec<Bls12_377Fr>>>,
-    pub b: Vec<Vec<Vec<Bls12_377Fr>>>,
+    pub a: LookupColumn,
+    pub b: LookupColumn,
     pub a_filter: Vec<Vec<Bls12_377Fr>>,
     pub b_filter: Vec<Vec<Bls12_377Fr>>,
 }
@@ -73,8 +75,8 @@ impl RawLookupTrace {
 
     pub(crate) fn set_columns(
         &mut self,
-        mut a: Vec<Vec<Vec<Bls12_377Fr>>>,
-        mut b: Vec<Vec<Vec<Bls12_377Fr>>>,
+        mut a: LookupColumn,
+        mut b: LookupColumn,
         mut a_filter: Vec<Vec<Bls12_377Fr>>,
         mut b_filter: Vec<Vec<Bls12_377Fr>>,
         columns: &mut [Vec<Bls12_377Fr>],
@@ -275,9 +277,9 @@ impl RawLookupTrace {
         max_height
     }
 
-    pub fn get_columns(&mut self) -> (Vec<Vec<Vec<Bls12_377Fr>>>, Vec<Vec<Vec<Bls12_377Fr>>>) {
-        let mut a: Vec<Vec<Vec<Bls12_377Fr>>> = Vec::new();
-        let mut b: Vec<Vec<Vec<Bls12_377Fr>>> = Vec::new();
+    pub fn get_columns(&mut self) -> (LookupColumn, LookupColumn) {
+        let mut a: LookupColumn = Vec::new();
+        let mut b: LookupColumn = Vec::new();
 
         for i in 0..self.a.len() {
             a.push(Vec::new());
@@ -315,10 +317,10 @@ impl RawLookupTrace {
             return a_filter_field;
         }
 
-        for i in 0..self.a.len() {
-            for j in 0..self.a_filter[i].len() {
-                a_filter_field[i].push(Bls12_377Fr::new(FF_Bls12_377Fr::from_be_bytes_mod_order(
-                    self.a_filter[i][j].as_slice(),
+        for (i, a_filter_row) in a_filter_field.iter_mut().enumerate().take(self.a.len()) {
+            for a_filter_value in &self.a_filter[i] {
+                a_filter_row.push(Bls12_377Fr::new(FF_Bls12_377Fr::from_be_bytes_mod_order(
+                    a_filter_value.as_slice(),
                 )));
             }
         }
@@ -333,10 +335,10 @@ impl RawLookupTrace {
             return b_filter_field;
         }
 
-        for i in 0..self.b.len() {
-            for j in 0..self.b_filter[i].len() {
-                b_filter_field[i].push(Bls12_377Fr::new(FF_Bls12_377Fr::from_be_bytes_mod_order(
-                    self.b_filter[i][j].as_slice(),
+        for (i, b_filter_row) in b_filter_field.iter_mut().enumerate().take(self.b.len()) {
+            for b_filter_value in &self.b_filter[i] {
+                b_filter_row.push(Bls12_377Fr::new(FF_Bls12_377Fr::from_be_bytes_mod_order(
+                    b_filter_value.as_slice(),
                 )));
             }
         }
@@ -416,12 +418,12 @@ impl From<RawRangeTrace> for RawLookupTrace {
         let mut a_ids: Vec<Vec<String>> = vec![];
         let mut b: Vec<Vec<Vec<[u8; 32]>>> = vec![vec![Vec::new()]];
 
-        for colA in value.a {
-            a.push(vec![colA]);
+        for col_a in value.a {
+            a.push(vec![col_a]);
         }
 
-        for colA_id in value.a_id {
-            a_ids.push(vec![colA_id]);
+        for col_a_id in value.a_id {
+            a_ids.push(vec![col_a_id]);
         }
 
         let mut counter = 0u64;
