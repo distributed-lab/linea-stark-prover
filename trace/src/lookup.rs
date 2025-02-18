@@ -83,7 +83,6 @@ impl RawLookupTrace {
         cfg: &AirLookupConfig,
     ) -> LookupColumns {
         // Get a, b columns
-        // let (a, b) = self.get_columns();
 
         for a_table_id in 0..a.len() {
             for a_col_id in 0..a[a_table_id].len() {
