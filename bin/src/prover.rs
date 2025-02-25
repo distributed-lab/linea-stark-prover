@@ -4,6 +4,7 @@ use p3_bls12_377_fr::Bls12_377Fr;
 use p3_fri::{FriConfig, TwoAdicFriPcs};
 use p3_uni_stark::verify;
 use rand::thread_rng;
+use trace::global::RawGlobalTrace;
 use trace::lookup::RawLookupTrace;
 use trace::permutation::RawPermutationTrace;
 use trace::range::RawRangeTrace;
@@ -14,10 +15,16 @@ pub fn prove_linea(
     permutation_traces: Vec<RawPermutationTrace>,
     lookup_traces: Vec<RawLookupTrace>,
     range_traces: Vec<RawRangeTrace>,
+    global_traces: Vec<RawGlobalTrace>,
     height: usize,
 ) {
     let mut raw_trace = RawTrace::new(challenges.clone(), height);
-    let cfgs = raw_trace.push_traces(permutation_traces, lookup_traces, range_traces);
+    let cfgs = raw_trace.push_traces(
+        permutation_traces,
+        lookup_traces,
+        range_traces,
+        global_traces,
+    );
 
     // TODO: should not be just random
     let mut rng = thread_rng();

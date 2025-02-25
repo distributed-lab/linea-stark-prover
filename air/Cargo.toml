@@ -4,6 +4,9 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-p3-air    = { workspace = true }
-p3-field  = { workspace = true }
-p3-matrix = { workspace = true }
+p3-air          = { workspace = true }
+p3-field        = { workspace = true }
+p3-matrix       = { workspace = true }
+p3-bls12-377-fr = { workspace = true }
+
+eyre = "0.6.12"
