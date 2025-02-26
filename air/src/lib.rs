@@ -211,7 +211,7 @@ impl<AB: AirBuilder> LineaConfigAIR<AB> for LineaAIR<AB::F> {
             match &node.operator._type {
                 AirOperatorType::Constant => intermediate_result[0][i] = AB::Expr::ZERO + node.operator.value,
                 AirOperatorType::Variable => {
-                    intermediate_result[0][i] = AB::Expr::ZERO + local[input_cursor];
+                    intermediate_result[0][i] = AB::Expr::ZERO + local[input_cursor] * local[g.skip_column_id];
                     input_cursor += 1;
                 }
                 _ => panic!("unknown operator type"),
@@ -220,17 +220,20 @@ impl<AB: AirBuilder> LineaConfigAIR<AB> for LineaAIR<AB::F> {
 
         // Computes the levels one by one
         for level in 1..g.nodes.len() {
+            println!("{}", g.nodes[2].len());
             for (pos, node) in g.nodes[level].iter().enumerate() {
                 let mut node_inputs = Vec::new();
                 node_inputs.resize(node.children.len(), AB::Expr::ZERO);
+
                 for (i, child_id) in node.children.iter().enumerate() {
                     let l = <LineaAIR<<AB as AirBuilder>::F> as LineaConfigAIR<AB>>::get_level(self, *child_id as usize);
                     let p = <LineaAIR<<AB as AirBuilder>::F> as LineaConfigAIR<AB>>::get_pos_level(self, *child_id as usize);
 
-                    node_inputs[i] = intermediate_result[l][p].clone()
+                    node_inputs[i] = intermediate_result[l][p].clone() * local[g.skip_column_id];
                 }
 
                 let res: AB::Expr = <LineaAIR<<AB as AirBuilder>::F> as LineaConfigAIR<AB>>::evaluate(self, node_inputs, node.operator.clone()).unwrap();
+                println!("{} {}", intermediate_result.len(), intermediate_result[pos].len());
                 intermediate_result[level][pos] = res.into();
             }
         }

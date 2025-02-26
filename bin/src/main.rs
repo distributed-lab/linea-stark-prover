@@ -72,7 +72,7 @@ fn main() {
         }
     }
 
-    for i in 0..6 {
+    for i in 6..7 {
         if let Ok(trace) = RawGlobalTrace::read_file(&format!("../global/global{}.bin", i)) {
             println!(
                 "Reading global{}.bin -> {}",

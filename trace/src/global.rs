@@ -29,6 +29,8 @@ pub struct RawGlobalTrace {
     pub InputsIds: Vec<String>,
     pub Inputs: Vec<Vec<[u8; 32]>>,
     pub Nodes: Vec<Vec<RawNode>>,
+    pub Start: usize,
+    pub Stop: usize,
 }
 
 
@@ -72,6 +74,9 @@ impl RawGlobalTrace {
             input_columns_ids.push(id);
         }
 
+        let skip_column_id = next_id();
+        columns_registry.insert("skip".to_string(), skip_column_id);
+
         AirGlobalConfig {
             nodes: self
                 .Nodes
@@ -79,6 +84,7 @@ impl RawGlobalTrace {
                 .map(|nodes| nodes.iter().map(|node| node.clone().into()).collect())
                 .collect(),
             input_columns_ids,
+            skip_column_id,
         }
     }
 
@@ -95,9 +101,18 @@ impl RawGlobalTrace {
         );
         let mut inputs = self.get_inputs();
 
-        // TODO: in reality we're bounded by GlobalConstraint domain size
         for i in 0..inputs.len() {
             columns[cfg.input_columns_ids[i]] = inputs[i].clone();
+
+            for j in 0..inputs[i].len() {
+                let skip_val = if (self.Start..self.Stop).contains(&j) {
+                    Bls12_377Fr::ONE
+                } else {
+                    Bls12_377Fr::ZERO
+                };
+
+                columns[cfg.skip_column_id].push(skip_val);
+            }
         }
     }
 

@@ -64,4 +64,5 @@ pub struct AirNode<F: Field> {
 pub struct AirGlobalConfig<F: Field> {
     pub nodes: Vec<Vec<AirNode<F>>>,
     pub input_columns_ids: Vec<usize>,
+    pub skip_column_id: usize,
 }
