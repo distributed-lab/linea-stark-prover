@@ -9,10 +9,9 @@ use crate::permutation::RawPermutationTrace;
 use crate::range::RawRangeTrace;
 use air::AirConfig;
 use p3_bls12_377_fr::Bls12_377Fr;
-use p3_field::{Field, FieldAlgebra};
+use p3_field::FieldAlgebra;
 use p3_matrix::dense::RowMajorMatrix;
 use std::collections::HashMap;
-use p3_air::AirBuilder;
 
 pub struct RawTrace {
     pub columns: Vec<Vec<Bls12_377Fr>>,
@@ -53,7 +52,10 @@ impl RawTrace {
         self.push_lookup(&mut l)
     }
 
-    pub fn push_permutation(&mut self, permutation: &mut RawPermutationTrace) -> AirConfig<Bls12_377Fr> {
+    pub fn push_permutation(
+        &mut self,
+        permutation: &mut RawPermutationTrace,
+    ) -> AirConfig<Bls12_377Fr> {
         permutation.resize(self.height);
 
         let cfg = permutation.update_registry(&mut self.column_registry, &mut self.columns);

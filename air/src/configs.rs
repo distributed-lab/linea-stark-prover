@@ -27,7 +27,7 @@ pub enum AirOperatorType {
     PolyEval,
     Product,
     Variable,
-    Unknown
+    Unknown,
 }
 
 impl From<u8> for AirOperatorType {
@@ -49,7 +49,7 @@ pub struct AirOperator<F: Field> {
     /// Used for [AirOperatorType::Constant] operator.
     pub value: F,
     /// Used for [AirOperatorType::LinearCombination] and [AirOperatorType::Product] operators.
-    pub coeffs: Option<Vec<u32>>,
+    pub coeffs: Option<Vec<i32>>,
     /// Used for [AirOperatorType::Variable] operator.
     pub id: i32,
 }
@@ -57,7 +57,7 @@ pub struct AirOperator<F: Field> {
 #[derive(Clone, Debug)]
 pub struct AirNode<F: Field> {
     pub children: Vec<u64>,
-    pub operator: AirOperator<F>
+    pub operator: AirOperator<F>,
 }
 
 #[derive(Clone, Debug)]

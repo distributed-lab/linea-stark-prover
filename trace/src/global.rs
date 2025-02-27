@@ -1,13 +1,11 @@
-use std::cmp::max;
-use air::configs::{AirGlobalConfig, AirNode, AirOperator, AirOperatorType, AirPermutationConfig};
+use air::configs::{AirGlobalConfig, AirNode, AirOperator, AirOperatorType};
 use ark_ff::PrimeField;
 use p3_bls12_377_fr::{Bls12_377Fr, FF_Bls12_377Fr};
+use p3_field::FieldAlgebra;
 use serde::{Deserialize, Serialize};
+use std::cmp::max;
 use std::collections::HashMap;
 use std::fs;
-use ciborium::Value;
-use p3_air::{Air, AirBuilder};
-use p3_field::{Field, FieldAlgebra};
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct RawOperator {
@@ -32,7 +30,6 @@ pub struct RawGlobalTrace {
     pub Start: usize,
     pub Stop: usize,
 }
-
 
 impl RawGlobalTrace {
     pub fn read_file(path: &str) -> Result<RawGlobalTrace, std::io::Error> {
@@ -67,11 +64,16 @@ impl RawGlobalTrace {
             columns.len() - 1
         };
 
+        // TODO check name exist, do not forget to skip for empty names
         let mut input_columns_ids = Vec::new();
         for i in 0..self.Inputs.len() {
-            let id = next_id();
-            columns_registry.insert(self.InputsIds[i].clone(), id);
-            input_columns_ids.push(id);
+            if let Some(id) = columns_registry.get(&self.InputsIds[i]) {
+                input_columns_ids.push(*id);
+            } else {
+                let id = next_id();
+                columns_registry.insert(self.InputsIds[i].clone(), id);
+                input_columns_ids.push(id);
+            }
         }
 
         let skip_column_id = next_id();
@@ -99,29 +101,22 @@ impl RawGlobalTrace {
             2,
             "Two challenges should be provided for the lookup trace"
         );
-        let mut inputs = self.get_inputs();
+
+        let inputs = self.get_inputs();
 
         for i in 0..inputs.len() {
             columns[cfg.input_columns_ids[i]] = inputs[i].clone();
-
-            for j in 0..inputs[i].len() {
-                let skip_val = if (self.Start..self.Stop).contains(&j) {
-                    Bls12_377Fr::ONE
-                } else {
-                    Bls12_377Fr::ZERO
-                };
-
-                columns[cfg.skip_column_id].push(skip_val);
-            }
         }
-    }
 
-    fn get_level(&self, num: usize) -> usize {
-        num >> 32
-    }
+        for j in 0..inputs[0].len() {
+            let skip_val = if j >= self.Start && j < self.Stop {
+                Bls12_377Fr::ONE
+            } else {
+                Bls12_377Fr::ZERO
+            };
 
-    fn get_pos_level(&self, num: usize) -> usize {
-        num & ((1 << 32) - 1)
+            columns[cfg.skip_column_id].push(skip_val);
+        }
     }
 
     fn get_inputs(&self) -> Vec<Vec<Bls12_377Fr>> {
@@ -135,23 +130,22 @@ impl RawGlobalTrace {
             })
             .collect()
     }
-
 }
 
-impl Into<AirNode<Bls12_377Fr>> for RawNode {
-    fn into(self) -> AirNode<Bls12_377Fr> {
-        let value = Bls12_377Fr::new(FF_Bls12_377Fr::from_be_bytes_mod_order(
-            &self.Operator.Value,
-        ));
+impl From<RawNode> for AirNode<Bls12_377Fr> {
+     fn from(val: RawNode) -> Self {
+         let value = Bls12_377Fr::new(FF_Bls12_377Fr::from_be_bytes_mod_order(
+             &val.Operator.Value,
+         ));
 
-        AirNode {
-            children: self.Children,
-            operator: AirOperator {
-                _type: AirOperatorType::from(self.Operator.Typ),
-                value,
-                coeffs: self.Operator.Coeffs.map(|coeffs| coeffs.iter().map(|coef| coef.unsigned_abs()).collect()),
-                id: self.Operator.Id,
-            },
-        }
-    }
+         AirNode {
+             children: val.Children,
+             operator: AirOperator {
+                 _type: AirOperatorType::from(val.Operator.Typ),
+                 value,
+                 coeffs: val.Operator.Coeffs,
+                 id: val.Operator.Id,
+             }
+         }
+     }
 }

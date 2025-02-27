@@ -2,8 +2,6 @@ mod config;
 mod prover;
 
 use crate::prover::prove_linea;
-use p3_bls12_377_fr::Bls12_377Fr;
-use p3_field::FieldAlgebra;
 use rand::distributions::Standard;
 use rand::{thread_rng, Rng};
 use trace::global::RawGlobalTrace;
@@ -14,7 +12,6 @@ use tracing_forest::ForestLayer;
 use tracing_subscriber::layer::SubscriberExt;
 use tracing_subscriber::util::SubscriberInitExt;
 use tracing_subscriber::{EnvFilter, Registry};
-use tracing_subscriber::fmt::format;
 
 fn main() {
     let env_filter = EnvFilter::builder()
@@ -39,7 +36,7 @@ fn main() {
     let mut range_traces: Vec<Vec<RawRangeTrace>> = vec![vec![]; 32];
     let mut global_traces: Vec<Vec<RawGlobalTrace>> = vec![vec![]; 32];
 
-    for i in 0..0 {
+    for i in 0..1416 {
         if let Ok(trace) = RawRangeTrace::read_file(&format!("../range_{}.bin", i)) {
             println!(
                 "Reading range_{}.bin -> {}",
@@ -50,7 +47,7 @@ fn main() {
         }
     }
 
-    for i in 0..0 {
+    for i in 0..973 {
         if let Ok(trace) = RawLookupTrace::read_file(&format!("../lookup_{}.bin", i)) {
             println!(
                 "Reading lookup_{}.bin -> {}",
@@ -72,7 +69,7 @@ fn main() {
         }
     }
 
-    for i in 6..7 {
+    for i in 0..20 {
         if let Ok(trace) = RawGlobalTrace::read_file(&format!("../global/global{}.bin", i)) {
             println!(
                 "Reading global{}.bin -> {}",
