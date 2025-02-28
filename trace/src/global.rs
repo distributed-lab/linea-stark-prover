@@ -10,25 +10,25 @@ use std::fs;
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct RawOperator {
     /// 0 - constant, 1 - lin, 2 - poly, 3 - prod, 4 - var
-    pub Typ: u8,
-    pub Value: [u8; 32],
-    pub Coeffs: Option<Vec<i32>>,
-    pub Id: i32,
+    pub typ: u8,
+    pub value: [u8; 32],
+    pub coeffs: Option<Vec<i32>>,
+    pub id: i32,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct RawNode {
-    pub Children: Vec<u64>,
-    pub Operator: RawOperator,
+    pub children: Vec<u64>,
+    pub operator: RawOperator,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct RawGlobalTrace {
-    pub InputsIds: Vec<String>,
-    pub Inputs: Vec<Vec<[u8; 32]>>,
-    pub Nodes: Vec<Vec<RawNode>>,
-    pub Start: usize,
-    pub Stop: usize,
+    pub inputs_ids: Vec<String>,
+    pub inputs: Vec<Vec<[u8; 32]>>,
+    pub nodes: Vec<Vec<RawNode>>,
+    pub start: usize,
+    pub stop: usize,
 }
 
 impl RawGlobalTrace {
@@ -40,14 +40,14 @@ impl RawGlobalTrace {
     }
 
     pub(crate) fn resize(&mut self, size: usize) {
-        for e in &mut self.Inputs {
+        for e in &mut self.inputs {
             e.resize(size, [0u8; 32]);
         }
     }
 
     pub fn get_max_height(&self) -> usize {
         let mut max_height = 0_usize;
-        self.Inputs.iter().for_each(|g| {
+        self.inputs.iter().for_each(|g| {
             max_height = max(max_height, g.len());
         });
 
@@ -66,12 +66,12 @@ impl RawGlobalTrace {
 
         // TODO check name exist, do not forget to skip for empty names
         let mut input_columns_ids = Vec::new();
-        for i in 0..self.Inputs.len() {
-            if let Some(id) = columns_registry.get(&self.InputsIds[i]) {
+        for i in 0..self.inputs.len() {
+            if let Some(id) = columns_registry.get(&self.inputs_ids[i]) {
                 input_columns_ids.push(*id);
             } else {
                 let id = next_id();
-                columns_registry.insert(self.InputsIds[i].clone(), id);
+                columns_registry.insert(self.inputs_ids[i].clone(), id);
                 input_columns_ids.push(id);
             }
         }
@@ -81,7 +81,7 @@ impl RawGlobalTrace {
 
         AirGlobalConfig {
             nodes: self
-                .Nodes
+                .nodes
                 .iter()
                 .map(|nodes| nodes.iter().map(|node| node.clone().into()).collect())
                 .collect(),
@@ -109,7 +109,7 @@ impl RawGlobalTrace {
         }
 
         for j in 0..inputs[0].len() {
-            let skip_val = if j >= self.Start && j < self.Stop {
+            let skip_val = if j >= self.start && j < self.stop {
                 Bls12_377Fr::ONE
             } else {
                 Bls12_377Fr::ZERO
@@ -120,7 +120,7 @@ impl RawGlobalTrace {
     }
 
     fn get_inputs(&self) -> Vec<Vec<Bls12_377Fr>> {
-        self.Inputs
+        self.inputs
             .iter()
             .map(|col_inputs| {
                 col_inputs
@@ -135,16 +135,16 @@ impl RawGlobalTrace {
 impl From<RawNode> for AirNode<Bls12_377Fr> {
      fn from(val: RawNode) -> Self {
          let value = Bls12_377Fr::new(FF_Bls12_377Fr::from_be_bytes_mod_order(
-             &val.Operator.Value,
+             &val.operator.value,
          ));
 
          AirNode {
-             children: val.Children,
+             children: val.children,
              operator: AirOperator {
-                 _type: AirOperatorType::from(val.Operator.Typ),
+                 _type: AirOperatorType::from(val.operator.typ),
                  value,
-                 coeffs: val.Operator.Coeffs,
-                 id: val.Operator.Id,
+                 coeffs: val.operator.coeffs,
+                 id: val.operator.id,
              }
          }
      }
