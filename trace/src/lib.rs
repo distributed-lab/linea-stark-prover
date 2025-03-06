@@ -99,14 +99,14 @@ impl RawTrace {
         cfgs
     }
 
-    pub fn get_trace(&self) -> RowMajorMatrix<Bls12_377Fr> {
+    pub fn get_trace(&mut self) -> RowMajorMatrix<Bls12_377Fr> {
         let width = self.columns.len();
         // The final trace
         let mut values = vec![];
 
         for row in 0..self.height {
             for col in 0..width {
-                values.push(self.columns[col][row]);
+                values.push(std::mem::take(&mut self.columns[col][row]));
             }
         }
 

@@ -22,6 +22,21 @@ pub struct RawNode {
     pub operator: RawOperator,
 }
 
+impl Default for RawNode {
+    fn default() -> Self {
+        RawNode {
+            // Initialize fields here
+            children: vec![],
+            operator: RawOperator {
+                typ: 0,
+                value: [0; 32],
+                coeffs: None,
+                id: 0,
+            },
+        }
+    }
+}
+
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct RawGlobalTrace {
     pub inputs_ids: Vec<String>,
@@ -55,7 +70,7 @@ impl RawGlobalTrace {
     }
 
     pub fn update_registry(
-        &self,
+        &mut self,
         columns_registry: &mut HashMap<String, usize>,
         columns: &mut Vec<Vec<Bls12_377Fr>>,
     ) -> AirGlobalConfig<Bls12_377Fr> {
@@ -67,8 +82,8 @@ impl RawGlobalTrace {
         // TODO check name exist, do not forget to skip for empty names
         let mut input_columns_ids = Vec::new();
         for i in 0..self.inputs.len() {
-            if let Some(id) = columns_registry.get(&self.inputs_ids[i]) {
-                input_columns_ids.push(*id);
+            if !self.inputs_ids[i].is_empty() && columns_registry.get(&self.inputs_ids[i]).is_some()  {
+                input_columns_ids.push(*columns_registry.get(&self.inputs_ids[i]).unwrap());
             } else {
                 let id = next_id();
                 columns_registry.insert(self.inputs_ids[i].clone(), id);
@@ -82,8 +97,8 @@ impl RawGlobalTrace {
         AirGlobalConfig {
             nodes: self
                 .nodes
-                .iter()
-                .map(|nodes| nodes.iter().map(|node| node.clone().into()).collect())
+                .iter_mut()
+                .map(|nodes| nodes.iter_mut().map(|node| std::mem::take(node).into()).collect())
                 .collect(),
             input_columns_ids,
             skip_column_id,
@@ -102,13 +117,13 @@ impl RawGlobalTrace {
             "Two challenges should be provided for the lookup trace"
         );
 
-        let inputs = self.get_inputs();
-
+        let mut inputs = self.get_inputs();
+        let sz = inputs[0].len();
         for i in 0..inputs.len() {
-            columns[cfg.input_columns_ids[i]] = inputs[i].clone();
+            columns[cfg.input_columns_ids[i]] = std::mem::take(&mut inputs[i]);
         }
 
-        for j in 0..inputs[0].len() {
+        for j in 0..sz {
             let skip_val = if j >= self.start && j < self.stop {
                 Bls12_377Fr::ONE
             } else {
