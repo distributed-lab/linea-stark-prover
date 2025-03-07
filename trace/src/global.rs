@@ -145,6 +145,10 @@ impl RawGlobalTrace {
             })
             .collect()
     }
+
+    pub fn get_expression_height(&self) -> usize {
+        self.nodes.len().ilog2() as usize
+    }
 }
 
 impl From<RawNode> for AirNode<Bls12_377Fr> {

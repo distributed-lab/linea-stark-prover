@@ -4,6 +4,7 @@ mod prover;
 use crate::prover::prove_linea;
 use rand::distributions::Standard;
 use rand::{thread_rng, Rng};
+use std::collections::HashMap;
 use trace::global::RawGlobalTrace;
 use trace::range::RawRangeTrace;
 use trace::{lookup::RawLookupTrace, permutation::RawPermutationTrace};
@@ -37,6 +38,7 @@ fn main() {
     let mut global_traces: Vec<Vec<RawGlobalTrace>> = vec![vec![]; 32];
 
     let ranges = vec![
+        (0, 20000),
         (20000, 40000),
         (40000, 60000),
         (60000, 68000)
@@ -53,7 +55,11 @@ fn main() {
             }
         }
 
-        println!("Read {}/{} global constraints", read_counter, range.1 - range.0);
+        println!(
+            "Read {}/{} global constraints",
+            read_counter,
+            range.1 - range.0
+        );
 
         let mut height = 1 << (permutation_traces.len() - 1);
 
@@ -63,27 +69,28 @@ fn main() {
             let range_trace = range_traces.pop().unwrap();
             let global_trace = global_traces.pop().unwrap();
 
-            if !permutation_trace.is_empty()
-                || !lookup_trace.is_empty()
-                || !range_trace.is_empty()
-                || !global_trace.is_empty()
-            {
-                println!(
-                    "Proving for height 2^{}: {}x lookups, {}x perms, {}x ranges, {}x globals.",
-                    31 - i,
-                    lookup_trace.len(),
-                    permutation_trace.len(),
-                    range_trace.len(),
-                    global_trace.len(),
-                );
-                prove_linea(
-                    vec![alpha_challenge, delta_challenge],
-                    permutation_trace,
-                    lookup_trace,
-                    range_trace,
-                    global_trace,
-                    height,
-                );
+            let traces = group_by_expression_height(global_trace.clone());
+
+            for (expression_height, trace_vec) in traces {
+                if !trace_vec.is_empty() {
+                    println!(
+                        "Proving for height 2^{}. Expression height: {}. {}x lookups, {}x perms, {}x ranges, {}x globals.",
+                        31 - i,
+                        expression_height,
+                        lookup_trace.len(),
+                        permutation_trace.len(),
+                        range_trace.len(),
+                        trace_vec.len(),
+                    );
+                    prove_linea(
+                        vec![alpha_challenge, delta_challenge],
+                        permutation_trace.clone(),
+                        lookup_trace.clone(),
+                        range_trace.clone(),
+                        trace_vec,
+                        height,
+                    );
+                }
             }
 
             height >>= 1;
@@ -94,4 +101,20 @@ fn main() {
         range_traces = vec![vec![]; 32];
         global_traces = vec![vec![]; 32];
     }
+}
+
+fn group_by_expression_height(globals: Vec<RawGlobalTrace>) -> HashMap<usize, Vec<RawGlobalTrace>> {
+    let mut res: HashMap<usize, Vec<RawGlobalTrace>> = HashMap::new();
+
+    for global in globals {
+        let expression_height = global.get_expression_height();
+
+        if let Some(val) = res.get_mut(&global.get_expression_height()) {
+            val.push(global.clone());
+        } else {
+            res.insert(expression_height, vec![global.clone()]);
+        }
+    }
+
+    res
 }
