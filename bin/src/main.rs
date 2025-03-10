@@ -68,9 +68,11 @@ fn main() {
         let range_trace = range_traces.pop().unwrap();
         let global_trace = global_traces.pop().unwrap();
 
+        println!("Proving expression height {}", expression_height);
         if !global_trace.is_empty() {
             for (i, trace) in global_trace.iter().enumerate() {
-                println!("Proving trace {}/{} with expression height {}", i, global_trace.len(), expression_height);
+                println!("Proving trace {}/{}", i, global_trace.len());
+
                 prove_linea(
                     vec![alpha_challenge, delta_challenge],
                     permutation_trace.clone(),
