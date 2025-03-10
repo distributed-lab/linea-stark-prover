@@ -147,7 +147,7 @@ impl RawGlobalTrace {
     }
 
     pub fn get_expression_height(&self) -> usize {
-        self.nodes.len().ilog2() as usize
+        self.nodes.len()
     }
 }
 
