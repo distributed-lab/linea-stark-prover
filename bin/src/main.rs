@@ -32,16 +32,13 @@ fn main() {
 
     // read all traces
 
-    let mut lookup_traces: Vec<Vec<RawLookupTrace>> = vec![vec![]; 32];
-    let mut permutation_traces: Vec<Vec<RawPermutationTrace>> = vec![vec![]; 32];
-    let mut range_traces: Vec<Vec<RawRangeTrace>> = vec![vec![]; 32];
-    let mut global_traces: Vec<Vec<RawGlobalTrace>> = vec![vec![]; 32];
+    let mut lookup_traces: Vec<Vec<RawLookupTrace>> = vec![vec![]; 70];
+    let mut permutation_traces: Vec<Vec<RawPermutationTrace>> = vec![vec![]; 70];
+    let mut range_traces: Vec<Vec<RawRangeTrace>> = vec![vec![]; 70];
+    let mut global_traces: Vec<Vec<RawGlobalTrace>> = vec![vec![]; 70];
 
     let ranges = vec![
-        (0, 20000),
-        (20000, 40000),
-        (40000, 60000),
-        (60000, 68000)
+        (512, 1024)
     ];
 
     for range in ranges {
@@ -49,10 +46,13 @@ fn main() {
 
         println!("Reading globals in range from {} to {}", range.0, range.1);
         for i in range.0..range.1 {
-            if let Ok(trace) = RawGlobalTrace::read_file(&format!("../traces/trace/global{}.bin", i)) {
+            if let Ok(trace) = RawGlobalTrace::read_file(&format!("/Users/nazarevsky/Documents/linea/linea-monorepo/prover/zkevm/trace/global{}.bin", i)) {
                 read_counter += 1;
-                global_traces[trace.get_max_height().ilog2() as usize].push(trace);
+
+                global_traces[trace.get_expression_height()].push(trace)
+                // global_traces[trace.get_max_height().ilog2() as usize].push(trace);
             }
+            println!("Read {} from {}", i, range.1);
         }
 
         println!(
@@ -60,46 +60,27 @@ fn main() {
             read_counter,
             range.1 - range.0
         );
+    }
 
-        let mut height = 1 << (permutation_traces.len() - 1);
+    for expression_height in (1..70).rev() {
+        let permutation_trace = permutation_traces.pop().unwrap();
+        let lookup_trace = lookup_traces.pop().unwrap();
+        let range_trace = range_traces.pop().unwrap();
+        let global_trace = global_traces.pop().unwrap();
 
-        for i in 0..31 {
-            let permutation_trace = permutation_traces.pop().unwrap();
-            let lookup_trace = lookup_traces.pop().unwrap();
-            let range_trace = range_traces.pop().unwrap();
-            let global_trace = global_traces.pop().unwrap();
-
-            let traces = group_by_expression_height(global_trace.clone());
-
-            for (expression_height, trace_vec) in traces {
-                if !trace_vec.is_empty() {
-                    println!(
-                        "Proving for height 2^{}. Expression height: {}. {}x lookups, {}x perms, {}x ranges, {}x globals.",
-                        31 - i,
-                        expression_height,
-                        lookup_trace.len(),
-                        permutation_trace.len(),
-                        range_trace.len(),
-                        trace_vec.len(),
-                    );
-                    prove_linea(
-                        vec![alpha_challenge, delta_challenge],
-                        permutation_trace.clone(),
-                        lookup_trace.clone(),
-                        range_trace.clone(),
-                        trace_vec,
-                        height,
-                    );
-                }
+        if !global_trace.is_empty() {
+            for (i, trace) in global_trace.iter().enumerate() {
+                println!("Proving trace {}/{} with expression height {}", i, global_trace.len(), expression_height);
+                prove_linea(
+                    vec![alpha_challenge, delta_challenge],
+                    permutation_trace.clone(),
+                    lookup_trace.clone(),
+                    range_trace.clone(),
+                    vec![trace.clone()],
+                    trace.get_max_height(),
+                );
             }
-
-            height >>= 1;
         }
-
-        lookup_traces = vec![vec![]; 32];
-        permutation_traces = vec![vec![]; 32];
-        range_traces = vec![vec![]; 32];
-        global_traces = vec![vec![]; 32];
     }
 }
 
