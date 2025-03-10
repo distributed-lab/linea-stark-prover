@@ -38,7 +38,7 @@ fn main() {
     let mut global_traces: Vec<Vec<RawGlobalTrace>> = vec![vec![]; 70];
 
     let ranges = vec![
-        (512, 1024)
+        (0, 68700)
     ];
 
     for range in ranges {
@@ -46,7 +46,7 @@ fn main() {
 
         println!("Reading globals in range from {} to {}", range.0, range.1);
         for i in range.0..range.1 {
-            if let Ok(trace) = RawGlobalTrace::read_file(&format!("/Users/nazarevsky/Documents/linea/linea-monorepo/prover/zkevm/trace/global{}.bin", i)) {
+            if let Ok(trace) = RawGlobalTrace::read_file(&format!("../traces/trace/global{}.bin", i)) {
                 read_counter += 1;
 
                 global_traces[trace.get_expression_height()].push(trace)
