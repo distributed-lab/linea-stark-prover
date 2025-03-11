@@ -35,7 +35,7 @@ fn main() {
     let mut lookup_traces: Vec<Vec<RawLookupTrace>> = vec![vec![]; 70];
     let mut permutation_traces: Vec<Vec<RawPermutationTrace>> = vec![vec![]; 70];
     let mut range_traces: Vec<Vec<RawRangeTrace>> = vec![vec![]; 70];
-    let mut global_traces: Vec<Vec<RawGlobalTrace>> = vec![vec![]; 70];
+    let mut global_traces: Vec<Vec<(RawGlobalTrace, i32)>> = vec![vec![]; 70];
 
     let ranges = vec![
         (0, 68700)
@@ -46,10 +46,10 @@ fn main() {
 
         println!("Reading globals in range from {} to {}", range.0, range.1);
         for i in range.0..range.1 {
-            if let Ok(trace) = RawGlobalTrace::read_file(&format!("../global{}.bin", i)) {
+            if let Ok(trace) = RawGlobalTrace::read_file(&format!("../traces/trace/global{}.bin", i)) {
                 read_counter += 1;
 
-                global_traces[trace.get_expression_height()].push(trace)
+                global_traces[trace.get_expression_height()].push((trace, i))
             }
             println!("Read {} from {}", i, range.1);
         }
@@ -69,8 +69,8 @@ fn main() {
 
         println!("Proving expression height {}", expression_height);
         if !global_trace.is_empty() {
-            for (i, trace) in global_trace.iter().enumerate() {
-                println!("Proving trace {}/{}", i, global_trace.len());
+            for (i, (trace, file_ind)) in global_trace.iter().enumerate() {
+                println!("Proving trace {}/{}. File: global{}.bin. Trace height: {}, expression height: {}", i, global_trace.len(), file_ind, trace.get_max_height(), trace.get_expression_height());
 
                 prove_linea(
                     vec![alpha_challenge, delta_challenge],
