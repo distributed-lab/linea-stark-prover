@@ -1,7 +1,11 @@
 use air::configs::{AirGlobalConfig, AirNode, AirOperator, AirOperatorType};
+use air::LineaAIR;
 use ark_ff::PrimeField;
+use p3_air::{Air, BaseAir};
 use p3_bls12_377_fr::{Bls12_377Fr, FF_Bls12_377Fr};
 use p3_field::FieldAlgebra;
+use p3_uni_stark::{SymbolicAirBuilder, SymbolicExpression};
+use p3_util::log2_ceil_usize;
 use serde::{Deserialize, Serialize};
 use std::cmp::max;
 use std::collections::HashMap;
@@ -82,7 +86,8 @@ impl RawGlobalTrace {
         // TODO check name exist, do not forget to skip for empty names
         let mut input_columns_ids = Vec::new();
         for i in 0..self.inputs.len() {
-            if !self.inputs_ids[i].is_empty() && columns_registry.get(&self.inputs_ids[i]).is_some()  {
+            if !self.inputs_ids[i].is_empty() && columns_registry.get(&self.inputs_ids[i]).is_some()
+            {
                 input_columns_ids.push(*columns_registry.get(&self.inputs_ids[i]).unwrap());
             } else {
                 let id = next_id();
@@ -98,7 +103,12 @@ impl RawGlobalTrace {
             nodes: self
                 .nodes
                 .iter_mut()
-                .map(|nodes| nodes.iter_mut().map(|node| std::mem::take(node).into()).collect())
+                .map(|nodes| {
+                    nodes
+                        .iter_mut()
+                        .map(|node| std::mem::take(node).into())
+                        .collect()
+                })
                 .collect(),
             input_columns_ids,
             skip_column_id,
@@ -153,22 +163,34 @@ impl RawGlobalTrace {
     pub fn get_expression_width(&self) -> usize {
         self.nodes.get(0).map_or_else(|| 0, |nodes| nodes.len())
     }
+
+    pub fn get_blowup(&self, air: LineaAIR<Bls12_377Fr>, num_public: usize) -> usize {
+        let mut builder = SymbolicAirBuilder::new(0, air.width(), num_public);
+        air.eval(&mut builder);
+        let symbolic_constraints = builder.constraints();
+
+        let constraint_degree = symbolic_constraints
+            .iter()
+            .map(SymbolicExpression::degree_multiple)
+            .max()
+            .unwrap_or(0);
+
+        log2_ceil_usize(constraint_degree - 1)
+    }
 }
 
 impl From<RawNode> for AirNode<Bls12_377Fr> {
-     fn from(val: RawNode) -> Self {
-         let value = Bls12_377Fr::new(FF_Bls12_377Fr::from_be_bytes_mod_order(
-             &val.operator.value,
-         ));
+    fn from(val: RawNode) -> Self {
+        let value = Bls12_377Fr::new(FF_Bls12_377Fr::from_be_bytes_mod_order(&val.operator.value));
 
-         AirNode {
-             children: val.children,
-             operator: AirOperator {
-                 _type: AirOperatorType::from(val.operator.typ),
-                 value,
-                 coeffs: val.operator.coeffs,
-                 id: val.operator.id,
-             }
-         }
-     }
+        AirNode {
+            children: val.children,
+            operator: AirOperator {
+                _type: AirOperatorType::from(val.operator.typ),
+                value,
+                coeffs: val.operator.coeffs,
+                id: val.operator.id,
+            },
+        }
+    }
 }
