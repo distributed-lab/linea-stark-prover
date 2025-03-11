@@ -70,7 +70,7 @@ fn main() {
         println!("Proving expression height {}", expression_height);
         if !global_trace.is_empty() {
             for (i, (trace, file_ind)) in global_trace.iter().enumerate() {
-                println!("Proving trace {}/{}. File: global{}.bin. Trace height: {}, expression height: {}", i, global_trace.len(), file_ind, trace.get_max_height(), trace.get_expression_height());
+                println!("Proving trace {}/{}. File: global{}.bin. Trace height: {}, expression height: {}, expression_width {}", i, global_trace.len(), file_ind, trace.get_max_height(), trace.get_expression_height(), trace.get_expression_width());
 
                 prove_linea(
                     vec![alpha_challenge, delta_challenge],
