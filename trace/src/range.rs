@@ -25,7 +25,7 @@ impl RawRangeTrace {
     }
 
     pub fn get_max_height(&self) -> usize {
-        let mut height = self.b as usize;
+        let mut height = self.a[0].len();
         for i in 0..self.a.len() {
             height = max(height, self.a[i].len())
         }

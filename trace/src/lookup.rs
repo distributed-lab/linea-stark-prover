@@ -443,9 +443,11 @@ impl From<RawRangeTrace> for RawLookupTrace {
     fn from(value: RawRangeTrace) -> Self {
         let mut a: Vec<Vec<Vec<[u8; 32]>>> = vec![];
         let mut a_ids: Vec<Vec<String>> = vec![];
-        let mut b: Vec<Vec<Vec<[u8; 32]>>> = vec![vec![Vec::new()]];
+        let mut b: Vec<Vec<Vec<[u8; 32]>>> = vec![];
 
+        let mut max_height = 0;
         for col_a in value.a {
+            max_height = max(max_height, col_a.len());
             a.push(vec![col_a]);
         }
 
@@ -455,8 +457,14 @@ impl From<RawRangeTrace> for RawLookupTrace {
 
         let mut counter = 0u64;
 
+        let mut b_ids = Vec::new();
         while counter < value.b {
-            b[0][0].push(
+            if counter as usize % max_height == 0 {
+                b.push(vec![vec![]]);
+                b_ids.push(vec![format!("{}_{}", counter as usize/ max_height, value.b)]);
+            }
+
+            b[counter as usize/ max_height][0].push(
                 Bls12_377Fr::from_canonical_u64(counter)
                     .value
                     .into_bigint()
@@ -465,6 +473,7 @@ impl From<RawRangeTrace> for RawLookupTrace {
                     .try_into()
                     .unwrap(),
             );
+
             counter += 1;
         }
 
@@ -472,7 +481,7 @@ impl From<RawRangeTrace> for RawLookupTrace {
             a,
             a_ids,
             b,
-            b_ids: vec![vec![format!("{}", value.b)]],
+            b_ids,
             name: value.name,
             a_filter: vec![],
             b_filter: vec![],

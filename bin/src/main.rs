@@ -41,8 +41,8 @@ fn main() {
     let mut range_traces: Vec<Vec<RawRangeTrace>> = vec![vec![]; MAX_LOG_BLOWUP];
     let mut global_traces: Vec<Vec<RawGlobalTrace>> = vec![vec![]; MAX_LOG_BLOWUP];
 
-    for i in 0..1416 {
-        if let Ok(trace) = RawRangeTrace::read_file(&format!("../range_{}.bin", i)) {
+    for i in 0..2347 {
+        if let Ok(trace) = RawRangeTrace::read_file(&format!("/Users/nazarevsky/Documents/linea/linea-monorepo/prover/zkevm/trace/range_{}.bin", i)) {
             println!(
                 "Reading range_{}.bin -> {}",
                 i,
@@ -61,7 +61,7 @@ fn main() {
         }
     }
 
-    for i in 0..973 {
+    for i in 0..1484 {
         if let Ok(trace) = RawLookupTrace::read_file(&format!("../lookup_{}.bin", i)) {
             println!(
                 "Reading lookup_{}.bin -> {}",
