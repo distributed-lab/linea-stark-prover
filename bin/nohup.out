@@ -1,0 +1,1194 @@
+INFO     prove [ 247s | 0.43% / 100.00% ]
+INFO     ┝━ commit to trace data [ 187s | 72.63% / 75.89% ]
+INFO     │  ┕━ coset_lde_batch [ 8.04s | 3.26% ] dims: 608x8192 | added_bits: 7
+INFO     ┝━ compute quotient polynomial [ 3.02s | 1.22% ]
+INFO     ┝━ commit to quotient poly chunks [ 44.5s | 15.62% / 18.07% ]
+INFO     │  ┝━ coset_lde_batch [ 80.8ms | 0.03% ] dims: 1x8192 | added_bits: 7
+INFO     │  ┝━ coset_lde_batch [ 46.0ms | 0.02% ] dims: 1x8192 | added_bits: 7
+INFO     │  ┝━ coset_lde_batch [ 45.8ms | 0.02% ] dims: 1x8192 | added_bits: 7
+INFO     │  ┝━ coset_lde_batch [ 46.5ms | 0.02% ] dims: 1x8192 | added_bits: 7
+INFO     │  ┝━ coset_lde_batch [ 45.9ms | 0.02% ] dims: 1x8192 | added_bits: 7
+INFO     │  ┝━ coset_lde_batch [ 45.7ms | 0.02% ] dims: 1x8192 | added_bits: 7
+INFO     │  ┝━ coset_lde_batch [ 47.3ms | 0.02% ] dims: 1x8192 | added_bits: 7
+INFO     │  ┝━ coset_lde_batch [ 46.6ms | 0.02% ] dims: 1x8192 | added_bits: 7
+INFO     │  ┝━ coset_lde_batch [ 47.1ms | 0.02% ] dims: 1x8192 | added_bits: 7
+INFO     │  ┝━ coset_lde_batch [ 47.5ms | 0.02% ] dims: 1x8192 | added_bits: 7
+INFO     │  ┝━ coset_lde_batch [ 46.2ms | 0.02% ] dims: 1x8192 | added_bits: 7
+INFO     │  ┝━ coset_lde_batch [ 46.1ms | 0.02% ] dims: 1x8192 | added_bits: 7
+INFO     │  ┝━ coset_lde_batch [ 46.1ms | 0.02% ] dims: 1x8192 | added_bits: 7
+INFO     │  ┝━ coset_lde_batch [ 46.8ms | 0.02% ] dims: 1x8192 | added_bits: 7
+INFO     │  ┝━ coset_lde_batch [ 45.8ms | 0.02% ] dims: 1x8192 | added_bits: 7
+INFO     │  ┝━ coset_lde_batch [ 45.5ms | 0.02% ] dims: 1x8192 | added_bits: 7
+INFO     │  ┝━ coset_lde_batch [ 44.8ms | 0.02% ] dims: 1x8192 | added_bits: 7
+INFO     │  ┝━ coset_lde_batch [ 45.9ms | 0.02% ] dims: 1x8192 | added_bits: 7
+INFO     │  ┝━ coset_lde_batch [ 44.5ms | 0.02% ] dims: 1x8192 | added_bits: 7
+INFO     │  ┝━ coset_lde_batch [ 45.6ms | 0.02% ] dims: 1x8192 | added_bits: 7
+INFO     │  ┝━ coset_lde_batch [ 46.5ms | 0.02% ] dims: 1x8192 | added_bits: 7
+INFO     │  ┝━ coset_lde_batch [ 45.5ms | 0.02% ] dims: 1x8192 | added_bits: 7
+INFO     │  ┝━ coset_lde_batch [ 45.6ms | 0.02% ] dims: 1x8192 | added_bits: 7
+INFO     │  ┝━ coset_lde_batch [ 46.0ms | 0.02% ] dims: 1x8192 | added_bits: 7
+INFO     │  ┝━ coset_lde_batch [ 45.1ms | 0.02% ] dims: 1x8192 | added_bits: 7
+INFO     │  ┝━ coset_lde_batch [ 44.8ms | 0.02% ] dims: 1x8192 | added_bits: 7
+INFO     │  ┝━ coset_lde_batch [ 46.0ms | 0.02% ] dims: 1x8192 | added_bits: 7
+INFO     │  ┝━ coset_lde_batch [ 46.3ms | 0.02% ] dims: 1x8192 | added_bits: 7
+INFO     │  ┝━ coset_lde_batch [ 45.7ms | 0.02% ] dims: 1x8192 | added_bits: 7
+INFO     │  ┝━ coset_lde_batch [ 46.6ms | 0.02% ] dims: 1x8192 | added_bits: 7
+INFO     │  ┝━ coset_lde_batch [ 44.2ms | 0.02% ] dims: 1x8192 | added_bits: 7
+INFO     │  ┝━ coset_lde_batch [ 45.4ms | 0.02% ] dims: 1x8192 | added_bits: 7
+INFO     │  ┝━ coset_lde_batch [ 46.4ms | 0.02% ] dims: 1x8192 | added_bits: 7
+INFO     │  ┝━ coset_lde_batch [ 45.9ms | 0.02% ] dims: 1x8192 | added_bits: 7
+INFO     │  ┝━ coset_lde_batch [ 46.8ms | 0.02% ] dims: 1x8192 | added_bits: 7
+INFO     │  ┝━ coset_lde_batch [ 46.3ms | 0.02% ] dims: 1x8192 | added_bits: 7
+INFO     │  ┝━ coset_lde_batch [ 46.7ms | 0.02% ] dims: 1x8192 | added_bits: 7
+INFO     │  ┝━ coset_lde_batch [ 47.0ms | 0.02% ] dims: 1x8192 | added_bits: 7
+INFO     │  ┝━ coset_lde_batch [ 45.7ms | 0.02% ] dims: 1x8192 | added_bits: 7
+INFO     │  ┝━ coset_lde_batch [ 47.0ms | 0.02% ] dims: 1x8192 | added_bits: 7
+INFO     │  ┝━ coset_lde_batch [ 47.0ms | 0.02% ] dims: 1x8192 | added_bits: 7
+INFO     │  ┝━ coset_lde_batch [ 46.1ms | 0.02% ] dims: 1x8192 | added_bits: 7
+INFO     │  ┝━ coset_lde_batch [ 49.4ms | 0.02% ] dims: 1x8192 | added_bits: 7
+INFO     │  ┝━ coset_lde_batch [ 47.4ms | 0.02% ] dims: 1x8192 | added_bits: 7
+INFO     │  ┝━ coset_lde_batch [ 46.4ms | 0.02% ] dims: 1x8192 | added_bits: 7
+INFO     │  ┝━ coset_lde_batch [ 45.5ms | 0.02% ] dims: 1x8192 | added_bits: 7
+INFO     │  ┝━ coset_lde_batch [ 45.9ms | 0.02% ] dims: 1x8192 | added_bits: 7
+INFO     │  ┝━ coset_lde_batch [ 47.5ms | 0.02% ] dims: 1x8192 | added_bits: 7
+INFO     │  ┝━ coset_lde_batch [ 46.5ms | 0.02% ] dims: 1x8192 | added_bits: 7
+INFO     │  ┝━ coset_lde_batch [ 46.1ms | 0.02% ] dims: 1x8192 | added_bits: 7
+INFO     │  ┝━ coset_lde_batch [ 46.5ms | 0.02% ] dims: 1x8192 | added_bits: 7
+INFO     │  ┝━ coset_lde_batch [ 46.9ms | 0.02% ] dims: 1x8192 | added_bits: 7
+INFO     │  ┝━ coset_lde_batch [ 46.7ms | 0.02% ] dims: 1x8192 | added_bits: 7
+INFO     │  ┝━ coset_lde_batch [ 46.6ms | 0.02% ] dims: 1x8192 | added_bits: 7
+INFO     │  ┝━ coset_lde_batch [ 47.3ms | 0.02% ] dims: 1x8192 | added_bits: 7
+INFO     │  ┝━ coset_lde_batch [ 46.4ms | 0.02% ] dims: 1x8192 | added_bits: 7
+INFO     │  ┝━ coset_lde_batch [ 46.6ms | 0.02% ] dims: 1x8192 | added_bits: 7
+INFO     │  ┝━ coset_lde_batch [ 46.4ms | 0.02% ] dims: 1x8192 | added_bits: 7
+INFO     │  ┝━ coset_lde_batch [ 47.8ms | 0.02% ] dims: 1x8192 | added_bits: 7
+INFO     │  ┝━ coset_lde_batch [ 46.4ms | 0.02% ] dims: 1x8192 | added_bits: 7
+INFO     │  ┝━ coset_lde_batch [ 45.6ms | 0.02% ] dims: 1x8192 | added_bits: 7
+INFO     │  ┝━ coset_lde_batch [ 45.4ms | 0.02% ] dims: 1x8192 | added_bits: 7
+INFO     │  ┝━ coset_lde_batch [ 46.4ms | 0.02% ] dims: 1x8192 | added_bits: 7
+INFO     │  ┝━ coset_lde_batch [ 46.0ms | 0.02% ] dims: 1x8192 | added_bits: 7
+INFO     │  ┝━ coset_lde_batch [ 46.0ms | 0.02% ] dims: 1x8192 | added_bits: 7
+INFO     │  ┝━ coset_lde_batch [ 46.1ms | 0.02% ] dims: 1x8192 | added_bits: 7
+INFO     │  ┝━ coset_lde_batch [ 46.6ms | 0.02% ] dims: 1x8192 | added_bits: 7
+INFO     │  ┝━ coset_lde_batch [ 44.9ms | 0.02% ] dims: 1x8192 | added_bits: 7
+INFO     │  ┝━ coset_lde_batch [ 45.8ms | 0.02% ] dims: 1x8192 | added_bits: 7
+INFO     │  ┝━ coset_lde_batch [ 45.4ms | 0.02% ] dims: 1x8192 | added_bits: 7
+INFO     │  ┝━ coset_lde_batch [ 44.6ms | 0.02% ] dims: 1x8192 | added_bits: 7
+INFO     │  ┝━ coset_lde_batch [ 45.4ms | 0.02% ] dims: 1x8192 | added_bits: 7
+INFO     │  ┝━ coset_lde_batch [ 46.0ms | 0.02% ] dims: 1x8192 | added_bits: 7
+INFO     │  ┝━ coset_lde_batch [ 46.1ms | 0.02% ] dims: 1x8192 | added_bits: 7
+INFO     │  ┝━ coset_lde_batch [ 46.9ms | 0.02% ] dims: 1x8192 | added_bits: 7
+INFO     │  ┝━ coset_lde_batch [ 48.8ms | 0.02% ] dims: 1x8192 | added_bits: 7
+INFO     │  ┝━ coset_lde_batch [ 46.7ms | 0.02% ] dims: 1x8192 | added_bits: 7
+INFO     │  ┝━ coset_lde_batch [ 46.7ms | 0.02% ] dims: 1x8192 | added_bits: 7
+INFO     │  ┝━ coset_lde_batch [ 51.1ms | 0.02% ] dims: 1x8192 | added_bits: 7
+INFO     │  ┝━ coset_lde_batch [ 46.6ms | 0.02% ] dims: 1x8192 | added_bits: 7
+INFO     │  ┝━ coset_lde_batch [ 47.1ms | 0.02% ] dims: 1x8192 | added_bits: 7
+INFO     │  ┝━ coset_lde_batch [ 46.3ms | 0.02% ] dims: 1x8192 | added_bits: 7
+INFO     │  ┝━ coset_lde_batch [ 48.8ms | 0.02% ] dims: 1x8192 | added_bits: 7
+INFO     │  ┝━ coset_lde_batch [ 47.5ms | 0.02% ] dims: 1x8192 | added_bits: 7
+INFO     │  ┝━ coset_lde_batch [ 47.9ms | 0.02% ] dims: 1x8192 | added_bits: 7
+INFO     │  ┝━ coset_lde_batch [ 53.0ms | 0.02% ] dims: 1x8192 | added_bits: 7
+INFO     │  ┝━ coset_lde_batch [ 51.4ms | 0.02% ] dims: 1x8192 | added_bits: 7
+INFO     │  ┝━ coset_lde_batch [ 50.7ms | 0.02% ] dims: 1x8192 | added_bits: 7
+INFO     │  ┝━ coset_lde_batch [ 46.2ms | 0.02% ] dims: 1x8192 | added_bits: 7
+INFO     │  ┝━ coset_lde_batch [ 46.5ms | 0.02% ] dims: 1x8192 | added_bits: 7
+INFO     │  ┝━ coset_lde_batch [ 47.2ms | 0.02% ] dims: 1x8192 | added_bits: 7
+INFO     │  ┝━ coset_lde_batch [ 47.3ms | 0.02% ] dims: 1x8192 | added_bits: 7
+INFO     │  ┝━ coset_lde_batch [ 47.2ms | 0.02% ] dims: 1x8192 | added_bits: 7
+INFO     │  ┝━ coset_lde_batch [ 46.4ms | 0.02% ] dims: 1x8192 | added_bits: 7
+INFO     │  ┝━ coset_lde_batch [ 47.4ms | 0.02% ] dims: 1x8192 | added_bits: 7
+INFO     │  ┝━ coset_lde_batch [ 46.9ms | 0.02% ] dims: 1x8192 | added_bits: 7
+INFO     │  ┝━ coset_lde_batch [ 48.1ms | 0.02% ] dims: 1x8192 | added_bits: 7
+INFO     │  ┝━ coset_lde_batch [ 48.0ms | 0.02% ] dims: 1x8192 | added_bits: 7
+INFO     │  ┝━ coset_lde_batch [ 46.4ms | 0.02% ] dims: 1x8192 | added_bits: 7
+INFO     │  ┝━ coset_lde_batch [ 46.1ms | 0.02% ] dims: 1x8192 | added_bits: 7
+INFO     │  ┝━ coset_lde_batch [ 46.7ms | 0.02% ] dims: 1x8192 | added_bits: 7
+INFO     │  ┝━ coset_lde_batch [ 46.9ms | 0.02% ] dims: 1x8192 | added_bits: 7
+INFO     │  ┝━ coset_lde_batch [ 47.0ms | 0.02% ] dims: 1x8192 | added_bits: 7
+INFO     │  ┝━ coset_lde_batch [ 50.1ms | 0.02% ] dims: 1x8192 | added_bits: 7
+INFO     │  ┝━ coset_lde_batch [ 53.3ms | 0.02% ] dims: 1x8192 | added_bits: 7
+INFO     │  ┝━ coset_lde_batch [ 49.7ms | 0.02% ] dims: 1x8192 | added_bits: 7
+INFO     │  ┝━ coset_lde_batch [ 47.4ms | 0.02% ] dims: 1x8192 | added_bits: 7
+INFO     │  ┝━ coset_lde_batch [ 49.1ms | 0.02% ] dims: 1x8192 | added_bits: 7
+INFO     │  ┝━ coset_lde_batch [ 46.8ms | 0.02% ] dims: 1x8192 | added_bits: 7
+INFO     │  ┝━ coset_lde_batch [ 45.9ms | 0.02% ] dims: 1x8192 | added_bits: 7
+INFO     │  ┝━ coset_lde_batch [ 46.2ms | 0.02% ] dims: 1x8192 | added_bits: 7
+INFO     │  ┝━ coset_lde_batch [ 44.9ms | 0.02% ] dims: 1x8192 | added_bits: 7
+INFO     │  ┝━ coset_lde_batch [ 53.0ms | 0.02% ] dims: 1x8192 | added_bits: 7
+INFO     │  ┝━ coset_lde_batch [ 50.1ms | 0.02% ] dims: 1x8192 | added_bits: 7
+INFO     │  ┝━ coset_lde_batch [ 45.4ms | 0.02% ] dims: 1x8192 | added_bits: 7
+INFO     │  ┝━ coset_lde_batch [ 44.2ms | 0.02% ] dims: 1x8192 | added_bits: 7
+INFO     │  ┝━ coset_lde_batch [ 47.2ms | 0.02% ] dims: 1x8192 | added_bits: 7
+INFO     │  ┝━ coset_lde_batch [ 45.7ms | 0.02% ] dims: 1x8192 | added_bits: 7
+INFO     │  ┝━ coset_lde_batch [ 47.8ms | 0.02% ] dims: 1x8192 | added_bits: 7
+INFO     │  ┝━ coset_lde_batch [ 47.5ms | 0.02% ] dims: 1x8192 | added_bits: 7
+INFO     │  ┝━ coset_lde_batch [ 46.0ms | 0.02% ] dims: 1x8192 | added_bits: 7
+INFO     │  ┝━ coset_lde_batch [ 46.5ms | 0.02% ] dims: 1x8192 | added_bits: 7
+INFO     │  ┝━ coset_lde_batch [ 46.2ms | 0.02% ] dims: 1x8192 | added_bits: 7
+INFO     │  ┝━ coset_lde_batch [ 45.9ms | 0.02% ] dims: 1x8192 | added_bits: 7
+INFO     │  ┝━ coset_lde_batch [ 45.5ms | 0.02% ] dims: 1x8192 | added_bits: 7
+INFO     │  ┝━ coset_lde_batch [ 46.2ms | 0.02% ] dims: 1x8192 | added_bits: 7
+INFO     │  ┝━ coset_lde_batch [ 46.3ms | 0.02% ] dims: 1x8192 | added_bits: 7
+INFO     │  ┕━ coset_lde_batch [ 46.8ms | 0.02% ] dims: 1x8192 | added_bits: 7
+INFO     ┕━ open [ 10.8s | 0.00% / 4.39% ]
+INFO        ┝━ compute_inverse_denominators [ 58.5ms | 0.02% ]
+INFO        ┝━ reduce matrix quotient [ 3.81s | 0.00% / 1.54% ] dims: 608x1048576
+INFO        │  ┝━ compute opened values with Lagrange interpolation [ 27.8ms | 0.01% ]
+INFO        │  ┕━ reduce rows [ 3.78s | 1.53% ]
+INFO        ┝━ reduce matrix quotient [ 3.83s | 0.00% / 1.56% ] dims: 608x1048576
+INFO        │  ┝━ compute opened values with Lagrange interpolation [ 32.6ms | 0.01% ]
+INFO        │  ┕━ reduce rows [ 3.80s | 1.54% ]
+INFO        ┝━ reduce matrix quotient [ 27.9ms | 0.00% / 0.01% ] dims: 1x1048576
+INFO        │  ┝━ compute opened values with Lagrange interpolation [ 1.48ms | 0.00% ]
+INFO        │  ┕━ reduce rows [ 26.4ms | 0.01% ]
+INFO        ┝━ reduce matrix quotient [ 31.1ms | 0.00% / 0.01% ] dims: 1x1048576
+INFO        │  ┝━ compute opened values with Lagrange interpolation [ 1.19ms | 0.00% ]
+INFO        │  ┕━ reduce rows [ 29.9ms | 0.01% ]
+INFO        ┝━ reduce matrix quotient [ 29.7ms | 0.00% / 0.01% ] dims: 1x1048576
+INFO        │  ┝━ compute opened values with Lagrange interpolation [ 1.07ms | 0.00% ]
+INFO        │  ┕━ reduce rows [ 28.6ms | 0.01% ]
+INFO        ┝━ reduce matrix quotient [ 46.0ms | 0.00% / 0.02% ] dims: 1x1048576
+INFO        │  ┝━ compute opened values with Lagrange interpolation [ 1.19ms | 0.00% ]
+INFO        │  ┕━ reduce rows [ 44.8ms | 0.02% ]
+INFO        ┝━ reduce matrix quotient [ 66.0ms | 0.00% / 0.03% ] dims: 1x1048576
+INFO        │  ┝━ compute opened values with Lagrange interpolation [ 4.11ms | 0.00% ]
+INFO        │  ┕━ reduce rows [ 61.9ms | 0.03% ]
+INFO        ┝━ reduce matrix quotient [ 48.9ms | 0.00% / 0.02% ] dims: 1x1048576
+INFO        │  ┝━ compute opened values with Lagrange interpolation [ 2.87ms | 0.00% ]
+INFO        │  ┕━ reduce rows [ 46.0ms | 0.02% ]
+INFO        ┝━ reduce matrix quotient [ 29.9ms | 0.00% / 0.01% ] dims: 1x1048576
+INFO        │  ┝━ compute opened values with Lagrange interpolation [ 2.26ms | 0.00% ]
+INFO        │  ┕━ reduce rows [ 27.6ms | 0.01% ]
+INFO        ┝━ reduce matrix quotient [ 19.4ms | 0.00% / 0.01% ] dims: 1x1048576
+INFO        │  ┝━ compute opened values with Lagrange interpolation [ 926µs | 0.00% ]
+INFO        │  ┕━ reduce rows [ 18.5ms | 0.01% ]
+INFO        ┝━ reduce matrix quotient [ 16.6ms | 0.00% / 0.01% ] dims: 1x1048576
+INFO        │  ┝━ compute opened values with Lagrange interpolation [ 717µs | 0.00% ]
+INFO        │  ┕━ reduce rows [ 15.9ms | 0.01% ]
+INFO        ┝━ reduce matrix quotient [ 12.9ms | 0.00% / 0.01% ] dims: 1x1048576
+INFO        │  ┝━ compute opened values with Lagrange interpolation [ 688µs | 0.00% ]
+INFO        │  ┕━ reduce rows [ 12.2ms | 0.00% ]
+INFO        ┝━ reduce matrix quotient [ 14.5ms | 0.00% / 0.01% ] dims: 1x1048576
+INFO        │  ┝━ compute opened values with Lagrange interpolation [ 761µs | 0.00% ]
+INFO        │  ┕━ reduce rows [ 13.7ms | 0.01% ]
+INFO        ┝━ reduce matrix quotient [ 18.3ms | 0.00% / 0.01% ] dims: 1x1048576
+INFO        │  ┝━ compute opened values with Lagrange interpolation [ 767µs | 0.00% ]
+INFO        │  ┕━ reduce rows [ 17.5ms | 0.01% ]
+INFO        ┝━ reduce matrix quotient [ 14.4ms | 0.00% / 0.01% ] dims: 1x1048576
+INFO        │  ┝━ compute opened values with Lagrange interpolation [ 826µs | 0.00% ]
+INFO        │  ┕━ reduce rows [ 13.6ms | 0.01% ]
+INFO        ┝━ reduce matrix quotient [ 13.8ms | 0.00% / 0.01% ] dims: 1x1048576
+INFO        │  ┝━ compute opened values with Lagrange interpolation [ 737µs | 0.00% ]
+INFO        │  ┕━ reduce rows [ 13.1ms | 0.01% ]
+INFO        ┝━ reduce matrix quotient [ 19.2ms | 0.00% / 0.01% ] dims: 1x1048576
+INFO        │  ┝━ compute opened values with Lagrange interpolation [ 700µs | 0.00% ]
+INFO        │  ┕━ reduce rows [ 18.5ms | 0.01% ]
+INFO        ┝━ reduce matrix quotient [ 12.9ms | 0.00% / 0.01% ] dims: 1x1048576
+INFO        │  ┝━ compute opened values with Lagrange interpolation [ 767µs | 0.00% ]
+INFO        │  ┕━ reduce rows [ 12.1ms | 0.00% ]
+INFO        ┝━ reduce matrix quotient [ 13.7ms | 0.00% / 0.01% ] dims: 1x1048576
+INFO        │  ┝━ compute opened values with Lagrange interpolation [ 716µs | 0.00% ]
+INFO        │  ┕━ reduce rows [ 13.0ms | 0.01% ]
+INFO        ┝━ reduce matrix quotient [ 12.5ms | 0.00% / 0.01% ] dims: 1x1048576
+INFO        │  ┝━ compute opened values with Lagrange interpolation [ 972µs | 0.00% ]
+INFO        │  ┕━ reduce rows [ 11.5ms | 0.00% ]
+INFO        ┝━ reduce matrix quotient [ 13.3ms | 0.00% / 0.01% ] dims: 1x1048576
+INFO        │  ┝━ compute opened values with Lagrange interpolation [ 727µs | 0.00% ]
+INFO        │  ┕━ reduce rows [ 12.5ms | 0.01% ]
+INFO        ┝━ reduce matrix quotient [ 18.8ms | 0.00% / 0.01% ] dims: 1x1048576
+INFO        │  ┝━ compute opened values with Lagrange interpolation [ 623µs | 0.00% ]
+INFO        │  ┕━ reduce rows [ 18.2ms | 0.01% ]
+INFO        ┝━ reduce matrix quotient [ 9.83ms | 0.00% / 0.00% ] dims: 1x1048576
+INFO        │  ┝━ compute opened values with Lagrange interpolation [ 717µs | 0.00% ]
+INFO        │  ┕━ reduce rows [ 9.10ms | 0.00% ]
+INFO        ┝━ reduce matrix quotient [ 9.20ms | 0.00% / 0.00% ] dims: 1x1048576
+INFO        │  ┝━ compute opened values with Lagrange interpolation [ 464µs | 0.00% ]
+INFO        │  ┕━ reduce rows [ 8.73ms | 0.00% ]
+INFO        ┝━ reduce matrix quotient [ 10.3ms | 0.00% / 0.00% ] dims: 1x1048576
+INFO        │  ┝━ compute opened values with Lagrange interpolation [ 721µs | 0.00% ]
+INFO        │  ┕━ reduce rows [ 9.59ms | 0.00% ]
+INFO        ┝━ reduce matrix quotient [ 9.43ms | 0.00% / 0.00% ] dims: 1x1048576
+INFO        │  ┝━ compute opened values with Lagrange interpolation [ 531µs | 0.00% ]
+INFO        │  ┕━ reduce rows [ 8.90ms | 0.00% ]
+INFO        ┝━ reduce matrix quotient [ 9.29ms | 0.00% / 0.00% ] dims: 1x1048576
+INFO        │  ┝━ compute opened values with Lagrange interpolation [ 567µs | 0.00% ]
+INFO        │  ┕━ reduce rows [ 8.72ms | 0.00% ]
+INFO        ┝━ reduce matrix quotient [ 10.0ms | 0.00% / 0.00% ] dims: 1x1048576
+INFO        │  ┝━ compute opened values with Lagrange interpolation [ 607µs | 0.00% ]
+INFO        │  ┕━ reduce rows [ 9.43ms | 0.00% ]
+INFO        ┝━ reduce matrix quotient [ 9.64ms | 0.00% / 0.00% ] dims: 1x1048576
+INFO        │  ┝━ compute opened values with Lagrange interpolation [ 575µs | 0.00% ]
+INFO        │  ┕━ reduce rows [ 9.06ms | 0.00% ]
+INFO        ┝━ reduce matrix quotient [ 9.89ms | 0.00% / 0.00% ] dims: 1x1048576
+INFO        │  ┝━ compute opened values with Lagrange interpolation [ 680µs | 0.00% ]
+INFO        │  ┕━ reduce rows [ 9.20ms | 0.00% ]
+INFO        ┝━ reduce matrix quotient [ 9.48ms | 0.00% / 0.00% ] dims: 1x1048576
+INFO        │  ┝━ compute opened values with Lagrange interpolation [ 694µs | 0.00% ]
+INFO        │  ┕━ reduce rows [ 8.77ms | 0.00% ]
+INFO        ┝━ reduce matrix quotient [ 10.1ms | 0.00% / 0.00% ] dims: 1x1048576
+INFO        │  ┝━ compute opened values with Lagrange interpolation [ 777µs | 0.00% ]
+INFO        │  ┕━ reduce rows [ 9.28ms | 0.00% ]
+INFO        ┝━ reduce matrix quotient [ 9.64ms | 0.00% / 0.00% ] dims: 1x1048576
+INFO        │  ┝━ compute opened values with Lagrange interpolation [ 650µs | 0.00% ]
+INFO        │  ┕━ reduce rows [ 8.98ms | 0.00% ]
+INFO        ┝━ reduce matrix quotient [ 9.71ms | 0.00% / 0.00% ] dims: 1x1048576
+INFO        │  ┝━ compute opened values with Lagrange interpolation [ 580µs | 0.00% ]
+INFO        │  ┕━ reduce rows [ 9.13ms | 0.00% ]
+INFO        ┝━ reduce matrix quotient [ 9.70ms | 0.00% / 0.00% ] dims: 1x1048576
+INFO        │  ┝━ compute opened values with Lagrange interpolation [ 599µs | 0.00% ]
+INFO        │  ┕━ reduce rows [ 9.10ms | 0.00% ]
+INFO        ┝━ reduce matrix quotient [ 9.91ms | 0.00% / 0.00% ] dims: 1x1048576
+INFO        │  ┝━ compute opened values with Lagrange interpolation [ 656µs | 0.00% ]
+INFO        │  ┕━ reduce rows [ 9.25ms | 0.00% ]
+INFO        ┝━ reduce matrix quotient [ 10.2ms | 0.00% / 0.00% ] dims: 1x1048576
+INFO        │  ┝━ compute opened values with Lagrange interpolation [ 569µs | 0.00% ]
+INFO        │  ┕━ reduce rows [ 9.60ms | 0.00% ]
+INFO        ┝━ reduce matrix quotient [ 53.8ms | 0.00% / 0.02% ] dims: 1x1048576
+INFO        │  ┝━ compute opened values with Lagrange interpolation [ 664µs | 0.00% ]
+INFO        │  ┕━ reduce rows [ 53.2ms | 0.02% ]
+INFO        ┝━ reduce matrix quotient [ 51.7ms | 0.00% / 0.02% ] dims: 1x1048576
+INFO        │  ┝━ compute opened values with Lagrange interpolation [ 965µs | 0.00% ]
+INFO        │  ┕━ reduce rows [ 50.7ms | 0.02% ]
+INFO        ┝━ reduce matrix quotient [ 34.7ms | 0.00% / 0.01% ] dims: 1x1048576
+INFO        │  ┝━ compute opened values with Lagrange interpolation [ 901µs | 0.00% ]
+INFO        │  ┕━ reduce rows [ 33.8ms | 0.01% ]
+INFO        ┝━ reduce matrix quotient [ 14.6ms | 0.00% / 0.01% ] dims: 1x1048576
+INFO        │  ┝━ compute opened values with Lagrange interpolation [ 966µs | 0.00% ]
+INFO        │  ┕━ reduce rows [ 13.7ms | 0.01% ]
+INFO        ┝━ reduce matrix quotient [ 9.90ms | 0.00% / 0.00% ] dims: 1x1048576
+INFO        │  ┝━ compute opened values with Lagrange interpolation [ 485µs | 0.00% ]
+INFO        │  ┕━ reduce rows [ 9.41ms | 0.00% ]
+INFO        ┝━ reduce matrix quotient [ 9.42ms | 0.00% / 0.00% ] dims: 1x1048576
+INFO        │  ┝━ compute opened values with Lagrange interpolation [ 558µs | 0.00% ]
+INFO        │  ┕━ reduce rows [ 8.86ms | 0.00% ]
+INFO        ┝━ reduce matrix quotient [ 10.6ms | 0.00% / 0.00% ] dims: 1x1048576
+INFO        │  ┝━ compute opened values with Lagrange interpolation [ 588µs | 0.00% ]
+INFO        │  ┕━ reduce rows [ 9.98ms | 0.00% ]
+INFO        ┝━ reduce matrix quotient [ 9.82ms | 0.00% / 0.00% ] dims: 1x1048576
+INFO        │  ┝━ compute opened values with Lagrange interpolation [ 562µs | 0.00% ]
+INFO        │  ┕━ reduce rows [ 9.25ms | 0.00% ]
+INFO        ┝━ reduce matrix quotient [ 15.3ms | 0.00% / 0.01% ] dims: 1x1048576
+INFO        │  ┝━ compute opened values with Lagrange interpolation [ 553µs | 0.00% ]
+INFO        │  ┕━ reduce rows [ 14.7ms | 0.01% ]
+INFO        ┝━ reduce matrix quotient [ 10.2ms | 0.00% / 0.00% ] dims: 1x1048576
+INFO        │  ┝━ compute opened values with Lagrange interpolation [ 603µs | 0.00% ]
+INFO        │  ┕━ reduce rows [ 9.57ms | 0.00% ]
+INFO        ┝━ reduce matrix quotient [ 10.0ms | 0.00% / 0.00% ] dims: 1x1048576
+INFO        │  ┝━ compute opened values with Lagrange interpolation [ 545µs | 0.00% ]
+INFO        │  ┕━ reduce rows [ 9.46ms | 0.00% ]
+INFO        ┝━ reduce matrix quotient [ 9.00ms | 0.00% / 0.00% ] dims: 1x1048576
+INFO        │  ┝━ compute opened values with Lagrange interpolation [ 540µs | 0.00% ]
+INFO        │  ┕━ reduce rows [ 8.46ms | 0.00% ]
+INFO        ┝━ reduce matrix quotient [ 9.83ms | 0.00% / 0.00% ] dims: 1x1048576
+INFO        │  ┝━ compute opened values with Lagrange interpolation [ 537µs | 0.00% ]
+INFO        │  ┕━ reduce rows [ 9.29ms | 0.00% ]
+INFO        ┝━ reduce matrix quotient [ 9.53ms | 0.00% / 0.00% ] dims: 1x1048576
+INFO        │  ┝━ compute opened values with Lagrange interpolation [ 572µs | 0.00% ]
+INFO        │  ┕━ reduce rows [ 8.95ms | 0.00% ]
+INFO        ┝━ reduce matrix quotient [ 9.44ms | 0.00% / 0.00% ] dims: 1x1048576
+INFO        │  ┝━ compute opened values with Lagrange interpolation [ 688µs | 0.00% ]
+INFO        │  ┕━ reduce rows [ 8.75ms | 0.00% ]
+INFO        ┝━ reduce matrix quotient [ 8.93ms | 0.00% / 0.00% ] dims: 1x1048576
+INFO        │  ┝━ compute opened values with Lagrange interpolation [ 490µs | 0.00% ]
+INFO        │  ┕━ reduce rows [ 8.44ms | 0.00% ]
+INFO        ┝━ reduce matrix quotient [ 15.5ms | 0.00% / 0.01% ] dims: 1x1048576
+INFO        │  ┝━ compute opened values with Lagrange interpolation [ 578µs | 0.00% ]
+INFO        │  ┕━ reduce rows [ 14.9ms | 0.01% ]
+INFO        ┝━ reduce matrix quotient [ 8.71ms | 0.00% / 0.00% ] dims: 1x1048576
+INFO        │  ┝━ compute opened values with Lagrange interpolation [ 610µs | 0.00% ]
+INFO        │  ┕━ reduce rows [ 8.10ms | 0.00% ]
+INFO        ┝━ reduce matrix quotient [ 9.83ms | 0.00% / 0.00% ] dims: 1x1048576
+INFO        │  ┝━ compute opened values with Lagrange interpolation [ 586µs | 0.00% ]
+INFO        │  ┕━ reduce rows [ 9.24ms | 0.00% ]
+INFO        ┝━ reduce matrix quotient [ 9.29ms | 0.00% / 0.00% ] dims: 1x1048576
+INFO        │  ┝━ compute opened values with Lagrange interpolation [ 525µs | 0.00% ]
+INFO        │  ┕━ reduce rows [ 8.76ms | 0.00% ]
+INFO        ┝━ reduce matrix quotient [ 9.31ms | 0.00% / 0.00% ] dims: 1x1048576
+INFO        │  ┝━ compute opened values with Lagrange interpolation [ 514µs | 0.00% ]
+INFO        │  ┕━ reduce rows [ 8.79ms | 0.00% ]
+INFO        ┝━ reduce matrix quotient [ 8.93ms | 0.00% / 0.00% ] dims: 1x1048576
+INFO        │  ┝━ compute opened values with Lagrange interpolation [ 578µs | 0.00% ]
+INFO        │  ┕━ reduce rows [ 8.35ms | 0.00% ]
+INFO        ┝━ reduce matrix quotient [ 9.53ms | 0.00% / 0.00% ] dims: 1x1048576
+INFO        │  ┝━ compute opened values with Lagrange interpolation [ 591µs | 0.00% ]
+INFO        │  ┕━ reduce rows [ 8.93ms | 0.00% ]
+INFO        ┝━ reduce matrix quotient [ 9.28ms | 0.00% / 0.00% ] dims: 1x1048576
+INFO        │  ┝━ compute opened values with Lagrange interpolation [ 550µs | 0.00% ]
+INFO        │  ┕━ reduce rows [ 8.73ms | 0.00% ]
+INFO        ┝━ reduce matrix quotient [ 9.16ms | 0.00% / 0.00% ] dims: 1x1048576
+INFO        │  ┝━ compute opened values with Lagrange interpolation [ 538µs | 0.00% ]
+INFO        │  ┕━ reduce rows [ 8.62ms | 0.00% ]
+INFO        ┝━ reduce matrix quotient [ 9.00ms | 0.00% / 0.00% ] dims: 1x1048576
+INFO        │  ┝━ compute opened values with Lagrange interpolation [ 584µs | 0.00% ]
+INFO        │  ┕━ reduce rows [ 8.41ms | 0.00% ]
+INFO        ┝━ reduce matrix quotient [ 9.86ms | 0.00% / 0.00% ] dims: 1x1048576
+INFO        │  ┝━ compute opened values with Lagrange interpolation [ 608µs | 0.00% ]
+INFO        │  ┕━ reduce rows [ 9.25ms | 0.00% ]
+INFO        ┝━ reduce matrix quotient [ 8.96ms | 0.00% / 0.00% ] dims: 1x1048576
+INFO        │  ┝━ compute opened values with Lagrange interpolation [ 530µs | 0.00% ]
+INFO        │  ┕━ reduce rows [ 8.43ms | 0.00% ]
+INFO        ┝━ reduce matrix quotient [ 9.24ms | 0.00% / 0.00% ] dims: 1x1048576
+INFO        │  ┝━ compute opened values with Lagrange interpolation [ 621µs | 0.00% ]
+INFO        │  ┕━ reduce rows [ 8.62ms | 0.00% ]
+INFO        ┝━ reduce matrix quotient [ 9.72ms | 0.00% / 0.00% ] dims: 1x1048576
+INFO        │  ┝━ compute opened values with Lagrange interpolation [ 549µs | 0.00% ]
+INFO        │  ┕━ reduce rows [ 9.16ms | 0.00% ]
+INFO        ┝━ reduce matrix quotient [ 9.41ms | 0.00% / 0.00% ] dims: 1x1048576
+INFO        │  ┝━ compute opened values with Lagrange interpolation [ 530µs | 0.00% ]
+INFO        │  ┕━ reduce rows [ 8.88ms | 0.00% ]
+INFO        ┝━ reduce matrix quotient [ 9.64ms | 0.00% / 0.00% ] dims: 1x1048576
+INFO        │  ┝━ compute opened values with Lagrange interpolation [ 581µs | 0.00% ]
+INFO        │  ┕━ reduce rows [ 9.01ms | 0.00% ]
+INFO        ┝━ reduce matrix quotient [ 16.7ms | 0.00% / 0.01% ] dims: 1x1048576
+INFO        │  ┝━ compute opened values with Lagrange interpolation [ 505µs | 0.00% ]
+INFO        │  ┕━ reduce rows [ 16.1ms | 0.01% ]
+INFO        ┝━ reduce matrix quotient [ 9.12ms | 0.00% / 0.00% ] dims: 1x1048576
+INFO        │  ┝━ compute opened values with Lagrange interpolation [ 526µs | 0.00% ]
+INFO        │  ┕━ reduce rows [ 8.59ms | 0.00% ]
+INFO        ┝━ reduce matrix quotient [ 9.86ms | 0.00% / 0.00% ] dims: 1x1048576
+INFO        │  ┝━ compute opened values with Lagrange interpolation [ 452µs | 0.00% ]
+INFO        │  ┕━ reduce rows [ 9.40ms | 0.00% ]
+INFO        ┝━ reduce matrix quotient [ 9.29ms | 0.00% / 0.00% ] dims: 1x1048576
+INFO        │  ┝━ compute opened values with Lagrange interpolation [ 442µs | 0.00% ]
+INFO        │  ┕━ reduce rows [ 8.84ms | 0.00% ]
+INFO        ┝━ reduce matrix quotient [ 9.93ms | 0.00% / 0.00% ] dims: 1x1048576
+INFO        │  ┝━ compute opened values with Lagrange interpolation [ 614µs | 0.00% ]
+INFO        │  ┕━ reduce rows [ 9.32ms | 0.00% ]
+INFO        ┝━ reduce matrix quotient [ 9.94ms | 0.00% / 0.00% ] dims: 1x1048576
+INFO        │  ┝━ compute opened values with Lagrange interpolation [ 575µs | 0.00% ]
+INFO        │  ┕━ reduce rows [ 9.36ms | 0.00% ]
+INFO        ┝━ reduce matrix quotient [ 9.88ms | 0.00% / 0.00% ] dims: 1x1048576
+INFO        │  ┝━ compute opened values with Lagrange interpolation [ 550µs | 0.00% ]
+INFO        │  ┕━ reduce rows [ 9.33ms | 0.00% ]
+INFO        ┝━ reduce matrix quotient [ 10.0ms | 0.00% / 0.00% ] dims: 1x1048576
+INFO        │  ┝━ compute opened values with Lagrange interpolation [ 572µs | 0.00% ]
+INFO        │  ┕━ reduce rows [ 9.45ms | 0.00% ]
+INFO        ┝━ reduce matrix quotient [ 9.79ms | 0.00% / 0.00% ] dims: 1x1048576
+INFO        │  ┝━ compute opened values with Lagrange interpolation [ 561µs | 0.00% ]
+INFO        │  ┕━ reduce rows [ 9.22ms | 0.00% ]
+INFO        ┝━ reduce matrix quotient [ 9.44ms | 0.00% / 0.00% ] dims: 1x1048576
+INFO        │  ┝━ compute opened values with Lagrange interpolation [ 574µs | 0.00% ]
+INFO        │  ┕━ reduce rows [ 8.86ms | 0.00% ]
+INFO        ┝━ reduce matrix quotient [ 9.58ms | 0.00% / 0.00% ] dims: 1x1048576
+INFO        │  ┝━ compute opened values with Lagrange interpolation [ 682µs | 0.00% ]
+INFO        │  ┕━ reduce rows [ 8.90ms | 0.00% ]
+INFO        ┝━ reduce matrix quotient [ 10.1ms | 0.00% / 0.00% ] dims: 1x1048576
+INFO        │  ┝━ compute opened values with Lagrange interpolation [ 497µs | 0.00% ]
+INFO        │  ┕━ reduce rows [ 9.57ms | 0.00% ]
+INFO        ┝━ reduce matrix quotient [ 9.78ms | 0.00% / 0.00% ] dims: 1x1048576
+INFO        │  ┝━ compute opened values with Lagrange interpolation [ 591µs | 0.00% ]
+INFO        │  ┕━ reduce rows [ 9.18ms | 0.00% ]
+INFO        ┝━ reduce matrix quotient [ 9.64ms | 0.00% / 0.00% ] dims: 1x1048576
+INFO        │  ┝━ compute opened values with Lagrange interpolation [ 604µs | 0.00% ]
+INFO        │  ┕━ reduce rows [ 9.04ms | 0.00% ]
+INFO        ┝━ reduce matrix quotient [ 9.91ms | 0.00% / 0.00% ] dims: 1x1048576
+INFO        │  ┝━ compute opened values with Lagrange interpolation [ 540µs | 0.00% ]
+INFO        │  ┕━ reduce rows [ 9.36ms | 0.00% ]
+INFO        ┝━ reduce matrix quotient [ 10.5ms | 0.00% / 0.00% ] dims: 1x1048576
+INFO        │  ┝━ compute opened values with Lagrange interpolation [ 588µs | 0.00% ]
+INFO        │  ┕━ reduce rows [ 9.89ms | 0.00% ]
+INFO        ┝━ reduce matrix quotient [ 10.4ms | 0.00% / 0.00% ] dims: 1x1048576
+INFO        │  ┝━ compute opened values with Lagrange interpolation [ 625µs | 0.00% ]
+INFO        │  ┕━ reduce rows [ 9.78ms | 0.00% ]
+INFO        ┝━ reduce matrix quotient [ 10.2ms | 0.00% / 0.00% ] dims: 1x1048576
+INFO        │  ┝━ compute opened values with Lagrange interpolation [ 563µs | 0.00% ]
+INFO        │  ┕━ reduce rows [ 9.66ms | 0.00% ]
+INFO        ┝━ reduce matrix quotient [ 10.2ms | 0.00% / 0.00% ] dims: 1x1048576
+INFO        │  ┝━ compute opened values with Lagrange interpolation [ 566µs | 0.00% ]
+INFO        │  ┕━ reduce rows [ 9.67ms | 0.00% ]
+INFO        ┝━ reduce matrix quotient [ 17.0ms | 0.00% / 0.01% ] dims: 1x1048576
+INFO        │  ┝━ compute opened values with Lagrange interpolation [ 598µs | 0.00% ]
+INFO        │  ┕━ reduce rows [ 16.4ms | 0.01% ]
+INFO        ┝━ reduce matrix quotient [ 10.4ms | 0.00% / 0.00% ] dims: 1x1048576
+INFO        │  ┝━ compute opened values with Lagrange interpolation [ 605µs | 0.00% ]
+INFO        │  ┕━ reduce rows [ 9.82ms | 0.00% ]
+INFO        ┝━ reduce matrix quotient [ 9.34ms | 0.00% / 0.00% ] dims: 1x1048576
+INFO        │  ┝━ compute opened values with Lagrange interpolation [ 519µs | 0.00% ]
+INFO        │  ┕━ reduce rows [ 8.81ms | 0.00% ]
+INFO        ┝━ reduce matrix quotient [ 10.0ms | 0.00% / 0.00% ] dims: 1x1048576
+INFO        │  ┝━ compute opened values with Lagrange interpolation [ 585µs | 0.00% ]
+INFO        │  ┕━ reduce rows [ 9.42ms | 0.00% ]
+INFO        ┝━ reduce matrix quotient [ 9.96ms | 0.00% / 0.00% ] dims: 1x1048576
+INFO        │  ┝━ compute opened values with Lagrange interpolation [ 627µs | 0.00% ]
+INFO        │  ┕━ reduce rows [ 9.33ms | 0.00% ]
+INFO        ┝━ reduce matrix quotient [ 9.86ms | 0.00% / 0.00% ] dims: 1x1048576
+INFO        │  ┝━ compute opened values with Lagrange interpolation [ 609µs | 0.00% ]
+INFO        │  ┕━ reduce rows [ 9.25ms | 0.00% ]
+INFO        ┝━ reduce matrix quotient [ 10.5ms | 0.00% / 0.00% ] dims: 1x1048576
+INFO        │  ┝━ compute opened values with Lagrange interpolation [ 693µs | 0.00% ]
+INFO        │  ┕━ reduce rows [ 9.80ms | 0.00% ]
+INFO        ┝━ reduce matrix quotient [ 9.86ms | 0.00% / 0.00% ] dims: 1x1048576
+INFO        │  ┝━ compute opened values with Lagrange interpolation [ 576µs | 0.00% ]
+INFO        │  ┕━ reduce rows [ 9.28ms | 0.00% ]
+INFO        ┝━ reduce matrix quotient [ 10.0ms | 0.00% / 0.00% ] dims: 1x1048576
+INFO        │  ┝━ compute opened values with Lagrange interpolation [ 624µs | 0.00% ]
+INFO        │  ┕━ reduce rows [ 9.40ms | 0.00% ]
+INFO        ┝━ reduce matrix quotient [ 10.0ms | 0.00% / 0.00% ] dims: 1x1048576
+INFO        │  ┝━ compute opened values with Lagrange interpolation [ 639µs | 0.00% ]
+INFO        │  ┕━ reduce rows [ 9.41ms | 0.00% ]
+INFO        ┝━ reduce matrix quotient [ 10.2ms | 0.00% / 0.00% ] dims: 1x1048576
+INFO        │  ┝━ compute opened values with Lagrange interpolation [ 559µs | 0.00% ]
+INFO        │  ┕━ reduce rows [ 9.63ms | 0.00% ]
+INFO        ┝━ reduce matrix quotient [ 9.99ms | 0.00% / 0.00% ] dims: 1x1048576
+INFO        │  ┝━ compute opened values with Lagrange interpolation [ 648µs | 0.00% ]
+INFO        │  ┕━ reduce rows [ 9.34ms | 0.00% ]
+INFO        ┝━ reduce matrix quotient [ 9.95ms | 0.00% / 0.00% ] dims: 1x1048576
+INFO        │  ┝━ compute opened values with Lagrange interpolation [ 549µs | 0.00% ]
+INFO        │  ┕━ reduce rows [ 9.37ms | 0.00% ]
+INFO        ┝━ reduce matrix quotient [ 10.1ms | 0.00% / 0.00% ] dims: 1x1048576
+INFO        │  ┝━ compute opened values with Lagrange interpolation [ 555µs | 0.00% ]
+INFO        │  ┕━ reduce rows [ 9.50ms | 0.00% ]
+INFO        ┝━ reduce matrix quotient [ 10.1ms | 0.00% / 0.00% ] dims: 1x1048576
+INFO        │  ┝━ compute opened values with Lagrange interpolation [ 601µs | 0.00% ]
+INFO        │  ┕━ reduce rows [ 9.54ms | 0.00% ]
+INFO        ┝━ reduce matrix quotient [ 10.1ms | 0.00% / 0.00% ] dims: 1x1048576
+INFO        │  ┝━ compute opened values with Lagrange interpolation [ 574µs | 0.00% ]
+INFO        │  ┕━ reduce rows [ 9.53ms | 0.00% ]
+INFO        ┝━ reduce matrix quotient [ 9.90ms | 0.00% / 0.00% ] dims: 1x1048576
+INFO        │  ┝━ compute opened values with Lagrange interpolation [ 618µs | 0.00% ]
+INFO        │  ┕━ reduce rows [ 9.27ms | 0.00% ]
+INFO        ┝━ reduce matrix quotient [ 9.94ms | 0.00% / 0.00% ] dims: 1x1048576
+INFO        │  ┝━ compute opened values with Lagrange interpolation [ 603µs | 0.00% ]
+INFO        │  ┕━ reduce rows [ 9.33ms | 0.00% ]
+INFO        ┝━ reduce matrix quotient [ 9.79ms | 0.00% / 0.00% ] dims: 1x1048576
+INFO        │  ┝━ compute opened values with Lagrange interpolation [ 532µs | 0.00% ]
+INFO        │  ┕━ reduce rows [ 9.25ms | 0.00% ]
+INFO        ┝━ reduce matrix quotient [ 9.83ms | 0.00% / 0.00% ] dims: 1x1048576
+INFO        │  ┝━ compute opened values with Lagrange interpolation [ 545µs | 0.00% ]
+INFO        │  ┕━ reduce rows [ 9.28ms | 0.00% ]
+INFO        ┝━ reduce matrix quotient [ 10.5ms | 0.00% / 0.00% ] dims: 1x1048576
+INFO        │  ┝━ compute opened values with Lagrange interpolation [ 617µs | 0.00% ]
+INFO        │  ┕━ reduce rows [ 9.84ms | 0.00% ]
+INFO        ┝━ reduce matrix quotient [ 16.5ms | 0.00% / 0.01% ] dims: 1x1048576
+INFO        │  ┝━ compute opened values with Lagrange interpolation [ 571µs | 0.00% ]
+INFO        │  ┕━ reduce rows [ 15.9ms | 0.01% ]
+INFO        ┝━ reduce matrix quotient [ 9.27ms | 0.00% / 0.00% ] dims: 1x1048576
+INFO        │  ┝━ compute opened values with Lagrange interpolation [ 646µs | 0.00% ]
+INFO        │  ┕━ reduce rows [ 8.62ms | 0.00% ]
+INFO        ┝━ reduce matrix quotient [ 9.24ms | 0.00% / 0.00% ] dims: 1x1048576
+INFO        │  ┝━ compute opened values with Lagrange interpolation [ 636µs | 0.00% ]
+INFO        │  ┕━ reduce rows [ 8.60ms | 0.00% ]
+INFO        ┝━ reduce matrix quotient [ 9.10ms | 0.00% / 0.00% ] dims: 1x1048576
+INFO        │  ┝━ compute opened values with Lagrange interpolation [ 529µs | 0.00% ]
+INFO        │  ┕━ reduce rows [ 8.57ms | 0.00% ]
+INFO        ┝━ reduce matrix quotient [ 9.02ms | 0.00% / 0.00% ] dims: 1x1048576
+INFO        │  ┝━ compute opened values with Lagrange interpolation [ 598µs | 0.00% ]
+INFO        │  ┕━ reduce rows [ 8.42ms | 0.00% ]
+INFO        ┝━ reduce matrix quotient [ 9.29ms | 0.00% / 0.00% ] dims: 1x1048576
+INFO        │  ┝━ compute opened values with Lagrange interpolation [ 467µs | 0.00% ]
+INFO        │  ┕━ reduce rows [ 8.82ms | 0.00% ]
+INFO        ┝━ reduce matrix quotient [ 9.01ms | 0.00% / 0.00% ] dims: 1x1048576
+INFO        │  ┝━ compute opened values with Lagrange interpolation [ 531µs | 0.00% ]
+INFO        │  ┕━ reduce rows [ 8.48ms | 0.00% ]
+INFO        ┝━ reduce matrix quotient [ 9.09ms | 0.00% / 0.00% ] dims: 1x1048576
+INFO        │  ┝━ compute opened values with Lagrange interpolation [ 540µs | 0.00% ]
+INFO        │  ┕━ reduce rows [ 8.55ms | 0.00% ]
+INFO        ┝━ reduce matrix quotient [ 9.01ms | 0.00% / 0.00% ] dims: 1x1048576
+INFO        │  ┝━ compute opened values with Lagrange interpolation [ 462µs | 0.00% ]
+INFO        │  ┕━ reduce rows [ 8.54ms | 0.00% ]
+INFO        ┝━ reduce matrix quotient [ 8.88ms | 0.00% / 0.00% ] dims: 1x1048576
+INFO        │  ┝━ compute opened values with Lagrange interpolation [ 577µs | 0.00% ]
+INFO        │  ┕━ reduce rows [ 8.30ms | 0.00% ]
+INFO        ┝━ reduce matrix quotient [ 9.56ms | 0.00% / 0.00% ] dims: 1x1048576
+INFO        │  ┝━ compute opened values with Lagrange interpolation [ 528µs | 0.00% ]
+INFO        │  ┕━ reduce rows [ 9.03ms | 0.00% ]
+INFO        ┝━ reduce matrix quotient [ 13.9ms | 0.00% / 0.01% ] dims: 1x1048576
+INFO        │  ┝━ compute opened values with Lagrange interpolation [ 444µs | 0.00% ]
+INFO        │  ┕━ reduce rows [ 13.5ms | 0.01% ]
+INFO        ┝━ reduce matrix quotient [ 12.0ms | 0.00% / 0.00% ] dims: 1x1048576
+INFO        │  ┝━ compute opened values with Lagrange interpolation [ 631µs | 0.00% ]
+INFO        │  ┕━ reduce rows [ 11.4ms | 0.00% ]
+INFO        ┝━ reduce matrix quotient [ 8.68ms | 0.00% / 0.00% ] dims: 1x1048576
+INFO        │  ┝━ compute opened values with Lagrange interpolation [ 520µs | 0.00% ]
+INFO        │  ┕━ reduce rows [ 8.16ms | 0.00% ]
+INFO        ┝━ reduce matrix quotient [ 9.80ms | 0.00% / 0.00% ] dims: 1x1048576
+INFO        │  ┝━ compute opened values with Lagrange interpolation [ 548µs | 0.00% ]
+INFO        │  ┕━ reduce rows [ 9.23ms | 0.00% ]
+INFO        ┝━ reduce matrix quotient [ 9.23ms | 0.00% / 0.00% ] dims: 1x1048576
+INFO        │  ┝━ compute opened values with Lagrange interpolation [ 436µs | 0.00% ]
+INFO        │  ┕━ reduce rows [ 8.79ms | 0.00% ]
+INFO        ┝━ reduce matrix quotient [ 9.32ms | 0.00% / 0.00% ] dims: 1x1048576
+INFO        │  ┝━ compute opened values with Lagrange interpolation [ 553µs | 0.00% ]
+INFO        │  ┕━ reduce rows [ 8.77ms | 0.00% ]
+INFO        ┝━ reduce matrix quotient [ 9.61ms | 0.00% / 0.00% ] dims: 1x1048576
+INFO        │  ┝━ compute opened values with Lagrange interpolation [ 538µs | 0.00% ]
+INFO        │  ┕━ reduce rows [ 9.07ms | 0.00% ]
+INFO        ┝━ reduce matrix quotient [ 10.2ms | 0.00% / 0.00% ] dims: 1x1048576
+INFO        │  ┝━ compute opened values with Lagrange interpolation [ 609µs | 0.00% ]
+INFO        │  ┕━ reduce rows [ 9.55ms | 0.00% ]
+INFO        ┝━ reduce matrix quotient [ 9.70ms | 0.00% / 0.00% ] dims: 1x1048576
+INFO        │  ┝━ compute opened values with Lagrange interpolation [ 572µs | 0.00% ]
+INFO        │  ┕━ reduce rows [ 9.12ms | 0.00% ]
+INFO        ┝━ reduce matrix quotient [ 9.85ms | 0.00% / 0.00% ] dims: 1x1048576
+INFO        │  ┝━ compute opened values with Lagrange interpolation [ 666µs | 0.00% ]
+INFO        │  ┕━ reduce rows [ 9.18ms | 0.00% ]
+INFO        ┕━ FRI prover [ 1.44s | 0.00% / 0.58% ]
+INFO           ┝━ commit phase [ 1.43s | 0.58% / 0.58% ]
+INFO           │  ┕━ divide_by_height [ 62.9µs | 0.00% ] dims: 1x128
+INFO           ┝━ grind for proof-of-work witness [ 1.31ms | 0.00% ]
+INFO           ┕━ query phase [ 2.32ms | 0.00% ]
+Verification...
+INFO     verify [ 275ms | 99.93% / 100.00% ]
+INFO     ┕━ infer log of constraint degree [ 201µs | 0.07% ]
+Proving log_blowup 6
+Generating trace...
+Creating LineaAir...
+Creating LineaAir...
+Proving...
+INFO     prove [ 43.5s | 0.20% / 100.00% ]
+INFO     ┝━ commit to trace data [ 31.1s | 68.66% / 71.42% ]
+INFO     │  ┕━ coset_lde_batch [ 1.20s | 2.75% ] dims: 201x8192 | added_bits: 6
+INFO     ┝━ compute quotient polynomial [ 335ms | 0.77% ]
+INFO     ┝━ commit to quotient poly chunks [ 10.9s | 22.00% / 25.13% ]
+INFO     │  ┝━ coset_lde_batch [ 38.6ms | 0.09% ] dims: 1x8192 | added_bits: 6
+INFO     │  ┝━ coset_lde_batch [ 19.0ms | 0.04% ] dims: 1x8192 | added_bits: 6
+INFO     │  ┝━ coset_lde_batch [ 19.8ms | 0.05% ] dims: 1x8192 | added_bits: 6
+INFO     │  ┝━ coset_lde_batch [ 19.8ms | 0.05% ] dims: 1x8192 | added_bits: 6
+INFO     │  ┝━ coset_lde_batch [ 19.5ms | 0.04% ] dims: 1x8192 | added_bits: 6
+INFO     │  ┝━ coset_lde_batch [ 21.6ms | 0.05% ] dims: 1x8192 | added_bits: 6
+INFO     │  ┝━ coset_lde_batch [ 21.6ms | 0.05% ] dims: 1x8192 | added_bits: 6
+INFO     │  ┝━ coset_lde_batch [ 20.7ms | 0.05% ] dims: 1x8192 | added_bits: 6
+INFO     │  ┝━ coset_lde_batch [ 21.1ms | 0.05% ] dims: 1x8192 | added_bits: 6
+INFO     │  ┝━ coset_lde_batch [ 21.6ms | 0.05% ] dims: 1x8192 | added_bits: 6
+INFO     │  ┝━ coset_lde_batch [ 22.1ms | 0.05% ] dims: 1x8192 | added_bits: 6
+INFO     │  ┝━ coset_lde_batch [ 21.1ms | 0.05% ] dims: 1x8192 | added_bits: 6
+INFO     │  ┝━ coset_lde_batch [ 20.5ms | 0.05% ] dims: 1x8192 | added_bits: 6
+INFO     │  ┝━ coset_lde_batch [ 22.0ms | 0.05% ] dims: 1x8192 | added_bits: 6
+INFO     │  ┝━ coset_lde_batch [ 21.3ms | 0.05% ] dims: 1x8192 | added_bits: 6
+INFO     │  ┝━ coset_lde_batch [ 22.6ms | 0.05% ] dims: 1x8192 | added_bits: 6
+INFO     │  ┝━ coset_lde_batch [ 21.7ms | 0.05% ] dims: 1x8192 | added_bits: 6
+INFO     │  ┝━ coset_lde_batch [ 24.7ms | 0.06% ] dims: 1x8192 | added_bits: 6
+INFO     │  ┝━ coset_lde_batch [ 23.2ms | 0.05% ] dims: 1x8192 | added_bits: 6
+INFO     │  ┝━ coset_lde_batch [ 24.2ms | 0.06% ] dims: 1x8192 | added_bits: 6
+INFO     │  ┝━ coset_lde_batch [ 22.6ms | 0.05% ] dims: 1x8192 | added_bits: 6
+INFO     │  ┝━ coset_lde_batch [ 21.6ms | 0.05% ] dims: 1x8192 | added_bits: 6
+INFO     │  ┝━ coset_lde_batch [ 20.5ms | 0.05% ] dims: 1x8192 | added_bits: 6
+INFO     │  ┝━ coset_lde_batch [ 20.5ms | 0.05% ] dims: 1x8192 | added_bits: 6
+INFO     │  ┝━ coset_lde_batch [ 20.4ms | 0.05% ] dims: 1x8192 | added_bits: 6
+INFO     │  ┝━ coset_lde_batch [ 20.6ms | 0.05% ] dims: 1x8192 | added_bits: 6
+INFO     │  ┝━ coset_lde_batch [ 20.5ms | 0.05% ] dims: 1x8192 | added_bits: 6
+INFO     │  ┝━ coset_lde_batch [ 21.3ms | 0.05% ] dims: 1x8192 | added_bits: 6
+INFO     │  ┝━ coset_lde_batch [ 21.7ms | 0.05% ] dims: 1x8192 | added_bits: 6
+INFO     │  ┝━ coset_lde_batch [ 21.6ms | 0.05% ] dims: 1x8192 | added_bits: 6
+INFO     │  ┝━ coset_lde_batch [ 20.4ms | 0.05% ] dims: 1x8192 | added_bits: 6
+INFO     │  ┝━ coset_lde_batch [ 21.4ms | 0.05% ] dims: 1x8192 | added_bits: 6
+INFO     │  ┝━ coset_lde_batch [ 20.5ms | 0.05% ] dims: 1x8192 | added_bits: 6
+INFO     │  ┝━ coset_lde_batch [ 20.6ms | 0.05% ] dims: 1x8192 | added_bits: 6
+INFO     │  ┝━ coset_lde_batch [ 20.8ms | 0.05% ] dims: 1x8192 | added_bits: 6
+INFO     │  ┝━ coset_lde_batch [ 20.4ms | 0.05% ] dims: 1x8192 | added_bits: 6
+INFO     │  ┝━ coset_lde_batch [ 20.2ms | 0.05% ] dims: 1x8192 | added_bits: 6
+INFO     │  ┝━ coset_lde_batch [ 21.0ms | 0.05% ] dims: 1x8192 | added_bits: 6
+INFO     │  ┝━ coset_lde_batch [ 20.4ms | 0.05% ] dims: 1x8192 | added_bits: 6
+INFO     │  ┝━ coset_lde_batch [ 20.8ms | 0.05% ] dims: 1x8192 | added_bits: 6
+INFO     │  ┝━ coset_lde_batch [ 21.5ms | 0.05% ] dims: 1x8192 | added_bits: 6
+INFO     │  ┝━ coset_lde_batch [ 20.9ms | 0.05% ] dims: 1x8192 | added_bits: 6
+INFO     │  ┝━ coset_lde_batch [ 20.8ms | 0.05% ] dims: 1x8192 | added_bits: 6
+INFO     │  ┝━ coset_lde_batch [ 20.6ms | 0.05% ] dims: 1x8192 | added_bits: 6
+INFO     │  ┝━ coset_lde_batch [ 20.1ms | 0.05% ] dims: 1x8192 | added_bits: 6
+INFO     │  ┝━ coset_lde_batch [ 20.9ms | 0.05% ] dims: 1x8192 | added_bits: 6
+INFO     │  ┝━ coset_lde_batch [ 20.6ms | 0.05% ] dims: 1x8192 | added_bits: 6
+INFO     │  ┝━ coset_lde_batch [ 20.9ms | 0.05% ] dims: 1x8192 | added_bits: 6
+INFO     │  ┝━ coset_lde_batch [ 21.1ms | 0.05% ] dims: 1x8192 | added_bits: 6
+INFO     │  ┝━ coset_lde_batch [ 20.7ms | 0.05% ] dims: 1x8192 | added_bits: 6
+INFO     │  ┝━ coset_lde_batch [ 20.6ms | 0.05% ] dims: 1x8192 | added_bits: 6
+INFO     │  ┝━ coset_lde_batch [ 20.0ms | 0.05% ] dims: 1x8192 | added_bits: 6
+INFO     │  ┝━ coset_lde_batch [ 20.9ms | 0.05% ] dims: 1x8192 | added_bits: 6
+INFO     │  ┝━ coset_lde_batch [ 21.8ms | 0.05% ] dims: 1x8192 | added_bits: 6
+INFO     │  ┝━ coset_lde_batch [ 20.9ms | 0.05% ] dims: 1x8192 | added_bits: 6
+INFO     │  ┝━ coset_lde_batch [ 20.6ms | 0.05% ] dims: 1x8192 | added_bits: 6
+INFO     │  ┝━ coset_lde_batch [ 20.5ms | 0.05% ] dims: 1x8192 | added_bits: 6
+INFO     │  ┝━ coset_lde_batch [ 20.7ms | 0.05% ] dims: 1x8192 | added_bits: 6
+INFO     │  ┝━ coset_lde_batch [ 20.9ms | 0.05% ] dims: 1x8192 | added_bits: 6
+INFO     │  ┝━ coset_lde_batch [ 23.6ms | 0.05% ] dims: 1x8192 | added_bits: 6
+INFO     │  ┝━ coset_lde_batch [ 21.2ms | 0.05% ] dims: 1x8192 | added_bits: 6
+INFO     │  ┝━ coset_lde_batch [ 20.3ms | 0.05% ] dims: 1x8192 | added_bits: 6
+INFO     │  ┝━ coset_lde_batch [ 20.5ms | 0.05% ] dims: 1x8192 | added_bits: 6
+INFO     │  ┕━ coset_lde_batch [ 20.1ms | 0.05% ] dims: 1x8192 | added_bits: 6
+INFO     ┕━ open [ 1.08s | 0.00% / 2.49% ]
+INFO        ┝━ compute_inverse_denominators [ 24.9ms | 0.06% ]
+INFO        ┝━ reduce matrix quotient [ 137ms | 0.00% / 0.32% ] dims: 201x524288
+INFO        │  ┝━ compute opened values with Lagrange interpolation [ 2.55ms | 0.01% ]
+INFO        │  ┕━ reduce rows [ 135ms | 0.31% ]
+INFO        ┝━ reduce matrix quotient [ 138ms | 0.00% / 0.32% ] dims: 201x524288
+INFO        │  ┝━ compute opened values with Lagrange interpolation [ 2.98ms | 0.01% ]
+INFO        │  ┕━ reduce rows [ 135ms | 0.31% ]
+INFO        ┝━ reduce matrix quotient [ 3.23ms | 0.00% / 0.01% ] dims: 1x524288
+INFO        │  ┝━ compute opened values with Lagrange interpolation [ 492µs | 0.00% ]
+INFO        │  ┕━ reduce rows [ 2.73ms | 0.01% ]
+INFO        ┝━ reduce matrix quotient [ 3.16ms | 0.00% / 0.01% ] dims: 1x524288
+INFO        │  ┝━ compute opened values with Lagrange interpolation [ 434µs | 0.00% ]
+INFO        │  ┕━ reduce rows [ 2.72ms | 0.01% ]
+INFO        ┝━ reduce matrix quotient [ 3.36ms | 0.00% / 0.01% ] dims: 1x524288
+INFO        │  ┝━ compute opened values with Lagrange interpolation [ 513µs | 0.00% ]
+INFO        │  ┕━ reduce rows [ 2.85ms | 0.01% ]
+INFO        ┝━ reduce matrix quotient [ 3.30ms | 0.00% / 0.01% ] dims: 1x524288
+INFO        │  ┝━ compute opened values with Lagrange interpolation [ 502µs | 0.00% ]
+INFO        │  ┕━ reduce rows [ 2.79ms | 0.01% ]
+INFO        ┝━ reduce matrix quotient [ 3.17ms | 0.00% / 0.01% ] dims: 1x524288
+INFO        │  ┝━ compute opened values with Lagrange interpolation [ 456µs | 0.00% ]
+INFO        │  ┕━ reduce rows [ 2.71ms | 0.01% ]
+INFO        ┝━ reduce matrix quotient [ 3.24ms | 0.00% / 0.01% ] dims: 1x524288
+INFO        │  ┝━ compute opened values with Lagrange interpolation [ 503µs | 0.00% ]
+INFO        │  ┕━ reduce rows [ 2.74ms | 0.01% ]
+INFO        ┝━ reduce matrix quotient [ 3.14ms | 0.00% / 0.01% ] dims: 1x524288
+INFO        │  ┝━ compute opened values with Lagrange interpolation [ 450µs | 0.00% ]
+INFO        │  ┕━ reduce rows [ 2.69ms | 0.01% ]
+INFO        ┝━ reduce matrix quotient [ 3.05ms | 0.00% / 0.01% ] dims: 1x524288
+INFO        │  ┝━ compute opened values with Lagrange interpolation [ 409µs | 0.00% ]
+INFO        │  ┕━ reduce rows [ 2.64ms | 0.01% ]
+INFO        ┝━ reduce matrix quotient [ 3.17ms | 0.00% / 0.01% ] dims: 1x524288
+INFO        │  ┝━ compute opened values with Lagrange interpolation [ 405µs | 0.00% ]
+INFO        │  ┕━ reduce rows [ 2.76ms | 0.01% ]
+INFO        ┝━ reduce matrix quotient [ 3.25ms | 0.00% / 0.01% ] dims: 1x524288
+INFO        │  ┝━ compute opened values with Lagrange interpolation [ 428µs | 0.00% ]
+INFO        │  ┕━ reduce rows [ 2.82ms | 0.01% ]
+INFO        ┝━ reduce matrix quotient [ 3.11ms | 0.00% / 0.01% ] dims: 1x524288
+INFO        │  ┝━ compute opened values with Lagrange interpolation [ 397µs | 0.00% ]
+INFO        │  ┕━ reduce rows [ 2.71ms | 0.01% ]
+INFO        ┝━ reduce matrix quotient [ 3.18ms | 0.00% / 0.01% ] dims: 1x524288
+INFO        │  ┝━ compute opened values with Lagrange interpolation [ 414µs | 0.00% ]
+INFO        │  ┕━ reduce rows [ 2.77ms | 0.01% ]
+INFO        ┝━ reduce matrix quotient [ 3.16ms | 0.00% / 0.01% ] dims: 1x524288
+INFO        │  ┝━ compute opened values with Lagrange interpolation [ 402µs | 0.00% ]
+INFO        │  ┕━ reduce rows [ 2.76ms | 0.01% ]
+INFO        ┝━ reduce matrix quotient [ 3.56ms | 0.00% / 0.01% ] dims: 1x524288
+INFO        │  ┝━ compute opened values with Lagrange interpolation [ 486µs | 0.00% ]
+INFO        │  ┕━ reduce rows [ 3.07ms | 0.01% ]
+INFO        ┝━ reduce matrix quotient [ 3.21ms | 0.00% / 0.01% ] dims: 1x524288
+INFO        │  ┝━ compute opened values with Lagrange interpolation [ 545µs | 0.00% ]
+INFO        │  ┕━ reduce rows [ 2.66ms | 0.01% ]
+INFO        ┝━ reduce matrix quotient [ 3.18ms | 0.00% / 0.01% ] dims: 1x524288
+INFO        │  ┝━ compute opened values with Lagrange interpolation [ 400µs | 0.00% ]
+INFO        │  ┕━ reduce rows [ 2.78ms | 0.01% ]
+INFO        ┝━ reduce matrix quotient [ 3.27ms | 0.00% / 0.01% ] dims: 1x524288
+INFO        │  ┝━ compute opened values with Lagrange interpolation [ 401µs | 0.00% ]
+INFO        │  ┕━ reduce rows [ 2.86ms | 0.01% ]
+INFO        ┝━ reduce matrix quotient [ 3.04ms | 0.00% / 0.01% ] dims: 1x524288
+INFO        │  ┝━ compute opened values with Lagrange interpolation [ 400µs | 0.00% ]
+INFO        │  ┕━ reduce rows [ 2.63ms | 0.01% ]
+INFO        ┝━ reduce matrix quotient [ 3.43ms | 0.00% / 0.01% ] dims: 1x524288
+INFO        │  ┝━ compute opened values with Lagrange interpolation [ 483µs | 0.00% ]
+INFO        │  ┕━ reduce rows [ 2.94ms | 0.01% ]
+INFO        ┝━ reduce matrix quotient [ 3.13ms | 0.00% / 0.01% ] dims: 1x524288
+INFO        │  ┝━ compute opened values with Lagrange interpolation [ 427µs | 0.00% ]
+INFO        │  ┕━ reduce rows [ 2.71ms | 0.01% ]
+INFO        ┝━ reduce matrix quotient [ 3.07ms | 0.00% / 0.01% ] dims: 1x524288
+INFO        │  ┝━ compute opened values with Lagrange interpolation [ 426µs | 0.00% ]
+INFO        │  ┕━ reduce rows [ 2.65ms | 0.01% ]
+INFO        ┝━ reduce matrix quotient [ 3.13ms | 0.00% / 0.01% ] dims: 1x524288
+INFO        │  ┝━ compute opened values with Lagrange interpolation [ 411µs | 0.00% ]
+INFO        │  ┕━ reduce rows [ 2.72ms | 0.01% ]
+INFO        ┝━ reduce matrix quotient [ 3.26ms | 0.00% / 0.01% ] dims: 1x524288
+INFO        │  ┝━ compute opened values with Lagrange interpolation [ 392µs | 0.00% ]
+INFO        │  ┕━ reduce rows [ 2.85ms | 0.01% ]
+INFO        ┝━ reduce matrix quotient [ 3.30ms | 0.00% / 0.01% ] dims: 1x524288
+INFO        │  ┝━ compute opened values with Lagrange interpolation [ 422µs | 0.00% ]
+INFO        │  ┕━ reduce rows [ 2.88ms | 0.01% ]
+INFO        ┝━ reduce matrix quotient [ 3.10ms | 0.00% / 0.01% ] dims: 1x524288
+INFO        │  ┝━ compute opened values with Lagrange interpolation [ 386µs | 0.00% ]
+INFO        │  ┕━ reduce rows [ 2.72ms | 0.01% ]
+INFO        ┝━ reduce matrix quotient [ 3.16ms | 0.00% / 0.01% ] dims: 1x524288
+INFO        │  ┝━ compute opened values with Lagrange interpolation [ 463µs | 0.00% ]
+INFO        │  ┕━ reduce rows [ 2.69ms | 0.01% ]
+INFO        ┝━ reduce matrix quotient [ 3.05ms | 0.00% / 0.01% ] dims: 1x524288
+INFO        │  ┝━ compute opened values with Lagrange interpolation [ 441µs | 0.00% ]
+INFO        │  ┕━ reduce rows [ 2.61ms | 0.01% ]
+INFO        ┝━ reduce matrix quotient [ 3.31ms | 0.00% / 0.01% ] dims: 1x524288
+INFO        │  ┝━ compute opened values with Lagrange interpolation [ 519µs | 0.00% ]
+INFO        │  ┕━ reduce rows [ 2.79ms | 0.01% ]
+INFO        ┝━ reduce matrix quotient [ 3.32ms | 0.00% / 0.01% ] dims: 1x524288
+INFO        │  ┝━ compute opened values with Lagrange interpolation [ 546µs | 0.00% ]
+INFO        │  ┕━ reduce rows [ 2.78ms | 0.01% ]
+INFO        ┝━ reduce matrix quotient [ 3.21ms | 0.00% / 0.01% ] dims: 1x524288
+INFO        │  ┝━ compute opened values with Lagrange interpolation [ 523µs | 0.00% ]
+INFO        │  ┕━ reduce rows [ 2.68ms | 0.01% ]
+INFO        ┝━ reduce matrix quotient [ 3.15ms | 0.00% / 0.01% ] dims: 1x524288
+INFO        │  ┝━ compute opened values with Lagrange interpolation [ 411µs | 0.00% ]
+INFO        │  ┕━ reduce rows [ 2.73ms | 0.01% ]
+INFO        ┝━ reduce matrix quotient [ 3.21ms | 0.00% / 0.01% ] dims: 1x524288
+INFO        │  ┝━ compute opened values with Lagrange interpolation [ 480µs | 0.00% ]
+INFO        │  ┕━ reduce rows [ 2.73ms | 0.01% ]
+INFO        ┝━ reduce matrix quotient [ 3.10ms | 0.00% / 0.01% ] dims: 1x524288
+INFO        │  ┝━ compute opened values with Lagrange interpolation [ 379µs | 0.00% ]
+INFO        │  ┕━ reduce rows [ 2.72ms | 0.01% ]
+INFO        ┝━ reduce matrix quotient [ 3.30ms | 0.00% / 0.01% ] dims: 1x524288
+INFO        │  ┝━ compute opened values with Lagrange interpolation [ 430µs | 0.00% ]
+INFO        │  ┕━ reduce rows [ 2.87ms | 0.01% ]
+INFO        ┝━ reduce matrix quotient [ 3.59ms | 0.00% / 0.01% ] dims: 1x524288
+INFO        │  ┝━ compute opened values with Lagrange interpolation [ 447µs | 0.00% ]
+INFO        │  ┕━ reduce rows [ 3.14ms | 0.01% ]
+INFO        ┝━ reduce matrix quotient [ 3.28ms | 0.00% / 0.01% ] dims: 1x524288
+INFO        │  ┝━ compute opened values with Lagrange interpolation [ 430µs | 0.00% ]
+INFO        │  ┕━ reduce rows [ 2.84ms | 0.01% ]
+INFO        ┝━ reduce matrix quotient [ 3.06ms | 0.00% / 0.01% ] dims: 1x524288
+INFO        │  ┝━ compute opened values with Lagrange interpolation [ 379µs | 0.00% ]
+INFO        │  ┕━ reduce rows [ 2.68ms | 0.01% ]
+INFO        ┝━ reduce matrix quotient [ 3.10ms | 0.00% / 0.01% ] dims: 1x524288
+INFO        │  ┝━ compute opened values with Lagrange interpolation [ 419µs | 0.00% ]
+INFO        │  ┕━ reduce rows [ 2.68ms | 0.01% ]
+INFO        ┝━ reduce matrix quotient [ 3.42ms | 0.00% / 0.01% ] dims: 1x524288
+INFO        │  ┝━ compute opened values with Lagrange interpolation [ 491µs | 0.00% ]
+INFO        │  ┕━ reduce rows [ 2.93ms | 0.01% ]
+INFO        ┝━ reduce matrix quotient [ 3.25ms | 0.00% / 0.01% ] dims: 1x524288
+INFO        │  ┝━ compute opened values with Lagrange interpolation [ 469µs | 0.00% ]
+INFO        │  ┕━ reduce rows [ 2.77ms | 0.01% ]
+INFO        ┝━ reduce matrix quotient [ 3.14ms | 0.00% / 0.01% ] dims: 1x524288
+INFO        │  ┝━ compute opened values with Lagrange interpolation [ 412µs | 0.00% ]
+INFO        │  ┕━ reduce rows [ 2.73ms | 0.01% ]
+INFO        ┝━ reduce matrix quotient [ 3.05ms | 0.00% / 0.01% ] dims: 1x524288
+INFO        │  ┝━ compute opened values with Lagrange interpolation [ 424µs | 0.00% ]
+INFO        │  ┕━ reduce rows [ 2.63ms | 0.01% ]
+INFO        ┝━ reduce matrix quotient [ 3.50ms | 0.00% / 0.01% ] dims: 1x524288
+INFO        │  ┝━ compute opened values with Lagrange interpolation [ 423µs | 0.00% ]
+INFO        │  ┕━ reduce rows [ 3.08ms | 0.01% ]
+INFO        ┝━ reduce matrix quotient [ 3.22ms | 0.00% / 0.01% ] dims: 1x524288
+INFO        │  ┝━ compute opened values with Lagrange interpolation [ 413µs | 0.00% ]
+INFO        │  ┕━ reduce rows [ 2.80ms | 0.01% ]
+INFO        ┝━ reduce matrix quotient [ 3.10ms | 0.00% / 0.01% ] dims: 1x524288
+INFO        │  ┝━ compute opened values with Lagrange interpolation [ 415µs | 0.00% ]
+INFO        │  ┕━ reduce rows [ 2.68ms | 0.01% ]
+INFO        ┝━ reduce matrix quotient [ 3.16ms | 0.00% / 0.01% ] dims: 1x524288
+INFO        │  ┝━ compute opened values with Lagrange interpolation [ 370µs | 0.00% ]
+INFO        │  ┕━ reduce rows [ 2.79ms | 0.01% ]
+INFO        ┝━ reduce matrix quotient [ 3.32ms | 0.00% / 0.01% ] dims: 1x524288
+INFO        │  ┝━ compute opened values with Lagrange interpolation [ 457µs | 0.00% ]
+INFO        │  ┕━ reduce rows [ 2.87ms | 0.01% ]
+INFO        ┝━ reduce matrix quotient [ 3.45ms | 0.00% / 0.01% ] dims: 1x524288
+INFO        │  ┝━ compute opened values with Lagrange interpolation [ 477µs | 0.00% ]
+INFO        │  ┕━ reduce rows [ 2.97ms | 0.01% ]
+INFO        ┝━ reduce matrix quotient [ 3.38ms | 0.00% / 0.01% ] dims: 1x524288
+INFO        │  ┝━ compute opened values with Lagrange interpolation [ 479µs | 0.00% ]
+INFO        │  ┕━ reduce rows [ 2.90ms | 0.01% ]
+INFO        ┝━ reduce matrix quotient [ 3.23ms | 0.00% / 0.01% ] dims: 1x524288
+INFO        │  ┝━ compute opened values with Lagrange interpolation [ 514µs | 0.00% ]
+INFO        │  ┕━ reduce rows [ 2.72ms | 0.01% ]
+INFO        ┝━ reduce matrix quotient [ 3.15ms | 0.00% / 0.01% ] dims: 1x524288
+INFO        │  ┝━ compute opened values with Lagrange interpolation [ 392µs | 0.00% ]
+INFO        │  ┕━ reduce rows [ 2.76ms | 0.01% ]
+INFO        ┝━ reduce matrix quotient [ 3.21ms | 0.00% / 0.01% ] dims: 1x524288
+INFO        │  ┝━ compute opened values with Lagrange interpolation [ 415µs | 0.00% ]
+INFO        │  ┕━ reduce rows [ 2.79ms | 0.01% ]
+INFO        ┝━ reduce matrix quotient [ 3.28ms | 0.00% / 0.01% ] dims: 1x524288
+INFO        │  ┝━ compute opened values with Lagrange interpolation [ 449µs | 0.00% ]
+INFO        │  ┕━ reduce rows [ 2.83ms | 0.01% ]
+INFO        ┝━ reduce matrix quotient [ 3.21ms | 0.00% / 0.01% ] dims: 1x524288
+INFO        │  ┝━ compute opened values with Lagrange interpolation [ 396µs | 0.00% ]
+INFO        │  ┕━ reduce rows [ 2.81ms | 0.01% ]
+INFO        ┝━ reduce matrix quotient [ 3.21ms | 0.00% / 0.01% ] dims: 1x524288
+INFO        │  ┝━ compute opened values with Lagrange interpolation [ 408µs | 0.00% ]
+INFO        │  ┕━ reduce rows [ 2.80ms | 0.01% ]
+INFO        ┝━ reduce matrix quotient [ 3.15ms | 0.00% / 0.01% ] dims: 1x524288
+INFO        │  ┝━ compute opened values with Lagrange interpolation [ 393µs | 0.00% ]
+INFO        │  ┕━ reduce rows [ 2.76ms | 0.01% ]
+INFO        ┝━ reduce matrix quotient [ 3.12ms | 0.00% / 0.01% ] dims: 1x524288
+INFO        │  ┝━ compute opened values with Lagrange interpolation [ 400µs | 0.00% ]
+INFO        │  ┕━ reduce rows [ 2.71ms | 0.01% ]
+INFO        ┝━ reduce matrix quotient [ 3.20ms | 0.00% / 0.01% ] dims: 1x524288
+INFO        │  ┝━ compute opened values with Lagrange interpolation [ 562µs | 0.00% ]
+INFO        │  ┕━ reduce rows [ 2.64ms | 0.01% ]
+INFO        ┝━ reduce matrix quotient [ 3.14ms | 0.00% / 0.01% ] dims: 1x524288
+INFO        │  ┝━ compute opened values with Lagrange interpolation [ 406µs | 0.00% ]
+INFO        │  ┕━ reduce rows [ 2.73ms | 0.01% ]
+INFO        ┝━ reduce matrix quotient [ 3.18ms | 0.00% / 0.01% ] dims: 1x524288
+INFO        │  ┝━ compute opened values with Lagrange interpolation [ 400µs | 0.00% ]
+INFO        │  ┕━ reduce rows [ 2.78ms | 0.01% ]
+INFO        ┝━ reduce matrix quotient [ 3.12ms | 0.00% / 0.01% ] dims: 1x524288
+INFO        │  ┝━ compute opened values with Lagrange interpolation [ 409µs | 0.00% ]
+INFO        │  ┕━ reduce rows [ 2.71ms | 0.01% ]
+INFO        ┝━ reduce matrix quotient [ 3.16ms | 0.00% / 0.01% ] dims: 1x524288
+INFO        │  ┝━ compute opened values with Lagrange interpolation [ 479µs | 0.00% ]
+INFO        │  ┕━ reduce rows [ 2.68ms | 0.01% ]
+INFO        ┝━ reduce matrix quotient [ 3.13ms | 0.00% / 0.01% ] dims: 1x524288
+INFO        │  ┝━ compute opened values with Lagrange interpolation [ 433µs | 0.00% ]
+INFO        │  ┕━ reduce rows [ 2.69ms | 0.01% ]
+INFO        ┝━ reduce matrix quotient [ 3.08ms | 0.00% / 0.01% ] dims: 1x524288
+INFO        │  ┝━ compute opened values with Lagrange interpolation [ 416µs | 0.00% ]
+INFO        │  ┕━ reduce rows [ 2.66ms | 0.01% ]
+INFO        ┕━ FRI prover [ 575ms | 0.00% / 1.32% ]
+INFO           ┝━ commit phase [ 573ms | 1.32% / 1.32% ]
+INFO           │  ┕━ divide_by_height [ 33.5µs | 0.00% ] dims: 1x64
+INFO           ┝━ grind for proof-of-work witness [ 748µs | 0.00% ]
+INFO           ┕━ query phase [ 653µs | 0.00% ]
+Verification...
+INFO     verify [ 111ms | 99.94% / 100.00% ]
+INFO     ┕━ infer log of constraint degree [ 71.8µs | 0.06% ]
+Proving log_blowup 5
+Generating trace...
+Creating LineaAir...
+Creating LineaAir...
+Proving...
+INFO     prove [ 19.9s | 0.09% / 100.00% ]
+INFO     ┝━ commit to trace data [ 15.6s | 75.06% / 78.63% ]
+INFO     │  ┕━ coset_lde_batch [ 711ms | 3.57% ] dims: 199x8192 | added_bits: 5
+INFO     ┝━ compute quotient polynomial [ 766ms | 3.85% ]
+INFO     ┝━ commit to quotient poly chunks [ 2.90s | 12.62% / 14.56% ]
+INFO     │  ┝━ coset_lde_batch [ 19.3ms | 0.10% ] dims: 1x8192 | added_bits: 5
+INFO     │  ┝━ coset_lde_batch [ 11.5ms | 0.06% ] dims: 1x8192 | added_bits: 5
+INFO     │  ┝━ coset_lde_batch [ 11.9ms | 0.06% ] dims: 1x8192 | added_bits: 5
+INFO     │  ┝━ coset_lde_batch [ 13.3ms | 0.07% ] dims: 1x8192 | added_bits: 5
+INFO     │  ┝━ coset_lde_batch [ 11.7ms | 0.06% ] dims: 1x8192 | added_bits: 5
+INFO     │  ┝━ coset_lde_batch [ 12.1ms | 0.06% ] dims: 1x8192 | added_bits: 5
+INFO     │  ┝━ coset_lde_batch [ 11.4ms | 0.06% ] dims: 1x8192 | added_bits: 5
+INFO     │  ┝━ coset_lde_batch [ 11.5ms | 0.06% ] dims: 1x8192 | added_bits: 5
+INFO     │  ┝━ coset_lde_batch [ 10.9ms | 0.05% ] dims: 1x8192 | added_bits: 5
+INFO     │  ┝━ coset_lde_batch [ 11.9ms | 0.06% ] dims: 1x8192 | added_bits: 5
+INFO     │  ┝━ coset_lde_batch [ 12.1ms | 0.06% ] dims: 1x8192 | added_bits: 5
+INFO     │  ┝━ coset_lde_batch [ 11.8ms | 0.06% ] dims: 1x8192 | added_bits: 5
+INFO     │  ┝━ coset_lde_batch [ 11.9ms | 0.06% ] dims: 1x8192 | added_bits: 5
+INFO     │  ┝━ coset_lde_batch [ 11.2ms | 0.06% ] dims: 1x8192 | added_bits: 5
+INFO     │  ┝━ coset_lde_batch [ 10.9ms | 0.05% ] dims: 1x8192 | added_bits: 5
+INFO     │  ┝━ coset_lde_batch [ 12.1ms | 0.06% ] dims: 1x8192 | added_bits: 5
+INFO     │  ┝━ coset_lde_batch [ 12.1ms | 0.06% ] dims: 1x8192 | added_bits: 5
+INFO     │  ┝━ coset_lde_batch [ 12.5ms | 0.06% ] dims: 1x8192 | added_bits: 5
+INFO     │  ┝━ coset_lde_batch [ 11.7ms | 0.06% ] dims: 1x8192 | added_bits: 5
+INFO     │  ┝━ coset_lde_batch [ 12.2ms | 0.06% ] dims: 1x8192 | added_bits: 5
+INFO     │  ┝━ coset_lde_batch [ 12.7ms | 0.06% ] dims: 1x8192 | added_bits: 5
+INFO     │  ┝━ coset_lde_batch [ 11.5ms | 0.06% ] dims: 1x8192 | added_bits: 5
+INFO     │  ┝━ coset_lde_batch [ 12.2ms | 0.06% ] dims: 1x8192 | added_bits: 5
+INFO     │  ┝━ coset_lde_batch [ 11.6ms | 0.06% ] dims: 1x8192 | added_bits: 5
+INFO     │  ┝━ coset_lde_batch [ 12.1ms | 0.06% ] dims: 1x8192 | added_bits: 5
+INFO     │  ┝━ coset_lde_batch [ 11.9ms | 0.06% ] dims: 1x8192 | added_bits: 5
+INFO     │  ┝━ coset_lde_batch [ 12.1ms | 0.06% ] dims: 1x8192 | added_bits: 5
+INFO     │  ┝━ coset_lde_batch [ 11.5ms | 0.06% ] dims: 1x8192 | added_bits: 5
+INFO     │  ┝━ coset_lde_batch [ 11.6ms | 0.06% ] dims: 1x8192 | added_bits: 5
+INFO     │  ┝━ coset_lde_batch [ 11.2ms | 0.06% ] dims: 1x8192 | added_bits: 5
+INFO     │  ┝━ coset_lde_batch [ 11.7ms | 0.06% ] dims: 1x8192 | added_bits: 5
+INFO     │  ┕━ coset_lde_batch [ 12.3ms | 0.06% ] dims: 1x8192 | added_bits: 5
+INFO     ┕━ open [ 572ms | 0.00% / 2.87% ]
+INFO        ┝━ compute_inverse_denominators [ 11.1ms | 0.06% ]
+INFO        ┝━ reduce matrix quotient [ 88.5ms | 0.00% / 0.44% ] dims: 199x262144
+INFO        │  ┝━ compute opened values with Lagrange interpolation [ 3.40ms | 0.02% ]
+INFO        │  ┕━ reduce rows [ 85.1ms | 0.43% ]
+INFO        ┝━ reduce matrix quotient [ 88.6ms | 0.00% / 0.44% ] dims: 199x262144
+INFO        │  ┝━ compute opened values with Lagrange interpolation [ 3.13ms | 0.02% ]
+INFO        │  ┕━ reduce rows [ 85.4ms | 0.43% ]
+INFO        ┝━ reduce matrix quotient [ 2.31ms | 0.00% / 0.01% ] dims: 1x262144
+INFO        │  ┝━ compute opened values with Lagrange interpolation [ 508µs | 0.00% ]
+INFO        │  ┕━ reduce rows [ 1.80ms | 0.01% ]
+INFO        ┝━ reduce matrix quotient [ 1.97ms | 0.00% / 0.01% ] dims: 1x262144
+INFO        │  ┝━ compute opened values with Lagrange interpolation [ 436µs | 0.00% ]
+INFO        │  ┕━ reduce rows [ 1.54ms | 0.01% ]
+INFO        ┝━ reduce matrix quotient [ 2.09ms | 0.00% / 0.01% ] dims: 1x262144
+INFO        │  ┝━ compute opened values with Lagrange interpolation [ 451µs | 0.00% ]
+INFO        │  ┕━ reduce rows [ 1.63ms | 0.01% ]
+INFO        ┝━ reduce matrix quotient [ 1.98ms | 0.00% / 0.01% ] dims: 1x262144
+INFO        │  ┝━ compute opened values with Lagrange interpolation [ 418µs | 0.00% ]
+INFO        │  ┕━ reduce rows [ 1.56ms | 0.01% ]
+INFO        ┝━ reduce matrix quotient [ 2.02ms | 0.00% / 0.01% ] dims: 1x262144
+INFO        │  ┝━ compute opened values with Lagrange interpolation [ 435µs | 0.00% ]
+INFO        │  ┕━ reduce rows [ 1.58ms | 0.01% ]
+INFO        ┝━ reduce matrix quotient [ 1.89ms | 0.00% / 0.01% ] dims: 1x262144
+INFO        │  ┝━ compute opened values with Lagrange interpolation [ 373µs | 0.00% ]
+INFO        │  ┕━ reduce rows [ 1.52ms | 0.01% ]
+INFO        ┝━ reduce matrix quotient [ 2.09ms | 0.00% / 0.01% ] dims: 1x262144
+INFO        │  ┝━ compute opened values with Lagrange interpolation [ 479µs | 0.00% ]
+INFO        │  ┕━ reduce rows [ 1.61ms | 0.01% ]
+INFO        ┝━ reduce matrix quotient [ 2.03ms | 0.00% / 0.01% ] dims: 1x262144
+INFO        │  ┝━ compute opened values with Lagrange interpolation [ 473µs | 0.00% ]
+INFO        │  ┕━ reduce rows [ 1.55ms | 0.01% ]
+INFO        ┝━ reduce matrix quotient [ 2.01ms | 0.00% / 0.01% ] dims: 1x262144
+INFO        │  ┝━ compute opened values with Lagrange interpolation [ 426µs | 0.00% ]
+INFO        │  ┕━ reduce rows [ 1.58ms | 0.01% ]
+INFO        ┝━ reduce matrix quotient [ 2.10ms | 0.00% / 0.01% ] dims: 1x262144
+INFO        │  ┝━ compute opened values with Lagrange interpolation [ 548µs | 0.00% ]
+INFO        │  ┕━ reduce rows [ 1.56ms | 0.01% ]
+INFO        ┝━ reduce matrix quotient [ 2.00ms | 0.00% / 0.01% ] dims: 1x262144
+INFO        │  ┝━ compute opened values with Lagrange interpolation [ 406µs | 0.00% ]
+INFO        │  ┕━ reduce rows [ 1.59ms | 0.01% ]
+INFO        ┝━ reduce matrix quotient [ 1.96ms | 0.00% / 0.01% ] dims: 1x262144
+INFO        │  ┝━ compute opened values with Lagrange interpolation [ 414µs | 0.00% ]
+INFO        │  ┕━ reduce rows [ 1.55ms | 0.01% ]
+INFO        ┝━ reduce matrix quotient [ 2.06ms | 0.00% / 0.01% ] dims: 1x262144
+INFO        │  ┝━ compute opened values with Lagrange interpolation [ 466µs | 0.00% ]
+INFO        │  ┕━ reduce rows [ 1.59ms | 0.01% ]
+INFO        ┝━ reduce matrix quotient [ 2.19ms | 0.00% / 0.01% ] dims: 1x262144
+INFO        │  ┝━ compute opened values with Lagrange interpolation [ 424µs | 0.00% ]
+INFO        │  ┕━ reduce rows [ 1.76ms | 0.01% ]
+INFO        ┝━ reduce matrix quotient [ 1.99ms | 0.00% / 0.01% ] dims: 1x262144
+INFO        │  ┝━ compute opened values with Lagrange interpolation [ 419µs | 0.00% ]
+INFO        │  ┕━ reduce rows [ 1.56ms | 0.01% ]
+INFO        ┝━ reduce matrix quotient [ 2.09ms | 0.00% / 0.01% ] dims: 1x262144
+INFO        │  ┝━ compute opened values with Lagrange interpolation [ 503µs | 0.00% ]
+INFO        │  ┕━ reduce rows [ 1.58ms | 0.01% ]
+INFO        ┝━ reduce matrix quotient [ 2.00ms | 0.00% / 0.01% ] dims: 1x262144
+INFO        │  ┝━ compute opened values with Lagrange interpolation [ 445µs | 0.00% ]
+INFO        │  ┕━ reduce rows [ 1.55ms | 0.01% ]
+INFO        ┝━ reduce matrix quotient [ 2.25ms | 0.00% / 0.01% ] dims: 1x262144
+INFO        │  ┝━ compute opened values with Lagrange interpolation [ 452µs | 0.00% ]
+INFO        │  ┕━ reduce rows [ 1.80ms | 0.01% ]
+INFO        ┝━ reduce matrix quotient [ 2.09ms | 0.00% / 0.01% ] dims: 1x262144
+INFO        │  ┝━ compute opened values with Lagrange interpolation [ 568µs | 0.00% ]
+INFO        │  ┕━ reduce rows [ 1.52ms | 0.01% ]
+INFO        ┝━ reduce matrix quotient [ 2.32ms | 0.00% / 0.01% ] dims: 1x262144
+INFO        │  ┝━ compute opened values with Lagrange interpolation [ 511µs | 0.00% ]
+INFO        │  ┕━ reduce rows [ 1.80ms | 0.01% ]
+INFO        ┝━ reduce matrix quotient [ 2.16ms | 0.00% / 0.01% ] dims: 1x262144
+INFO        │  ┝━ compute opened values with Lagrange interpolation [ 457µs | 0.00% ]
+INFO        │  ┕━ reduce rows [ 1.70ms | 0.01% ]
+INFO        ┝━ reduce matrix quotient [ 2.21ms | 0.00% / 0.01% ] dims: 1x262144
+INFO        │  ┝━ compute opened values with Lagrange interpolation [ 496µs | 0.00% ]
+INFO        │  ┕━ reduce rows [ 1.71ms | 0.01% ]
+INFO        ┝━ reduce matrix quotient [ 2.09ms | 0.00% / 0.01% ] dims: 1x262144
+INFO        │  ┝━ compute opened values with Lagrange interpolation [ 439µs | 0.00% ]
+INFO        │  ┕━ reduce rows [ 1.65ms | 0.01% ]
+INFO        ┝━ reduce matrix quotient [ 2.24ms | 0.00% / 0.01% ] dims: 1x262144
+INFO        │  ┝━ compute opened values with Lagrange interpolation [ 472µs | 0.00% ]
+INFO        │  ┕━ reduce rows [ 1.76ms | 0.01% ]
+INFO        ┝━ reduce matrix quotient [ 2.00ms | 0.00% / 0.01% ] dims: 1x262144
+INFO        │  ┝━ compute opened values with Lagrange interpolation [ 434µs | 0.00% ]
+INFO        │  ┕━ reduce rows [ 1.57ms | 0.01% ]
+INFO        ┝━ reduce matrix quotient [ 2.02ms | 0.00% / 0.01% ] dims: 1x262144
+INFO        │  ┝━ compute opened values with Lagrange interpolation [ 470µs | 0.00% ]
+INFO        │  ┕━ reduce rows [ 1.55ms | 0.01% ]
+INFO        ┝━ reduce matrix quotient [ 2.01ms | 0.00% / 0.01% ] dims: 1x262144
+INFO        │  ┝━ compute opened values with Lagrange interpolation [ 432µs | 0.00% ]
+INFO        │  ┕━ reduce rows [ 1.57ms | 0.01% ]
+INFO        ┝━ reduce matrix quotient [ 2.00ms | 0.00% / 0.01% ] dims: 1x262144
+INFO        │  ┝━ compute opened values with Lagrange interpolation [ 438µs | 0.00% ]
+INFO        │  ┕━ reduce rows [ 1.56ms | 0.01% ]
+INFO        ┝━ reduce matrix quotient [ 2.06ms | 0.00% / 0.01% ] dims: 1x262144
+INFO        │  ┝━ compute opened values with Lagrange interpolation [ 486µs | 0.00% ]
+INFO        │  ┕━ reduce rows [ 1.57ms | 0.01% ]
+INFO        ┝━ reduce matrix quotient [ 1.99ms | 0.00% / 0.01% ] dims: 1x262144
+INFO        │  ┝━ compute opened values with Lagrange interpolation [ 414µs | 0.00% ]
+INFO        │  ┕━ reduce rows [ 1.58ms | 0.01% ]
+INFO        ┝━ reduce matrix quotient [ 2.21ms | 0.00% / 0.01% ] dims: 1x262144
+INFO        │  ┝━ compute opened values with Lagrange interpolation [ 409µs | 0.00% ]
+INFO        │  ┕━ reduce rows [ 1.80ms | 0.01% ]
+INFO        ┝━ reduce matrix quotient [ 2.11ms | 0.00% / 0.01% ] dims: 1x262144
+INFO        │  ┝━ compute opened values with Lagrange interpolation [ 511µs | 0.00% ]
+INFO        │  ┕━ reduce rows [ 1.59ms | 0.01% ]
+INFO        ┕━ FRI prover [ 317ms | 0.00% / 1.59% ]
+INFO           ┝━ commit phase [ 316ms | 1.59% / 1.59% ]
+INFO           │  ┕━ divide_by_height [ 18.1µs | 0.00% ] dims: 1x32
+INFO           ┝━ grind for proof-of-work witness [ 446µs | 0.00% ]
+INFO           ┕━ query phase [ 497µs | 0.00% ]
+Verification...
+INFO     verify [ 90.0ms | 99.84% / 100.00% ]
+INFO     ┕━ infer log of constraint degree [ 148µs | 0.16% ]
+Proving log_blowup 4
+Generating trace...
+Creating LineaAir...
+Creating LineaAir...
+Proving...
+INFO     prove [ 39.4s | 0.08% / 100.00% ]
+INFO     ┝━ commit to trace data [ 28.9s | 70.39% / 73.39% ]
+INFO     │  ┕━ coset_lde_batch [ 1.18s | 3.00% ] dims: 758x8192 | added_bits: 4
+INFO     ┝━ compute quotient polynomial [ 9.21s | 23.36% ]
+INFO     ┝━ commit to quotient poly chunks [ 735ms | 1.62% / 1.86% ]
+INFO     │  ┝━ coset_lde_batch [ 9.22ms | 0.02% ] dims: 1x8192 | added_bits: 4
+INFO     │  ┝━ coset_lde_batch [ 5.52ms | 0.01% ] dims: 1x8192 | added_bits: 4
+INFO     │  ┝━ coset_lde_batch [ 5.97ms | 0.02% ] dims: 1x8192 | added_bits: 4
+INFO     │  ┝━ coset_lde_batch [ 6.26ms | 0.02% ] dims: 1x8192 | added_bits: 4
+INFO     │  ┝━ coset_lde_batch [ 5.96ms | 0.02% ] dims: 1x8192 | added_bits: 4
+INFO     │  ┝━ coset_lde_batch [ 5.91ms | 0.01% ] dims: 1x8192 | added_bits: 4
+INFO     │  ┝━ coset_lde_batch [ 5.98ms | 0.02% ] dims: 1x8192 | added_bits: 4
+INFO     │  ┝━ coset_lde_batch [ 6.15ms | 0.02% ] dims: 1x8192 | added_bits: 4
+INFO     │  ┝━ coset_lde_batch [ 6.43ms | 0.02% ] dims: 1x8192 | added_bits: 4
+INFO     │  ┝━ coset_lde_batch [ 5.20ms | 0.01% ] dims: 1x8192 | added_bits: 4
+INFO     │  ┝━ coset_lde_batch [ 5.29ms | 0.01% ] dims: 1x8192 | added_bits: 4
+INFO     │  ┝━ coset_lde_batch [ 4.96ms | 0.01% ] dims: 1x8192 | added_bits: 4
+INFO     │  ┝━ coset_lde_batch [ 5.51ms | 0.01% ] dims: 1x8192 | added_bits: 4
+INFO     │  ┝━ coset_lde_batch [ 5.35ms | 0.01% ] dims: 1x8192 | added_bits: 4
+INFO     │  ┝━ coset_lde_batch [ 4.91ms | 0.01% ] dims: 1x8192 | added_bits: 4
+INFO     │  ┕━ coset_lde_batch [ 5.68ms | 0.01% ] dims: 1x8192 | added_bits: 4
+INFO     ┕━ open [ 516ms | 0.00% / 1.31% ]
+INFO        ┝━ compute_inverse_denominators [ 5.19ms | 0.01% ]
+INFO        ┝━ reduce matrix quotient [ 162ms | 0.00% / 0.41% ] dims: 758x131072
+INFO        │  ┝━ compute opened values with Lagrange interpolation [ 9.16ms | 0.02% ]
+INFO        │  ┕━ reduce rows [ 153ms | 0.39% ]
+INFO        ┝━ reduce matrix quotient [ 162ms | 0.00% / 0.41% ] dims: 758x131072
+INFO        │  ┝━ compute opened values with Lagrange interpolation [ 9.55ms | 0.02% ]
+INFO        │  ┕━ reduce rows [ 153ms | 0.39% ]
+INFO        ┝━ reduce matrix quotient [ 1.22ms | 0.00% / 0.00% ] dims: 1x131072
+INFO        │  ┝━ compute opened values with Lagrange interpolation [ 445µs | 0.00% ]
+INFO        │  ┕━ reduce rows [ 775µs | 0.00% ]
+INFO        ┝━ reduce matrix quotient [ 1.31ms | 0.00% / 0.00% ] dims: 1x131072
+INFO        │  ┝━ compute opened values with Lagrange interpolation [ 535µs | 0.00% ]
+INFO        │  ┕━ reduce rows [ 769µs | 0.00% ]
+INFO        ┝━ reduce matrix quotient [ 1.32ms | 0.00% / 0.00% ] dims: 1x131072
+INFO        │  ┝━ compute opened values with Lagrange interpolation [ 501µs | 0.00% ]
+INFO        │  ┕━ reduce rows [ 820µs | 0.00% ]
+INFO        ┝━ reduce matrix quotient [ 1.48ms | 0.00% / 0.00% ] dims: 1x131072
+INFO        │  ┝━ compute opened values with Lagrange interpolation [ 424µs | 0.00% ]
+INFO        │  ┕━ reduce rows [ 1.06ms | 0.00% ]
+INFO        ┝━ reduce matrix quotient [ 1.28ms | 0.00% / 0.00% ] dims: 1x131072
+INFO        │  ┝━ compute opened values with Lagrange interpolation [ 487µs | 0.00% ]
+INFO        │  ┕━ reduce rows [ 787µs | 0.00% ]
+INFO        ┝━ reduce matrix quotient [ 1.22ms | 0.00% / 0.00% ] dims: 1x131072
+INFO        │  ┝━ compute opened values with Lagrange interpolation [ 451µs | 0.00% ]
+INFO        │  ┕━ reduce rows [ 763µs | 0.00% ]
+INFO        ┝━ reduce matrix quotient [ 1.18ms | 0.00% / 0.00% ] dims: 1x131072
+INFO        │  ┝━ compute opened values with Lagrange interpolation [ 431µs | 0.00% ]
+INFO        │  ┕━ reduce rows [ 745µs | 0.00% ]
+INFO        ┝━ reduce matrix quotient [ 1.30ms | 0.00% / 0.00% ] dims: 1x131072
+INFO        │  ┝━ compute opened values with Lagrange interpolation [ 511µs | 0.00% ]
+INFO        │  ┕━ reduce rows [ 784µs | 0.00% ]
+INFO        ┝━ reduce matrix quotient [ 1.20ms | 0.00% / 0.00% ] dims: 1x131072
+INFO        │  ┝━ compute opened values with Lagrange interpolation [ 427µs | 0.00% ]
+INFO        │  ┕━ reduce rows [ 766µs | 0.00% ]
+INFO        ┝━ reduce matrix quotient [ 1.29ms | 0.00% / 0.00% ] dims: 1x131072
+INFO        │  ┝━ compute opened values with Lagrange interpolation [ 509µs | 0.00% ]
+INFO        │  ┕━ reduce rows [ 777µs | 0.00% ]
+INFO        ┝━ reduce matrix quotient [ 1.66ms | 0.00% / 0.00% ] dims: 1x131072
+INFO        │  ┝━ compute opened values with Lagrange interpolation [ 694µs | 0.00% ]
+INFO        │  ┕━ reduce rows [ 963µs | 0.00% ]
+INFO        ┝━ reduce matrix quotient [ 1.27ms | 0.00% / 0.00% ] dims: 1x131072
+INFO        │  ┝━ compute opened values with Lagrange interpolation [ 423µs | 0.00% ]
+INFO        │  ┕━ reduce rows [ 849µs | 0.00% ]
+INFO        ┝━ reduce matrix quotient [ 1.27ms | 0.00% / 0.00% ] dims: 1x131072
+INFO        │  ┝━ compute opened values with Lagrange interpolation [ 450µs | 0.00% ]
+INFO        │  ┕━ reduce rows [ 816µs | 0.00% ]
+INFO        ┝━ reduce matrix quotient [ 1.20ms | 0.00% / 0.00% ] dims: 1x131072
+INFO        │  ┝━ compute opened values with Lagrange interpolation [ 409µs | 0.00% ]
+INFO        │  ┕━ reduce rows [ 790µs | 0.00% ]
+INFO        ┝━ reduce matrix quotient [ 1.16ms | 0.00% / 0.00% ] dims: 1x131072
+INFO        │  ┝━ compute opened values with Lagrange interpolation [ 407µs | 0.00% ]
+INFO        │  ┕━ reduce rows [ 747µs | 0.00% ]
+INFO        ┝━ reduce matrix quotient [ 1.17ms | 0.00% / 0.00% ] dims: 1x131072
+INFO        │  ┝━ compute opened values with Lagrange interpolation [ 423µs | 0.00% ]
+INFO        │  ┕━ reduce rows [ 745µs | 0.00% ]
+INFO        ┕━ FRI prover [ 166ms | 0.00% / 0.42% ]
+INFO           ┝━ commit phase [ 165ms | 0.42% / 0.42% ]
+INFO           │  ┕━ divide_by_height [ 16.2µs | 0.00% ] dims: 1x16
+INFO           ┝━ grind for proof-of-work witness [ 353µs | 0.00% ]
+INFO           ┕━ query phase [ 461µs | 0.00% ]
+Verification...
+INFO     verify [ 194ms | 98.79% / 100.00% ]
+INFO     ┕━ infer log of constraint degree [ 2.34ms | 1.21% ]
+Proving log_blowup 3
+Generating trace...
+Creating LineaAir...
+Creating LineaAir...
+Proving...
+INFO     prove [ 61.8s | 0.09% / 100.00% ]
+INFO     ┝━ commit to trace data [ 50.1s | 77.60% / 81.03% ]
+INFO     │  ┕━ coset_lde_batch [ 2.12s | 3.44% ] dims: 2575x8192 | added_bits: 3
+INFO     ┝━ compute quotient polynomial [ 10.7s | 17.38% ]
+INFO     ┝━ commit to quotient poly chunks [ 219ms | 0.30% / 0.35% ]
+INFO     │  ┝━ coset_lde_batch [ 5.23ms | 0.01% ] dims: 1x8192 | added_bits: 3
+INFO     │  ┝━ coset_lde_batch [ 3.36ms | 0.01% ] dims: 1x8192 | added_bits: 3
+INFO     │  ┝━ coset_lde_batch [ 4.01ms | 0.01% ] dims: 1x8192 | added_bits: 3
+INFO     │  ┝━ coset_lde_batch [ 3.84ms | 0.01% ] dims: 1x8192 | added_bits: 3
+INFO     │  ┝━ coset_lde_batch [ 3.64ms | 0.01% ] dims: 1x8192 | added_bits: 3
+INFO     │  ┝━ coset_lde_batch [ 3.70ms | 0.01% ] dims: 1x8192 | added_bits: 3
+INFO     │  ┝━ coset_lde_batch [ 3.49ms | 0.01% ] dims: 1x8192 | added_bits: 3
+INFO     │  ┕━ coset_lde_batch [ 3.71ms | 0.01% ] dims: 1x8192 | added_bits: 3
+INFO     ┕━ open [ 702ms | 0.00% / 1.14% ]
+INFO        ┝━ compute_inverse_denominators [ 2.90ms | 0.00% ]
+INFO        ┝━ reduce matrix quotient [ 301ms | 0.00% / 0.49% ] dims: 2575x65536
+INFO        │  ┝━ compute opened values with Lagrange interpolation [ 31.5ms | 0.05% ]
+INFO        │  ┕━ reduce rows [ 270ms | 0.44% ]
+INFO        ┝━ reduce matrix quotient [ 301ms | 0.00% / 0.49% ] dims: 2575x65536
+INFO        │  ┝━ compute opened values with Lagrange interpolation [ 32.8ms | 0.05% ]
+INFO        │  ┕━ reduce rows [ 268ms | 0.43% ]
+INFO        ┝━ reduce matrix quotient [ 970µs | 0.00% / 0.00% ] dims: 1x65536
+INFO        │  ┝━ compute opened values with Lagrange interpolation [ 512µs | 0.00% ]
+INFO        │  ┕━ reduce rows [ 455µs | 0.00% ]
+INFO        ┝━ reduce matrix quotient [ 943µs | 0.00% / 0.00% ] dims: 1x65536
+INFO        │  ┝━ compute opened values with Lagrange interpolation [ 427µs | 0.00% ]
+INFO        │  ┕━ reduce rows [ 514µs | 0.00% ]
+INFO        ┝━ reduce matrix quotient [ 959µs | 0.00% / 0.00% ] dims: 1x65536
+INFO        │  ┝━ compute opened values with Lagrange interpolation [ 470µs | 0.00% ]
+INFO        │  ┕━ reduce rows [ 486µs | 0.00% ]
+INFO        ┝━ reduce matrix quotient [ 948µs | 0.00% / 0.00% ] dims: 1x65536
+INFO        │  ┝━ compute opened values with Lagrange interpolation [ 464µs | 0.00% ]
+INFO        │  ┕━ reduce rows [ 482µs | 0.00% ]
+INFO        ┝━ reduce matrix quotient [ 949µs | 0.00% / 0.00% ] dims: 1x65536
+INFO        │  ┝━ compute opened values with Lagrange interpolation [ 434µs | 0.00% ]
+INFO        │  ┕━ reduce rows [ 513µs | 0.00% ]
+INFO        ┝━ reduce matrix quotient [ 965µs | 0.00% / 0.00% ] dims: 1x65536
+INFO        │  ┝━ compute opened values with Lagrange interpolation [ 485µs | 0.00% ]
+INFO        │  ┕━ reduce rows [ 477µs | 0.00% ]
+INFO        ┝━ reduce matrix quotient [ 870µs | 0.00% / 0.00% ] dims: 1x65536
+INFO        │  ┝━ compute opened values with Lagrange interpolation [ 416µs | 0.00% ]
+INFO        │  ┕━ reduce rows [ 453µs | 0.00% ]
+INFO        ┝━ reduce matrix quotient [ 1.21ms | 0.00% / 0.00% ] dims: 1x65536
+INFO        │  ┝━ compute opened values with Lagrange interpolation [ 509µs | 0.00% ]
+INFO        │  ┕━ reduce rows [ 702µs | 0.00% ]
+INFO        ┕━ FRI prover [ 88.4ms | 0.00% / 0.14% ]
+INFO           ┝━ commit phase [ 87.7ms | 0.14% / 0.14% ]
+INFO           │  ┕━ divide_by_height [ 23.2µs | 0.00% ] dims: 1x8
+INFO           ┝━ grind for proof-of-work witness [ 153µs | 0.00% ]
+INFO           ┕━ query phase [ 574µs | 0.00% ]
+Verification...
+INFO     verify [ 540ms | 98.95% / 100.00% ]
+INFO     ┕━ infer log of constraint degree [ 5.69ms | 1.05% ]
+Proving log_blowup 2
+Generating trace...
+Creating LineaAir...
+Creating LineaAir...
+Proving...
+INFO     prove [ 106s | 0.11% / 100.00% ]
+INFO     ┝━ commit to trace data [ 93.2s | 83.18% / 87.60% ]
+INFO     │  ┕━ coset_lde_batch [ 4.70s | 4.42% ] dims: 9615x8192 | added_bits: 2
+INFO     ┝━ compute quotient polynomial [ 11.7s | 11.03% ]
+INFO     ┝━ commit to quotient poly chunks [ 68.7ms | 0.05% / 0.06% ]
+INFO     │  ┝━ coset_lde_batch [ 5.09ms | 0.00% ] dims: 1x8192 | added_bits: 2
+INFO     │  ┝━ coset_lde_batch [ 2.25ms | 0.00% ] dims: 1x8192 | added_bits: 2
+INFO     │  ┝━ coset_lde_batch [ 2.15ms | 0.00% ] dims: 1x8192 | added_bits: 2
+INFO     │  ┕━ coset_lde_batch [ 2.01ms | 0.00% ] dims: 1x8192 | added_bits: 2
+INFO     ┕━ open [ 1.27s | 0.00% / 1.19% ]
+INFO        ┝━ compute_inverse_denominators [ 1.79ms | 0.00% ]
+INFO        ┝━ reduce matrix quotient [ 611ms | 0.00% / 0.57% ] dims: 9615x32768
+INFO        │  ┝━ compute opened values with Lagrange interpolation [ 112ms | 0.11% ]
+INFO        │  ┕━ reduce rows [ 499ms | 0.47% ]
+INFO        ┝━ reduce matrix quotient [ 607ms | 0.00% / 0.57% ] dims: 9615x32768
+INFO        │  ┝━ compute opened values with Lagrange interpolation [ 113ms | 0.11% ]
+INFO        │  ┕━ reduce rows [ 493ms | 0.46% ]
+INFO        ┝━ reduce matrix quotient [ 835µs | 0.00% / 0.00% ] dims: 1x32768
+INFO        │  ┝━ compute opened values with Lagrange interpolation [ 504µs | 0.00% ]
+INFO        │  ┕━ reduce rows [ 328µs | 0.00% ]
+INFO        ┝━ reduce matrix quotient [ 829µs | 0.00% / 0.00% ] dims: 1x32768
+INFO        │  ┝━ compute opened values with Lagrange interpolation [ 508µs | 0.00% ]
+INFO        │  ┕━ reduce rows [ 316µs | 0.00% ]
+INFO        ┝━ reduce matrix quotient [ 779µs | 0.00% / 0.00% ] dims: 1x32768
+INFO        │  ┝━ compute opened values with Lagrange interpolation [ 506µs | 0.00% ]
+INFO        │  ┕━ reduce rows [ 270µs | 0.00% ]
+INFO        ┝━ reduce matrix quotient [ 840µs | 0.00% / 0.00% ] dims: 1x32768
+INFO        │  ┝━ compute opened values with Lagrange interpolation [ 574µs | 0.00% ]
+INFO        │  ┕━ reduce rows [ 264µs | 0.00% ]
+INFO        ┕━ FRI prover [ 47.4ms | 0.00% / 0.04% ]
+INFO           ┝━ commit phase [ 46.4ms | 0.04% / 0.04% ]
+INFO           │  ┕━ divide_by_height [ 70.3µs | 0.00% ] dims: 1x4
+INFO           ┝━ grind for proof-of-work witness [ 107µs | 0.00% ]
+INFO           ┕━ query phase [ 876µs | 0.00% ]
+Verification...
+INFO     verify [ 1.90s | 98.48% / 100.00% ]
+INFO     ┕━ infer log of constraint degree [ 28.8ms | 1.52% ]
+Proving log_blowup 1
+Generating trace...
+Creating LineaAir...
+Creating LineaAir...
+Proving...
+INFO     prove [ 750s | 0.95% / 100.00% ]
+INFO     ┝━ commit to trace data [ 658s | 78.62% / 87.65% ]
+INFO     │  ┕━ coset_lde_batch [ 67.7s | 9.02% ] dims: 126154x8192 | added_bits: 1
+INFO     ┝━ compute quotient polynomial [ 52.5s | 7.00% ]
+INFO     ┝━ commit to quotient poly chunks [ 26.6ms | 0.00% / 0.00% ]
+INFO     │  ┝━ coset_lde_batch [ 3.53ms | 0.00% ] dims: 1x8192 | added_bits: 1
+INFO     │  ┕━ coset_lde_batch [ 1.70ms | 0.00% ] dims: 1x8192 | added_bits: 1
+INFO     ┕━ open [ 33.0s | 0.00% / 4.40% ]
+INFO        ┝━ compute_inverse_denominators [ 1.59ms | 0.00% ]
+INFO        ┝━ reduce matrix quotient [ 16.1s | 0.00% / 2.15% ] dims: 126154x16384
+INFO        │  ┝━ compute opened values with Lagrange interpolation [ 5.48s | 0.73% ]
+INFO        │  ┕━ reduce rows [ 10.6s | 1.42% ]
+INFO        ┝━ reduce matrix quotient [ 16.8s | 0.00% / 2.24% ] dims: 126154x16384
+INFO        │  ┝━ compute opened values with Lagrange interpolation [ 6.06s | 0.81% ]
+INFO        │  ┕━ reduce rows [ 10.7s | 1.43% ]
+INFO        ┝━ reduce matrix quotient [ 3.53ms | 0.00% / 0.00% ] dims: 1x16384
+INFO        │  ┝━ compute opened values with Lagrange interpolation [ 1.82ms | 0.00% ]
+INFO        │  ┕━ reduce rows [ 1.42ms | 0.00% ]
+INFO        ┝━ reduce matrix quotient [ 2.01ms | 0.00% / 0.00% ] dims: 1x16384
+INFO        │  ┝━ compute opened values with Lagrange interpolation [ 1.35ms | 0.00% ]
+INFO        │  ┕━ reduce rows [ 595µs | 0.00% ]
+INFO        ┕━ FRI prover [ 97.0ms | 0.00% / 0.01% ]
+INFO           ┝━ commit phase [ 33.9ms | 0.00% / 0.00% ]
+INFO           │  ┕━ divide_by_height [ 14.3µs | 0.00% ] dims: 1x2
+INFO           ┝━ grind for proof-of-work witness [ 413µs | 0.00% ]
+INFO           ┕━ query phase [ 62.6ms | 0.01% ]
+Verification...
+INFO     verify [ 28.8s | 83.73% / 100.00% ]
+INFO     ┕━ infer log of constraint degree [ 4.68s | 16.27% ]
+Program has exited. Memory monitoring stopped.

@@ -7,6 +7,10 @@ use serde::{Deserialize, Serialize};
 use std::cmp::max;
 use std::collections::HashMap;
 use std::fs;
+use p3_air::{Air, BaseAir};
+use p3_uni_stark::{SymbolicAirBuilder, SymbolicExpression};
+use p3_util::log2_ceil_usize;
+use air::LineaAIR;
 
 type LookupColumn = Vec<Vec<Vec<Bls12_377Fr>>>;
 
@@ -412,6 +416,26 @@ impl RawLookupTrace {
             occurrences_id,
             check_id,
         }
+    }
+
+    pub fn get_min_blowup(&self, air: LineaAIR<Bls12_377Fr>, num_public: usize) -> usize {
+        let mut builder = SymbolicAirBuilder::new(0, air.width(), num_public);
+        air.eval(&mut builder);
+        let symbolic_constraints = builder.constraints();
+
+        let constraint_degree = symbolic_constraints
+            .iter()
+            .map(SymbolicExpression::degree_multiple)
+            .max()
+            .unwrap_or(0);
+
+        // Increase log blowup for higher security
+        let mut log = log2_ceil_usize(constraint_degree - 1);
+        if log == 1 {
+            log = 2
+        }
+
+        log
     }
 }
 

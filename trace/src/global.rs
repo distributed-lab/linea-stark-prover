@@ -164,7 +164,7 @@ impl RawGlobalTrace {
         self.nodes.get(0).map_or_else(|| 0, |nodes| nodes.len())
     }
 
-    pub fn get_blowup(&self, air: LineaAIR<Bls12_377Fr>, num_public: usize) -> usize {
+    pub fn get_min_blowup(&self, air: LineaAIR<Bls12_377Fr>, num_public: usize) -> usize {
         let mut builder = SymbolicAirBuilder::new(0, air.width(), num_public);
         air.eval(&mut builder);
         let symbolic_constraints = builder.constraints();
@@ -175,7 +175,13 @@ impl RawGlobalTrace {
             .max()
             .unwrap_or(0);
 
-        log2_ceil_usize(constraint_degree - 1)
+        // Increase log blowup for higher security
+        let mut log = log2_ceil_usize(constraint_degree - 1);
+        if log == 1 {
+            log = 2
+        }
+
+        log
     }
 }
 
