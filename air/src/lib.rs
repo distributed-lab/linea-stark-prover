@@ -1,31 +1,52 @@
 pub mod configs;
 
-use crate::configs::{AirLookupConfig, AirPermutationConfig};
+use crate::configs::{
+    AirGlobalConfig, AirLookupConfig, AirOperator, AirOperatorType, AirPermutationConfig,
+};
+use eyre::{bail, eyre};
 use p3_air::{Air, AirBuilder, BaseAir};
 use p3_field::{Field, FieldAlgebra};
 use p3_matrix::Matrix;
 
 #[derive(Clone, Debug)]
-pub enum AirConfig {
+pub enum AirConfig<F: Field> {
     /// Lookup with filters
     Lookup(AirLookupConfig),
     Permutation(AirPermutationConfig),
+    Global(AirGlobalConfig<F>),
 }
 
 pub trait LineaConfigAIR<AB: AirBuilder> {
     fn eval_lookup(&self, builder: &mut AB, l: &AirLookupConfig);
     fn eval_permutation(&self, builder: &mut AB, p: &AirPermutationConfig);
+    fn eval_global(&self, builder: &mut AB, g: &AirGlobalConfig<AB::F>);
+    fn evaluate_linear_combination(
+        &self,
+        inputs: Vec<AB::Expr>,
+        coeffs: Option<Vec<i32>>,
+    ) -> eyre::Result<AB::Expr>;
+    fn evaluate_poly_eval(&self, inputs: Vec<AB::Expr>) -> eyre::Result<AB::Expr>;
+    fn evaluate_product(
+        &self,
+        inputs: Vec<AB::Expr>,
+        coeffs: Option<Vec<i32>>,
+    ) -> eyre::Result<AB::Expr>;
+    fn evaluate(
+        &self,
+        inputs: Vec<AB::Expr>,
+        operator: AirOperator<AB::F>,
+    ) -> eyre::Result<AB::Expr>;
 }
 
 #[derive(Clone)]
-pub struct LineaAIR<F> {
-    configs: Vec<AirConfig>,
+pub struct LineaAIR<F: Field> {
+    configs: Vec<AirConfig<F>>,
     width: usize,
     challenges: Vec<F>,
 }
 
 impl<F: Field> LineaAIR<F> {
-    pub fn new(configs: Vec<AirConfig>, width: usize, challenges: Vec<F>) -> Self {
+    pub fn new(configs: Vec<AirConfig<F>>, width: usize, challenges: Vec<F>) -> Self {
         Self {
             configs,
             width,
@@ -45,6 +66,7 @@ impl<AB: AirBuilder> Air<AB> for LineaAIR<AB::F> {
         self.configs.iter().for_each(|c| match c {
             AirConfig::Lookup(l) => self.eval_lookup(builder, l),
             AirConfig::Permutation(p) => self.eval_permutation(builder, p),
+            AirConfig::Global(g) => self.eval_global(builder, g),
         });
     }
 }
@@ -180,4 +202,154 @@ impl<AB: AirBuilder> LineaConfigAIR<AB> for LineaAIR<AB::F> {
             .when_last_row()
             .assert_eq(local[p.check_id], AB::F::ONE);
     }
+
+    fn eval_global(&self, builder: &mut AB, g: &AirGlobalConfig<AB::F>) {
+        let main = builder.main();
+
+        let local = main.row_slice(0);
+
+        let mut intermediate_result = Vec::new();
+        for i in 0..g.nodes.len() {
+            let mut vec = Vec::new();
+            vec.resize(g.nodes[i].len(), AB::Expr::ZERO);
+            intermediate_result.push(vec);
+        }
+
+        // Store the initial values in the level entries of the vector.
+        let mut input_cursor_id = 0;
+        for (i, node) in g.nodes[0].iter().enumerate() {
+            match &node.operator._type {
+                AirOperatorType::Constant => {
+                    intermediate_result[0][i] = AB::Expr::ZERO + node.operator.value
+                }
+                AirOperatorType::Variable => {
+                    intermediate_result[0][i] =
+                        AB::Expr::ZERO + local[g.input_columns_ids[input_cursor_id]];
+                    input_cursor_id += 1;
+                }
+                _ => panic!("This operator type can not be used on zero level"),
+            }
+        }
+
+        // Computes the levels one by one
+        for level in 1..g.nodes.len() {
+            for (pos, node) in g.nodes[level].iter().enumerate() {
+                let mut node_inputs = Vec::new();
+                node_inputs.resize(node.children.len(), AB::Expr::ZERO);
+
+                for (i, child_id) in node.children.iter().enumerate() {
+                    let l = get_level(*child_id as usize);
+                    let p = get_pos_level(*child_id as usize);
+
+                    node_inputs[i] = intermediate_result[l][p].clone();
+                }
+
+                let res: AB::Expr =
+                    <LineaAIR<<AB as AirBuilder>::F> as LineaConfigAIR<AB>>::evaluate(
+                        self,
+                        node_inputs,
+                        node.operator.clone(),
+                    )
+                    .unwrap();
+                intermediate_result[level][pos] = res;
+            }
+        }
+
+        assert_eq!(intermediate_result.last().unwrap().len(), 1);
+
+        builder.assert_eq(
+            intermediate_result[g.nodes.len() - 1][0].clone() * local[g.skip_column_id],
+            AB::Expr::ZERO,
+        );
+    }
+
+    fn evaluate(
+        &self,
+        inputs: Vec<AB::Expr>,
+        operator: AirOperator<AB::F>,
+    ) -> eyre::Result<AB::Expr> {
+        match operator._type {
+            AirOperatorType::LinearCombination => <LineaAIR<<AB as AirBuilder>::F> as LineaConfigAIR<AB>>::evaluate_linear_combination(self, inputs, operator.coeffs),
+            AirOperatorType::PolyEval => <LineaAIR<<AB as AirBuilder>::F> as LineaConfigAIR<AB>>::evaluate_poly_eval(self, inputs),
+            AirOperatorType::Product => <LineaAIR<<AB as AirBuilder>::F> as LineaConfigAIR<AB>>::evaluate_product(self, inputs, operator.coeffs),
+            _ => bail!("evaluate should be never called on Constant or Variable or the provided operator is unknown"),
+        }
+    }
+
+    fn evaluate_linear_combination(
+        &self,
+        inputs: Vec<AB::Expr>,
+        coeffs_opt: Option<Vec<i32>>,
+    ) -> eyre::Result<AB::Expr> {
+        let coeffs = coeffs_opt.clone().ok_or(eyre!(
+            "coefficients for linear combination should not be None"
+        ))?;
+        if inputs.len() != coeffs.len() {
+            bail!("number of inputs should be equal to the number of coefficients: {} inputs but {} coefficients", inputs.len(), coeffs.len())
+        }
+
+        let mut res = AB::Expr::ZERO;
+        for (i, input) in inputs.iter().enumerate() {
+            let mut coeff = AB::Expr::from_canonical_u32(coeffs[i].unsigned_abs());
+            if coeffs[i] < 0 {
+                coeff = -coeff;
+            }
+
+            res += input.clone() * coeff;
+        }
+
+        Ok(res)
+    }
+
+    fn evaluate_poly_eval(&self, inputs: Vec<AB::Expr>) -> eyre::Result<AB::Expr> {
+        let x = inputs
+            .first()
+            .ok_or(eyre::eyre!(
+                "can't get the first element since input vector is empty"
+            ))?
+            .clone();
+        let mut res = inputs
+            .last()
+            .ok_or(eyre::eyre!(
+                "can't get the last element since input vector is empty"
+            ))?
+            .clone();
+
+        let mut i = inputs.len() - 2;
+        while i >= 1 {
+            res *= x.clone();
+            res += inputs[i].clone();
+            i -= 1;
+        }
+
+        Ok(res)
+    }
+
+    fn evaluate_product(
+        &self,
+        inputs: Vec<AB::Expr>,
+        coeffs_opt: Option<Vec<i32>>,
+    ) -> eyre::Result<AB::Expr> {
+        let coeffs = coeffs_opt.clone().ok_or(eyre!(
+            "coefficients for linear combination should not be None"
+        ))?;
+        if inputs.len() != coeffs.len() {
+            bail!("number of inputs should be equal to the number of coefficients: {} inputs but {} coefficients", inputs.len(), coeffs.len())
+        }
+
+        let mut res = AB::Expr::ONE;
+        for (i, input) in inputs.iter().enumerate() {
+            res *= input.exp_u64(coeffs[i] as u64);
+        }
+
+        Ok(res)
+    }
+}
+
+fn get_level(num: usize) -> usize {
+    num >> 32
+}
+
+fn get_pos_level(num: usize) -> usize {
+    num & ((1 << 32) - 1)
 }

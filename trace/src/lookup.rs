@@ -1,8 +1,13 @@
 use crate::range::RawRangeTrace;
+use crate::{RawProcessedTrace, RawTrace, MIN_LOG_BLOWUP};
 use air::configs::AirLookupConfig;
+use air::{AirConfig, LineaAIR};
 use ark_ff::{BigInteger, PrimeField};
+use p3_air::{Air, BaseAir};
 use p3_bls12_377_fr::{Bls12_377Fr, FF_Bls12_377Fr};
 use p3_field::{Field, FieldAlgebra};
+use p3_uni_stark::{SymbolicAirBuilder, SymbolicExpression};
+use p3_util::log2_ceil_usize;
 use serde::{Deserialize, Serialize};
 use std::cmp::max;
 use std::collections::HashMap;
@@ -28,14 +33,61 @@ pub struct RawLookupTrace {
     pub b_filter: Vec<Vec<[u8; 32]>>,
 }
 
-impl RawLookupTrace {
-    pub fn read_file(path: &str) -> Result<RawLookupTrace, std::io::Error> {
+impl RawTrace for RawLookupTrace {
+    fn read_file(path: &str) -> Result<Self, std::io::Error> {
         let file_content = fs::read(path)?;
         let raw_trace: RawLookupTrace =
             ciborium::from_reader(std::io::Cursor::new(file_content)).unwrap();
         Ok(raw_trace)
     }
 
+    fn get_max_height(&self) -> usize {
+        let mut max_height = 0_usize;
+
+        self.a.iter().for_each(|ai| {
+            ai.iter().for_each(|aij| {
+                max_height = max(max_height, aij.len());
+            })
+        });
+
+        self.b.iter().for_each(|bi| {
+            bi.iter().for_each(|bij| {
+                max_height = max(max_height, bij.len());
+            })
+        });
+
+        max_height
+    }
+
+    fn get_min_blowup(&self, air: LineaAIR<Bls12_377Fr>, num_public: usize) -> usize {
+        let mut builder = SymbolicAirBuilder::new(0, air.width(), num_public);
+        air.eval(&mut builder);
+        let symbolic_constraints = builder.constraints();
+
+        let constraint_degree = symbolic_constraints
+            .iter()
+            .map(SymbolicExpression::degree_multiple)
+            .max()
+            .unwrap_or(0);
+
+        // Increase log blowup for higher security
+        max(log2_ceil_usize(constraint_degree - 1), MIN_LOG_BLOWUP)
+    }
+
+    fn update_processed_trace(
+        &mut self,
+        processed: &mut RawProcessedTrace,
+    ) -> AirConfig<Bls12_377Fr> {
+        self.resize(processed.height);
+
+        let cfg = self.update_registry(&mut processed.column_registry, &mut processed.columns);
+
+        self.set_trace(processed.challenges.clone(), &mut processed.columns, &cfg);
+        AirConfig::Lookup(cfg)
+    }
+}
+
+impl RawLookupTrace {
     pub fn is_a_filtered(&self) -> bool {
         !self.a_filter.is_empty() && !self.a_filter[0].is_empty()
     }
@@ -262,24 +314,6 @@ impl RawLookupTrace {
         columns[cfg.check_id] = std::mem::take(&mut prefix_sum_column);
     }
 
-    pub fn get_max_height(&self) -> usize {
-        let mut max_height = 0_usize;
-
-        self.a.iter().for_each(|ai| {
-            ai.iter().for_each(|aij| {
-                max_height = max(max_height, aij.len());
-            })
-        });
-
-        self.b.iter().for_each(|bi| {
-            bi.iter().for_each(|bij| {
-                max_height = max(max_height, bij.len());
-            })
-        });
-
-        max_height
-    }
-
     pub fn get_columns(&mut self) -> (LookupColumn, LookupColumn) {
         let mut a: LookupColumn = Vec::new();
         let mut b: LookupColumn = Vec::new();
@@ -419,9 +453,11 @@ impl From<RawRangeTrace> for RawLookupTrace {
     fn from(value: RawRangeTrace) -> Self {
         let mut a: Vec<Vec<Vec<[u8; 32]>>> = vec![];
         let mut a_ids: Vec<Vec<String>> = vec![];
-        let mut b: Vec<Vec<Vec<[u8; 32]>>> = vec![vec![Vec::new()]];
+        let mut b: Vec<Vec<Vec<[u8; 32]>>> = vec![];
 
+        let mut max_height = 0;
         for col_a in value.a {
+            max_height = max(max_height, col_a.len());
             a.push(vec![col_a]);
         }
 
@@ -431,8 +467,19 @@ impl From<RawRangeTrace> for RawLookupTrace {
 
         let mut counter = 0u64;
 
+        let mut b_ids = Vec::new();
         while counter < value.b {
-            b[0][0].push(
+            if counter as usize % max_height == 0 {
+                b.push(vec![vec![]]);
+                // TODO: not sure whether it should be empty or not. We need to investigate it's behavior.
+                b_ids.push(vec![format!(
+                    "{}_{}",
+                    counter as usize / max_height,
+                    value.b
+                )]);
+            }
+
+            b[counter as usize / max_height][0].push(
                 Bls12_377Fr::from_canonical_u64(counter)
                     .value
                     .into_bigint()
@@ -441,6 +488,7 @@ impl From<RawRangeTrace> for RawLookupTrace {
                     .try_into()
                     .unwrap(),
             );
+
             counter += 1;
         }
 
@@ -448,8 +496,8 @@ impl From<RawRangeTrace> for RawLookupTrace {
             a,
             a_ids,
             b,
-            b_ids: vec![vec![format!("{}", value.b)]],
-            name: value.name,
+            b_ids,
+            name: value.name.clone(),
             a_filter: vec![],
             b_filter: vec![],
         }
