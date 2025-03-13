@@ -23,15 +23,8 @@ pub fn read_range_traces(
                 trace.get_max_height().ilog2() as usize
             );
 
-            let mut raw_trace = RawProcessedTrace::new(challenges.clone(), trace.get_max_height());
-
-            let cfg = trace.update_processed_trace(&mut raw_trace);
-
-            let matrix = raw_trace.get_trace();
-
-            let (air, _, _) = get_air(&[cfg], &matrix, challenges.clone(), 0);
-
-            range_traces[trace.get_min_blowup(air, challenges.len())].push(trace);
+            let log_blowup = get_log_blowup(trace.clone(), challenges.clone());
+            range_traces[log_blowup].push(trace);
         }
     }
 
