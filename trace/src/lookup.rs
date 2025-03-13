@@ -471,6 +471,7 @@ impl From<RawRangeTrace> for RawLookupTrace {
         while counter < value.b {
             if counter as usize % max_height == 0 {
                 b.push(vec![vec![]]);
+                // TODO: not sure whether it should be empty or not. We need to investigate it's behavior.
                 b_ids.push(vec![format!(
                     "{}_{}",
                     counter as usize / max_height,
