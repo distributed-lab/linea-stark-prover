@@ -27,7 +27,6 @@ pub enum AirOperatorType {
     PolyEval,
     Product,
     Variable,
-    Unknown,
 }
 
 impl From<u8> for AirOperatorType {
@@ -38,7 +37,7 @@ impl From<u8> for AirOperatorType {
             2 => AirOperatorType::PolyEval,
             3 => AirOperatorType::Product,
             4 => AirOperatorType::Variable,
-            _ => AirOperatorType::Unknown,
+            _ => panic!("unknown operator"),
         }
     }
 }

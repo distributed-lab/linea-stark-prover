@@ -1,5 +1,5 @@
 use crate::lookup::RawLookupTrace;
-use crate::{RawProcessedTrace, RawTrace};
+use crate::{RawProcessedTrace, RawTrace, MIN_LOG_BLOWUP};
 use air::{AirConfig, LineaAIR};
 use p3_air::{Air, BaseAir};
 use p3_bls12_377_fr::Bls12_377Fr;
@@ -46,12 +46,7 @@ impl RawTrace for RawRangeTrace {
             .unwrap_or(0);
 
         // Increase log blowup for higher security
-        let mut log = log2_ceil_usize(constraint_degree - 1);
-        if log == 1 {
-            log = 2
-        }
-
-        log
+        max(log2_ceil_usize(constraint_degree - 1), MIN_LOG_BLOWUP)
     }
 
     fn update_processed_trace(

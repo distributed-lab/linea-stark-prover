@@ -1,5 +1,5 @@
 use crate::range::RawRangeTrace;
-use crate::{RawProcessedTrace, RawTrace};
+use crate::{RawProcessedTrace, RawTrace, MIN_LOG_BLOWUP};
 use air::configs::AirLookupConfig;
 use air::{AirConfig, LineaAIR};
 use ark_ff::{BigInteger, PrimeField};
@@ -71,12 +71,7 @@ impl RawTrace for RawLookupTrace {
             .unwrap_or(0);
 
         // Increase log blowup for higher security
-        let mut log = log2_ceil_usize(constraint_degree - 1);
-        if log == 1 {
-            log = 2
-        }
-
-        log
+        max(log2_ceil_usize(constraint_degree - 1), MIN_LOG_BLOWUP)
     }
 
     fn update_processed_trace(

@@ -41,10 +41,10 @@ fn main() {
     println!("Challenge alpha: {}", alpha_challenge);
 
     // read all traces
-    let mut range_traces = read_range_traces(challenges.clone(), 0, 0);
-    let mut lookup_traces = read_lookup_traces(challenges.clone(), 0, 0);
-    let mut global_traces = read_global_traces(challenges.clone(), 0, 2);
-    let mut permutation_traces = read_permutation_traces(challenges, 0, 0);
+    let mut range_traces = read_range_traces(challenges.clone(), 0, 2500);
+    let mut lookup_traces = read_lookup_traces(challenges.clone(), 0, 1500);
+    let mut global_traces = read_global_traces(challenges.clone(), 0, 68700);
+    let mut permutation_traces = read_permutation_traces(challenges, 0, 1);
 
     for log_blowup in (1..global_traces.len()).rev() {
         println!(

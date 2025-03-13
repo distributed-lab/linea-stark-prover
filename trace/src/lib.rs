@@ -13,6 +13,8 @@ use p3_field::FieldAlgebra;
 use p3_matrix::dense::RowMajorMatrix;
 use std::collections::HashMap;
 
+const MIN_LOG_BLOWUP: usize = 2;
+
 pub trait RawTrace: Sized {
     fn read_file(path: &str) -> Result<Self, std::io::Error>;
     fn get_max_height(&self) -> usize;
