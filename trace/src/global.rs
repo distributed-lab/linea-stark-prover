@@ -1,5 +1,6 @@
+use crate::{RawProcessedTrace, RawTrace};
 use air::configs::{AirGlobalConfig, AirNode, AirOperator, AirOperatorType};
-use air::LineaAIR;
+use air::{AirConfig, LineaAIR};
 use ark_ff::PrimeField;
 use p3_air::{Air, BaseAir};
 use p3_bls12_377_fr::{Bls12_377Fr, FF_Bls12_377Fr};
@@ -50,27 +51,60 @@ pub struct RawGlobalTrace {
     pub stop: usize,
 }
 
-impl RawGlobalTrace {
-    pub fn read_file(path: &str) -> Result<RawGlobalTrace, std::io::Error> {
+impl RawTrace for RawGlobalTrace {
+    fn read_file(path: &str) -> Result<RawGlobalTrace, std::io::Error> {
         let file_content = fs::read(path)?;
         let raw_trace: RawGlobalTrace =
             ciborium::from_reader(std::io::Cursor::new(file_content)).unwrap();
         Ok(raw_trace)
     }
 
-    pub(crate) fn resize(&mut self, size: usize) {
-        for e in &mut self.inputs {
-            e.resize(size, [0u8; 32]);
-        }
-    }
-
-    pub fn get_max_height(&self) -> usize {
+    fn get_max_height(&self) -> usize {
         let mut max_height = 0_usize;
         self.inputs.iter().for_each(|g| {
             max_height = max(max_height, g.len());
         });
 
         max_height
+    }
+
+    fn get_min_blowup(&self, air: LineaAIR<Bls12_377Fr>, num_public: usize) -> usize {
+        let mut builder = SymbolicAirBuilder::new(0, air.width(), num_public);
+        air.eval(&mut builder);
+        let symbolic_constraints = builder.constraints();
+
+        let constraint_degree = symbolic_constraints
+            .iter()
+            .map(SymbolicExpression::degree_multiple)
+            .max()
+            .unwrap_or(0);
+
+        // Increase log blowup for higher security
+        let mut log = log2_ceil_usize(constraint_degree - 1);
+        if log == 1 {
+            log = 2
+        }
+
+        log
+    }
+
+    fn update_processed_trace(
+        &mut self,
+        processed: &mut RawProcessedTrace,
+    ) -> AirConfig<Bls12_377Fr> {
+        self.resize(processed.height);
+
+        let cfg = self.update_registry(&mut processed.column_registry, &mut processed.columns);
+        self.set_trace(processed.challenges.clone(), &mut processed.columns, &cfg);
+        AirConfig::Global(cfg)
+    }
+}
+
+impl RawGlobalTrace {
+    pub(crate) fn resize(&mut self, size: usize) {
+        for e in &mut self.inputs {
+            e.resize(size, [0u8; 32]);
+        }
     }
 
     pub fn update_registry(
@@ -83,7 +117,6 @@ impl RawGlobalTrace {
             columns.len() - 1
         };
 
-        // TODO check name exist, do not forget to skip for empty names
         let mut input_columns_ids = Vec::new();
         for i in 0..self.inputs.len() {
             if !self.inputs_ids[i].is_empty() && columns_registry.get(&self.inputs_ids[i]).is_some()
@@ -161,27 +194,7 @@ impl RawGlobalTrace {
     }
 
     pub fn get_expression_width(&self) -> usize {
-        self.nodes.get(0).map_or_else(|| 0, |nodes| nodes.len())
-    }
-
-    pub fn get_min_blowup(&self, air: LineaAIR<Bls12_377Fr>, num_public: usize) -> usize {
-        let mut builder = SymbolicAirBuilder::new(0, air.width(), num_public);
-        air.eval(&mut builder);
-        let symbolic_constraints = builder.constraints();
-
-        let constraint_degree = symbolic_constraints
-            .iter()
-            .map(SymbolicExpression::degree_multiple)
-            .max()
-            .unwrap_or(0);
-
-        // Increase log blowup for higher security
-        let mut log = log2_ceil_usize(constraint_degree - 1);
-        if log == 1 {
-            log = 2
-        }
-
-        log
+        self.nodes.first().map_or_else(|| 0, |nodes| nodes.len())
     }
 }
 

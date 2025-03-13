@@ -1,6 +1,5 @@
 use crate::config::{ChallengeMmcs, Challenger, Compress, Config, Dft, Hash, Perm, Val, ValMmcs};
 use air::{AirConfig, LineaAIR};
-use p3_air::AirBuilder;
 use p3_bls12_377_fr::Bls12_377Fr;
 use p3_fri::{FriConfig, TwoAdicFriPcs};
 use p3_matrix::dense::RowMajorMatrix;
@@ -11,11 +10,11 @@ use trace::global::RawGlobalTrace;
 use trace::lookup::RawLookupTrace;
 use trace::permutation::RawPermutationTrace;
 use trace::range::RawRangeTrace;
-use trace::RawTrace;
+use trace::RawProcessedTrace;
 
 pub fn get_air(
-    cfgs: &Vec<AirConfig<Bls12_377Fr>>,
-    mut t: &RowMajorMatrix<Bls12_377Fr>,
+    cfgs: &[AirConfig<Bls12_377Fr>],
+    t: &RowMajorMatrix<Bls12_377Fr>,
     challenges: Vec<Bls12_377Fr>,
     min_blowup: usize,
 ) -> (
@@ -48,7 +47,7 @@ pub fn get_air(
 
     println!("Creating LineaAir...");
 
-    let air = LineaAIR::new(cfgs.clone(), t.width, challenges);
+    let air = LineaAIR::new(cfgs.to_vec(), t.width, challenges);
 
     (air, pcs, hash)
 }
@@ -62,7 +61,7 @@ pub fn prove_linea(
     height: usize,
     blowup: usize,
 ) {
-    let mut raw_trace = RawTrace::new(challenges.clone(), height);
+    let mut raw_trace = RawProcessedTrace::new(challenges.clone(), height);
     let cfgs = raw_trace.push_traces(
         permutation_traces,
         lookup_traces,

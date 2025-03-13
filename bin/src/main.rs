@@ -1,11 +1,16 @@
+extern crate core;
+
 mod config;
 mod prover;
+mod reader;
 
-use crate::prover::{get_air, prove_linea};
+use crate::prover::prove_linea;
+use crate::reader::{
+    read_global_traces, read_lookup_traces, read_permutation_traces, read_range_traces,
+};
 use rand::distributions::Standard;
 use rand::{thread_rng, Rng};
 use std::cmp::max;
-use std::collections::HashMap;
 use trace::global::RawGlobalTrace;
 use trace::range::RawRangeTrace;
 use trace::{lookup::RawLookupTrace, permutation::RawPermutationTrace, RawTrace};
@@ -16,6 +21,7 @@ use tracing_subscriber::util::SubscriberInitExt;
 use tracing_subscriber::{EnvFilter, Registry};
 
 const MAX_LOG_BLOWUP: usize = 15;
+const TRACES_PATH: &str = "../traces/trace";
 
 fn main() {
     let env_filter = EnvFilter::builder()
@@ -35,72 +41,12 @@ fn main() {
     println!("Challenge alpha: {}", alpha_challenge);
 
     // read all traces
+    let mut range_traces = read_range_traces(challenges.clone(), 0, 0);
+    let mut lookup_traces = read_lookup_traces(challenges.clone(), 0, 0);
+    let mut global_traces = read_global_traces(challenges.clone(), 0, 2);
+    let mut permutation_traces = read_permutation_traces(challenges, 0, 0);
 
-    let mut lookup_traces: Vec<Vec<RawLookupTrace>> = vec![vec![]; MAX_LOG_BLOWUP];
-    let mut permutation_traces: Vec<Vec<RawPermutationTrace>> = vec![vec![]; MAX_LOG_BLOWUP];
-    let mut range_traces: Vec<Vec<RawRangeTrace>> = vec![vec![]; MAX_LOG_BLOWUP];
-    let mut global_traces: Vec<Vec<RawGlobalTrace>> = vec![vec![]; MAX_LOG_BLOWUP];
-
-    for i in 0..2347 {
-        if let Ok(trace) = RawRangeTrace::read_file(&format!("/Users/nazarevsky/Documents/linea/linea-monorepo/prover/zkevm/trace/range_{}.bin", i)) {
-            println!(
-                "Reading range_{}.bin -> {}",
-                i,
-                trace.get_max_height().ilog2() as usize
-            );
-
-            let mut raw_trace = RawTrace::new(challenges.clone(), trace.get_max_height());
-
-            let cfgs = raw_trace.push_traces(vec![], vec![], vec![trace.clone()], vec![]);
-
-            let matrix = raw_trace.get_trace();
-
-            let (air, _, _) = get_air(&cfgs, &matrix, challenges.clone(), 0);
-
-            range_traces[trace.get_min_blowup(air, challenges.len())].push(trace);
-        }
-    }
-
-    for i in 0..1484 {
-        if let Ok(trace) = RawLookupTrace::read_file(&format!("../lookup_{}.bin", i)) {
-            println!(
-                "Reading lookup_{}.bin -> {}",
-                i,
-                trace.get_max_height().ilog2() as usize
-            );
-
-            let mut raw_trace = RawTrace::new(challenges.clone(), trace.get_max_height());
-
-            let cfgs = raw_trace.push_traces(vec![], vec![trace.clone()], vec![], vec![]);
-
-            let matrix = raw_trace.get_trace();
-
-            let (air, _, _) = get_air(&cfgs, &matrix, challenges.clone(), 0);
-
-            lookup_traces[trace.get_min_blowup(air, challenges.len())].push(trace);
-        }
-    }
-
-    for i in 0..68700 {
-        if let Ok(trace) = RawGlobalTrace::read_file(&format!("../traces/trace/global{}.bin", i)) {
-            println!(
-                "Reading global{}.bin -> {}",
-                i,
-                trace.get_max_height().ilog2() as usize
-            );
-
-            let mut raw_trace = RawTrace::new(challenges.clone(), trace.get_max_height());
-
-            let cfgs = raw_trace.push_traces(vec![], vec![], vec![], vec![trace.clone()]);
-
-            let matrix = raw_trace.get_trace();
-
-            let (air, _, _) = get_air(&cfgs, &matrix, challenges.clone(), 0);
-            global_traces[trace.get_min_blowup(air, challenges.len())].push(trace)
-        }
-    }
-
-    for log_blowup in 1..global_traces.len() {
+    for log_blowup in (1..global_traces.len()).rev() {
         println!(
             "Log blowup: {}. Total: {}. Ranges: {}, lookups: {}, globals: {}",
             log_blowup,
@@ -119,13 +65,13 @@ fn main() {
         let range_trace = range_traces.pop().unwrap();
         let global_trace = global_traces.pop().unwrap();
 
-        println!("Proving log_blowup {}", log_blowup);
-
         if !permutation_trace.is_empty()
             || !lookup_trace.is_empty()
             || !range_trace.is_empty()
             || !global_trace.is_empty()
         {
+            println!("Proving log_blowup {}", log_blowup);
+
             let height = get_max_height(
                 &permutation_trace,
                 &lookup_trace,
@@ -147,10 +93,10 @@ fn main() {
 }
 
 fn get_max_height(
-    permutation_traces: &Vec<RawPermutationTrace>,
-    lookup_traces: &Vec<RawLookupTrace>,
-    range_traces: &Vec<RawRangeTrace>,
-    global_traces: &Vec<RawGlobalTrace>,
+    permutation_traces: &[RawPermutationTrace],
+    lookup_traces: &[RawLookupTrace],
+    range_traces: &[RawRangeTrace],
+    global_traces: &[RawGlobalTrace],
 ) -> usize {
     let mut max_height: usize = 0;
 
@@ -168,20 +114,4 @@ fn get_max_height(
         .for_each(|trace| max_height = max(max_height, trace.get_max_height()));
 
     max_height
-}
-
-fn group_by_expression_height(globals: Vec<RawGlobalTrace>) -> HashMap<usize, Vec<RawGlobalTrace>> {
-    let mut res: HashMap<usize, Vec<RawGlobalTrace>> = HashMap::new();
-
-    for global in globals {
-        let expression_height = global.get_expression_height();
-
-        if let Some(val) = res.get_mut(&global.get_expression_height()) {
-            val.push(global.clone());
-        } else {
-            res.insert(expression_height, vec![global.clone()]);
-        }
-    }
-
-    res
 }
